@@ -5,6 +5,10 @@ namespace SMS.Shared.HttpManager.Utility
 {
     public static class UrlBuilderUtility
     {
+        public static string GetCombineUrl(string endPoint, string baseURL)
+        {
+            return Path.Combine(baseURL, endPoint);
+        }
 
         public static string GenerateQueryStringFromDTO<T>(T viewModel)
         {

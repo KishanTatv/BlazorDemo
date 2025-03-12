@@ -4,7 +4,7 @@
     {
         public class Auth
         {
-            public const string GetUserPhoto = "Auth/getUserPhoto";
+            public const string LoginRoute = "Auth/Login";
             public const string ForgetPassword = "Auth/ForgetPassword";
         }
     }
