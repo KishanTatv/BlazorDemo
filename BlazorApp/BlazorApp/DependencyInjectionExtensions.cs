@@ -15,7 +15,6 @@ namespace BlazorApp
             services.AddScoped<IAuth, Auth>();
 
             services.AddHttpClient<IHttpClientManager, HttpClientManager>();
-            //services.AddHttpClient();
 
             return services;
         }
