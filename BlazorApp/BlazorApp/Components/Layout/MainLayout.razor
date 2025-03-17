@@ -1,5 +1,12 @@
-﻿@inherits LayoutComponentBase
+﻿@using Blazored.Toast.Configuration
+@inherits LayoutComponentBase
 
+<Blazored.Toast.BlazoredToasts Position="ToastPosition.TopRight"
+                               Timeout="5000"
+                               IconType="IconType.FontAwesome"
+                               SuccessClass="success-toast-override"
+                               SuccessIcon="fa fa-check"
+                               ErrorIcon="fa fa-triangle-exclamation" />
 <div class="page">
     <div class="sidebar">
         <NavMenu />

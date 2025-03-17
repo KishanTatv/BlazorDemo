@@ -1,54 +1,27 @@
 ﻿@page "/login"
 @using BlazorApp.Client.Models.Request.Auth
 @using BlazorApp.Data.Interfaces.Auth
+@using Blazored.Toast.Configuration
+@using SMS.Shared.JWTToken
 @rendermode InteractiveWebAssembly
 @layout Layout.EmptyLayout
 
 
 @inject IAuth _auth;
 @inject NavigationManager _navigationManager;
+@inject IToastService toastService
+@inject ITokenService tokenService;
+
 
 <div class="login-main-div position-relative vh-100 d-flex flex-column justify-content-center align-items-center">
     <div class="login-container w-25">
+
         <div class="logo-section text-center">
             <img src="Images/logo.png" alt="Logo" class="w-25 h-50" />
             <h1 style="font-size:30px">School Management System</h1>
         </div>
 
-        @* <div class="form-section">
-            <h3 class="text-center">LogIn</h3>
-            <EditForm EditContext="editContext" OnValidSubmit="Login" FormName="loginForm">
-                <DataAnnotationsValidator />
-
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <InputText id="username" class="form-control w-100"
-                               @bind-Value="loginModel.Username"
-                               placeholder="Username" />
-                    <ValidationMessage For="@(() => loginModel.Username)" />
-                </div>
-
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <InputText id="password" class="form-control w-100"
-                               @bind-Value="loginModel.Password"
-                               Type="password"
-                               placeholder="Password" />
-                    <ValidationMessage For="@(() => loginModel.Password)" />
-                </div>
-
-                <br />
-                <button type="submit" class="btn btn-primary w-100">Submit</button>
-            </EditForm>
-
-            <a href="/dashboard">dsfjh</a>
-            <button @onclick="@(() => _navigationManager.NavigateTo("/dashboard"))">
-                Home (Allowed)
-            </button>
-
-        </div> *@
-
-        <EditForm Model=@loginModel OnValidSubmit="LogInClick">
+        <EditForm Model=@loginModel OnValidSubmit="LogInClick" FormName="loginForm">
             <DataAnnotationsValidator />
             <div class="form-group">
                 <label for="Name">Username</label>
@@ -68,8 +41,9 @@
     <footer class="position-absolute bottom-0">
         <p>© TatvaSoft All rights reserved</p>
     </footer>
-</div>
 
+
+</div>
 
 @code {
     private UserLoginDTO loginModel = new UserLoginDTO();
@@ -83,11 +57,14 @@
 
             if (res.Result && res.Data != null)
             {
+                await tokenService.StoreTokensAsync(res.Data[0], res.Data[1]);
                 _navigationManager.NavigateTo(Page_Routes.Dashboard);
+                toastService.ShowSuccess(res.Message);
             }
             else
             {
-                
+                toastService.ShowError(res.Message);
+
             }
         }
         catch (Exception e)
