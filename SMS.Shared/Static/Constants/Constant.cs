@@ -12,4 +12,11 @@
         public static string msgSomethingWrong = "Something Wrong !";
         public static string msgTryAgain = "Plaese try again !";
     }
+
+
+
+    public static class DateFormat
+    {
+        public static string ddMMMyyyy = "dd MMM, yyyy";
+    }
 }

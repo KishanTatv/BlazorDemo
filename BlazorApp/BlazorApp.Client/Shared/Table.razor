@@ -1,0 +1,57 @@
+﻿@* @using BlazorBootstrap
+@using SMS.DataAccess.Models.Student.Response
+
+<h3>Table</h3>
+
+<Grid TItem="Employee1"
+      Class="table table-hover table-bordered table-striped"
+      DataProvider="EmployeesDataProvider">
+
+    <GridColumns>
+        <GridColumn TItem="Employee1" HeaderText="Id" HeaderTextAlignment="Alignment.Center">
+            @context.Id
+        </GridColumn>
+        <GridColumn TItem="Employee1" HeaderText="Employee Name">
+            @context.Name
+        </GridColumn>
+        <GridColumn TItem="Employee1" HeaderText="Designation" HeaderTextAlignment="Alignment.Center">
+            @context.Designation
+        </GridColumn>
+    </GridColumns>
+</Grid>
+
+@code {
+    private List<Employee1> employees = new();
+
+    private async Task<GridDataProviderResult<Employee1>> EmployeesDataProvider(GridDataProviderRequest<Employee1> request)
+    {
+        if (!employees.Any()) // Ensuring employees is not empty
+        {
+            employees = GetEmployees().ToList();
+            Console.WriteLine($"Loaded {employees.Count} employees.");
+        }
+
+        return await Task.FromResult(new GridDataProviderResult<Employee1>
+        {
+            Data = employees.ToList(),
+            TotalCount = employees.Count
+        });
+    }
+
+    private IEnumerable<Employee1> GetEmployees()
+    {
+        return new List<Employee1>
+        {
+            new Employee1 { Id = 107, Name = "Alice", Designation = "AI Engineer"},
+            new Employee1 { Id = 103, Name = "Bob", Designation = "Senior DevOps Engineer"},
+            new Employee1 { Id = 106, Name = "John", Designation = "Data Engineer"},
+            new Employee1 { Id = 104, Name = "Pop", Designation = "Associate Architect"},
+            new Employee1 { Id = 105, Name = "Ronald", Designation = "Senior Data Engineer"},
+            new Employee1 { Id = 102, Name = "Line", Designation = "Architect"},
+            new Employee1 { Id = 101, Name = "Daniel", Designation = "Architect"},
+            new Employee1 { Id = 108, Name = "Zayne", Designation = "Data Analyst"},
+            new Employee1 { Id = 109, Name = "Isha", Designation = "App Maker"},
+        };
+    }
+}
+ *@

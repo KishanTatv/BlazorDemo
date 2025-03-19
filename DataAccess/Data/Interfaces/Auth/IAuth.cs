@@ -1,4 +1,4 @@
-﻿using BlazorApp.Client.Models.Request.Auth;
+﻿using SMS.DataAccess.Models.Auth.Request;
 using SMS.Shared.HttpManager.DTO;
 
 namespace BlazorApp.Data.Interfaces.Auth

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace BlazorApp.Client.Models.Request.Auth
+namespace SMS.DataAccess.Models.Auth.Request
 {
     public class UserLoginDTO
     {

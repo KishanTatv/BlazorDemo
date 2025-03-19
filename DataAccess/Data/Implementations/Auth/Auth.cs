@@ -1,7 +1,7 @@
-﻿using BlazorApp.Client.Models.Request.Auth;
-using BlazorApp.Data.Interfaces.Auth;
+﻿using BlazorApp.Data.Interfaces.Auth;
 using Microsoft.Extensions.Configuration;
 using SMS.DataAccess.Data;
+using SMS.DataAccess.Models.Auth.Request;
 using SMS.Shared.HttpManager.DTO;
 using SMS.Shared.HttpManager.Interface;
 using SMS.Shared.HttpManager.Utility;
@@ -11,15 +11,13 @@ namespace BlazorApp.Data.Implementations.Auth
 {
     public class Auth : IAuth
     {
-        private readonly IConfiguration _config;
         private readonly IHttpClientManager _httpClientManager;
         private readonly string _APIConnection;
 
         public Auth(IConfiguration config, IHttpClientManager httpClientManager)
         {
-            _config = config;
             _httpClientManager = httpClientManager;
-            _APIConnection = AppSettingsConfig.GetConnectionString(_config);
+            _APIConnection = AppSettingsConfig.GetConnectionString(config);
         }
 
         public async Task<HttpResponseDTO<List<string>>> Login(UserLoginDTO model)

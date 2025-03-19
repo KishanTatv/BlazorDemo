@@ -7,6 +7,8 @@ namespace SMS.Shared.JWTToken
 
     public class TokenService : ITokenService
     {
+        private JwtDTO? _tokenData;
+
         public static readonly string TOKEN_KEY = "token";
         public static readonly string REFRESH_TOKEN_KEY = "refreshToken";
         private readonly ILocalStorageService _localStorage;
@@ -14,6 +16,8 @@ namespace SMS.Shared.JWTToken
         {
             _localStorage = localStorage;
         }
+
+        public JwtDTO? TokenData => _tokenData;
 
         public async Task StoreTokensAsync(string accessToken, string refreshToken)
         {
@@ -35,24 +39,34 @@ namespace SMS.Shared.JWTToken
 
         public async Task<JwtDTO?> GetClaimFromToken()
         {
-            var token = await GetUserToken();
-            if (string.IsNullOrWhiteSpace(token) || string.IsNullOrEmpty(token))
+
+            if (_tokenData == null)
             {
-                return null;
+                var token = await GetUserToken();
+                if (string.IsNullOrWhiteSpace(token) || string.IsNullOrEmpty(token))
+                {
+                    return null;
+                }
+                JwtSecurityTokenHandler jwtHandler = new JwtSecurityTokenHandler();
+                if (!jwtHandler.CanReadToken(token))
+                {
+                    return null;
+                }
+                IEnumerable<Claim> claim = jwtHandler.ReadJwtToken(token).Claims;
+                JwtDTO jwtData = new JwtDTO()
+                {
+                    role = int.Parse(claim?.FirstOrDefault(c => c.Type == "role").Value),
+                    CurrentYearId = int.Parse(claim?.FirstOrDefault(c => c.Type == "CurrentYearId").Value),
+                    UserId = int.Parse(claim?.FirstOrDefault(c => c.Type == "UserId").Value),
+                };
+                _tokenData = jwtData;
             }
-            JwtSecurityTokenHandler jwtHandler = new JwtSecurityTokenHandler();
-            if (!jwtHandler.CanReadToken(token))
-            {
-                return null;
-            }
-            IEnumerable<Claim> claim = jwtHandler.ReadJwtToken(token).Claims;
-            JwtDTO jwtData = new JwtDTO()
-            {
-                role = int.Parse(claim?.FirstOrDefault(c => c.Type == "role").Value),
-                CurrentYearId = int.Parse(claim?.FirstOrDefault(c => c.Type == "CurrentYearId").Value),
-                UserId = int.Parse(claim?.FirstOrDefault(c => c.Type == "UserId").Value),
-            };
-            return jwtData;
+            return _tokenData;
+        }
+
+        public void SetTokenData(JwtDTO token)
+        {
+            _tokenData = token;
         }
 
         public async Task<bool> IsTokenValid()

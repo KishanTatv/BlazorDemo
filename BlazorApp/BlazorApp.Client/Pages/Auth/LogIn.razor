@@ -1,7 +1,7 @@
 ﻿@page "/login"
-@using BlazorApp.Client.Models.Request.Auth
 @using BlazorApp.Data.Interfaces.Auth
 @using Blazored.Toast.Configuration
+@using SMS.DataAccess.Models.Auth.Request
 @using SMS.Shared.JWTToken
 @rendermode InteractiveWebAssembly
 @layout Layout.EmptyLayout
@@ -9,7 +9,7 @@
 
 @inject IAuth _auth;
 @inject NavigationManager _navigationManager;
-@inject IToastService toastService
+@* @inject IToastService toastService *@
 @inject ITokenService tokenService;
 
 
@@ -59,11 +59,11 @@
             {
                 await tokenService.StoreTokensAsync(res.Data[0], res.Data[1]);
                 _navigationManager.NavigateTo(Page_Routes.Dashboard);
-                toastService.ShowSuccess(res.Message);
+                // toastService.ShowSuccess(res.Message);
             }
             else
             {
-                toastService.ShowError(res.Message);
+                // toastService.ShowError(res.Message);
 
             }
         }

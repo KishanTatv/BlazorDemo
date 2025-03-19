@@ -1,7 +1,87 @@
 ﻿@page "/student"
+@page "/student/{id:int}"
+@rendermode InteractiveWebAssembly
+@using BlazorBootstrap
+@using SMS.DataAccess.Data.Interfaces.Student
+@using SMS.DataAccess.Models.Auth.Request
+@using SMS.DataAccess.Models.Student.Response
 
-<h3>Student</h3>
+@inject IStudent _student;
+@inject ITokenService tokenService;
+
+<h2 class="border-bottom border-4 border-secondary mb-3">Student</h2>
+
+<Grid TItem="StudentListDTO" AllowPaging="true" AllowSorting="true" PageSize="10"
+      FixedHeader="true"
+      Height="400"
+      PageSizeSelectorVisible="true"
+      PageSizeSelectorItems="@(new int[] { 5,10,20 })"
+      Responsive="true"
+      Class="table table-hover table-bordered thead-light"
+      DataProvider="StudentDataProvider">
+    <GridColumns>
+        <GridColumn TItem="StudentListDTO" HeaderText="Student Name" PropertyName="FirstName" SortString="FirstName" SortKeySelector="item => item.FirstName">@context.FirstName @context.LastName</GridColumn>
+        <GridColumn TItem="StudentListDTO" HeaderText="Date Of Birth" PropertyName="DateOfBirth" SortString="DateOfBirth" SortKeySelector="item => item.DateOfBirth">@context.DateOfBirth.ToString(DateFormat.ddMMMyyyy)</GridColumn>
+        <GridColumn TItem="StudentListDTO" HeaderText="Email" PropertyName="Email" SortString="Email" SortKeySelector="item => item.Email">@context.Email</GridColumn>
+        <GridColumn TItem="StudentListDTO" HeaderText="Mobile" PropertyName="Mobile" SortString="Mobile" SortKeySelector="item => item.Mobile">@context.Mobile</GridColumn>
+        <GridColumn TItem="StudentListDTO" HeaderText="Class / Division" PropertyName="ClassName" SortString="ClassName" SortKeySelector="item => item.ClassName">@context.ClassName / @context.DivisionName</GridColumn>
+        <GridColumn TItem="StudentListDTO" HeaderText="Admission Date" PropertyName="AdmissionDate" SortString="AdmissionDate" SortKeySelector="item => item.AdmissionDate">@context.AdmissionDate.ToString(DateFormat.ddMMMyyyy)</GridColumn>
+        <GridColumn TItem="StudentListDTO" HeaderText="Address" PropertyName="Address" SortString="State" SortKeySelector="item => item.State"> @context.City , @context.State</GridColumn>
+    </GridColumns>
+</Grid>
+
+<p>@Id</p>
+
 
 @code {
+    [Parameter] public int? Id { get; set; }
+    private int currentPageNumber = 0;
+    private JwtDTO? tokenData;
+    private GetStudentListDTO studentReq = new GetStudentListDTO()
+        {
+            YearId = 1,
+            SortCol = "studentId",
+            SortDir = "desc"
+        };
+
+    private HttpResponseDTO<StudentListResponceVM> studentData = new HttpResponseDTO<StudentListResponceVM>();
+
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     tokenData = tokenService.TokenData;
+    // }
+
+    private async Task<GridDataProviderResult<StudentListDTO>> StudentDataProvider(GridDataProviderRequest<StudentListDTO> request)
+    {
+        if (request.Sorting is not null && request.Sorting.Any())
+        {
+            studentReq.SortCol = request.Sorting.FirstOrDefault()!.SortString;
+            studentReq.SortDir = request.Sorting.FirstOrDefault()!.SortDirection == SortDirection.Ascending ? "asc" : "desc";
+        }
+        studentReq.DisplayLength = request.PageSize;
+        studentReq.DisplayStart = request.PageNumber - 1;
+
+        await getStudentData();
+
+        return await Task.FromResult(new GridDataProviderResult<StudentListDTO>
+            {
+                Data = studentData.Data.Students,
+                TotalCount = studentData.Data.TotalItemCount
+            });
+    }
+
+    private async Task getStudentData()
+    {
+        studentData = await _student.GetStudentList(studentReq);
+    }
+
+
+    private async Task OnPageChangedAsync(int newPageNumber)
+    {
+        await Task.Run(() => { currentPageNumber = newPageNumber; });
+        studentReq.DisplayStart = newPageNumber - 1;
+        studentData = await _student.GetStudentList(studentReq);
+    }
+
 
 }

@@ -7,5 +7,10 @@
             public const string LoginRoute = "Auth/Login";
             public const string ForgetPassword = "Auth/ForgetPassword";
         }
+
+        public class Student
+        {
+            public const string StudentList = "Student/GetStudentList";
+        }
     }
 }

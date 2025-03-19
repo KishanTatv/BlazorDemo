@@ -1,8 +1,7 @@
-﻿@page "/";
-@using Blazored.Toast.Configuration
+﻿@page "/"
 @rendermode InteractiveWebAssembly
+@using Blazored.Toast.Configuration
 
-@inject IToastService toastService;
 @inject ITokenService tokenService;
 @inject NavigationManager _navigationManager;
 
@@ -13,6 +12,7 @@
                                SuccessClass="success-toast-override"
                                SuccessIcon="fa fa-check"
                                ErrorIcon="fa fa-triangle-exclamation" /> *@
+
 <h3>Dashboard</h3>
 @{
     if(tokenData?.role == 2)
@@ -24,9 +24,11 @@
         <p>Not Admin</p>
     }
 }
-<button class="btn btn-info" id="InfoButton" @onclick="@(() => toastService.ShowInfo("I'm an INFO message"))">Info Toast</button>
+<button class="btn btn-info" id="InfoButton" @onclick="showToastMsg">Info Toast</button>
 
 @code {
+     [Inject] protected ToastService ToastService { get; set; } = default!;
+
     private JwtDTO? tokenData;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -45,6 +47,21 @@
         {
             _navigationManager.NavigateTo(Page_Routes.Login);
         }
+        else
+        {
+            tokenService.SetTokenData(tokenData);
+        }
     }
 
+    private async Task showToastMsg()
+    {
+        try
+        {
+            ToastService.Notify(new(ToastType.Success, "Yes, Welcome!!"));
+        }
+        catch (Exception ex)
+        {
+            ToastService.Notify(new(ToastType.Danger, $"Error: {ex.Message}."));
+        }
+    }
 }
