@@ -5,5 +5,8 @@
         public const string Home = "/home";
         public const string Login = "/login";
         public const string Dashboard = "/";
+
+        public const string Student = "/student";
+        public const string AddStudent = "/student/add";
     }
 }

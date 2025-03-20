@@ -2,6 +2,12 @@
 {
     public static class API_Routes
     {
+        public class Common
+        {
+            public const string GetAllClasses = "common/GetClassList";
+            public const string GetDivisionsByClass = "common/GetDivisionListByClass";
+        }
+
         public class Auth
         {
             public const string LoginRoute = "Auth/Login";

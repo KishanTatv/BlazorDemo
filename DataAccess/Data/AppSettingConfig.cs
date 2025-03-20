@@ -9,7 +9,7 @@ namespace SMS.DataAccess.Data
             string? connectionString = configuration.GetConnectionString("ApiBaseUrl");
             if (connectionString == null)
             {
-                connectionString = "http://192.168.3.103:8091/api/";
+                connectionString = "https://localhost:7057/api/";
             }
             return connectionString;
         }

@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using SMS.DataAccess.Data.Interfaces.Student;
-using SMS.DataAccess.Models.Auth.Request;
+using SMS.DataAccess.Models.Student.Request;
 using SMS.DataAccess.Models.Student.Response;
 using SMS.Shared.HttpManager.DTO;
 using SMS.Shared.HttpManager.Interface;
@@ -20,7 +20,7 @@ namespace SMS.DataAccess.Data.Implementations.Student
             _APIConnection = AppSettingsConfig.GetConnectionString(config);
         }
 
-        public async Task<HttpResponseDTO<StudentListResponceVM>> GetStudentList(GetStudentListDTO model)
+        public async Task<HttpResponseDTO<StudentListResponceVM>> GetStudentList(StudentListReqDTO model)
         {
             HttpResponseDTO<StudentListResponceVM> responseVM = await _httpClientManager.GetAsync<StudentListResponceVM>(
                 UrlBuilderUtility.GetCombineUrl(API_Routes.Student.StudentList, _APIConnection) +

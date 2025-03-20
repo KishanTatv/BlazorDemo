@@ -5,7 +5,9 @@ using BlazorApp.Data.Interfaces.Auth;
 using Blazored.LocalStorage;
 using Blazored.Toast;
 using Blazored.Toast.Services;
+using SMS.DataAccess.Data.Implementations;
 using SMS.DataAccess.Data.Implementations.Student;
+using SMS.DataAccess.Data.Interfaces;
 using SMS.DataAccess.Data.Interfaces.Student;
 using SMS.Shared.HttpManager.Implementation;
 using SMS.Shared.HttpManager.Interface;
@@ -22,6 +24,8 @@ namespace BlazorApp
             services.AddScoped<IToastService, ToastService>();
 
             services.AddScoped<ITokenService, TokenService>();
+
+            services.AddScoped<ICommon, Common>();
             services.AddScoped<IAuth, Auth>();
             services.AddScoped<IStudent, Student>();
 

@@ -3,22 +3,26 @@
 @rendermode InteractiveWebAssembly
 @using BlazorBootstrap
 @using SMS.DataAccess.Data.Interfaces.Student
-@using SMS.DataAccess.Models.Auth.Request
+@using SMS.DataAccess.Models.Student.Request
 @using SMS.DataAccess.Models.Student.Response
 
 @inject IStudent _student;
 @inject ITokenService tokenService;
+@inject NavigationManager navigationManager;
 
-<h2 class="border-bottom border-4 border-secondary mb-3">Student</h2>
+<div class="d-flex justify-content-between border-bottom border-4 border-secondary pb-1 mb-3">
+    <h2 class="m-0">Student</h2>
+    <Button class="p-3 py-0" Color="ButtonColor.Secondary"  Size="ButtonSize.Small"  @onclick="AddStudentClick"> + Add </Button>
+</div>
 
 <Grid TItem="StudentListDTO" AllowPaging="true" AllowSorting="true" PageSize="10"
-      FixedHeader="true"
-      Height="400"
-      PageSizeSelectorVisible="true"
-      PageSizeSelectorItems="@(new int[] { 5,10,20 })"
-      Responsive="true"
-      Class="table table-hover table-bordered thead-light"
-      DataProvider="StudentDataProvider">
+FixedHeader="true"
+Height="400"
+PageSizeSelectorVisible="true"
+PageSizeSelectorItems="@(new int[] { 5,10,20 })"
+Responsive="true"
+Class="table table-hover table-bordered thead-light"
+DataProvider="StudentDataProvider">
     <GridColumns>
         <GridColumn TItem="StudentListDTO" HeaderText="Student Name" PropertyName="FirstName" SortString="FirstName" SortKeySelector="item => item.FirstName">@context.FirstName @context.LastName</GridColumn>
         <GridColumn TItem="StudentListDTO" HeaderText="Date Of Birth" PropertyName="DateOfBirth" SortString="DateOfBirth" SortKeySelector="item => item.DateOfBirth">@context.DateOfBirth.ToString(DateFormat.ddMMMyyyy)</GridColumn>
@@ -37,7 +41,7 @@
     [Parameter] public int? Id { get; set; }
     private int currentPageNumber = 0;
     private JwtDTO? tokenData;
-    private GetStudentListDTO studentReq = new GetStudentListDTO()
+    private StudentListReqDTO studentReq = new StudentListReqDTO()
         {
             YearId = 1,
             SortCol = "studentId",
@@ -83,5 +87,7 @@
         studentData = await _student.GetStudentList(studentReq);
     }
 
-
+    private void AddStudentClick(){
+        navigationManager.NavigateTo(Page_Routes.AddStudent);
+    }
 }

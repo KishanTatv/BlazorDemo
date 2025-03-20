@@ -1,0 +1,163 @@
+﻿@page "/student/add"
+@using SMS.DataAccess.Data.Interfaces
+@using SMS.DataAccess.Models
+@using SMS.DataAccess.Models.Student.Request
+@rendermode InteractiveWebAssembly
+
+@inject NavigationManager navigationManager;
+@inject ICommon _common;
+
+<div class="d-flex justify-content-between border-bottom border-4 border-secondary pb-1 mb-3">
+    <h2 class="m-0">Add Student</h2>
+    <Button class="p-3 py-0" Color="ButtonColor.Secondary" Size="ButtonSize.Small" @onclick="BackClick"> Back </Button>
+</div>
+
+<div class="container">
+    <EditForm Model=@studentModel OnValidSubmit="StudentSaveClick" FormName="loginForm">
+        <DataAnnotationsValidator />
+        <div class="row">
+            <div class="col-sm">
+                <div class="mb-3">
+                    <label>First Name</label>
+                    <TextInput @bind-Value=studentModel.FirstName class="form-control" id="firstName" />
+                    <ValidationMessage For="() => studentModel.FirstName" />
+                </div>
+            </div>
+            <div class="col-sm">
+                <div class="mb-3">
+                    <label>Last Name</label>
+                    <TextInput @bind-Value=studentModel.LastName class="form-control" id="lastName" />
+                    <ValidationMessage For="() => studentModel.LastName" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm">
+                <div class="mb-3">
+                    <label>Date Of Birth</label>
+                    <DateInput @bind-Value="studentModel.DateOfBirth" Placeholder="Enter Date" EnableMinMax="true" Min="studentMinDob" Max="studentMaxDob" />
+                    <ValidationMessage For="() => studentModel.DateOfBirth" />
+                </div>
+            </div>
+            <div class="col-sm">
+                <div class="mb-3">
+                    <label>Email</label>
+                    <TextInput @bind-Value=studentModel.Email class="form-control" id="email" />
+                    <ValidationMessage For="() => studentModel.Email" />
+                </div>
+            </div>
+            <div class="col-sm">
+                <div class="mb-3">
+                    <label>Phone</label>
+                    <TextInput @bind-Value=studentModel.Phone class="form-control" id="phone" type="number" />
+                    <ValidationMessage For="() => studentModel.Phone" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm">
+                <div class="mb-3">
+                    <label>Class</label>
+                    <InputSelect class="form-select" aria-label="Default select example" @bind-Value="studentModel.ClassId" @bind-Value:after="GetDivisionData">
+                        <option selected disabled>select class</option>
+                        @if (classList.Data != null)
+                        {
+                            foreach (var classOption in classList.Data)
+                            {
+                                <option value="@classOption.Id">@classOption.Value</option>
+                            }
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="() => studentModel.ClassId" />
+                </div>
+            </div>
+            <div class="col-sm">
+                <div class="mb-3">
+                    <label>Division</label>
+                    <InputSelect class="form-select" aria-label="Default select example" @bind-Value="studentModel.DivisionId">
+                        <option selected disabled>select division</option>
+                        @if (divisionList.Data != null)
+                        {
+                            foreach (var divisionOption in divisionList.Data)
+                            {
+                                <option value="@divisionOption.Id">@divisionOption.Value</option>
+                            }
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="() => studentModel.DivisionId" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm">
+                <div class="mb-3">
+                    <label>Admission Date</label>
+                    <DateInput @bind-Value="studentModel.AdmissionDate" Placeholder="Admission Date" />
+                    <ValidationMessage For="() => studentModel.AdmissionDate" />
+                </div>
+            </div>
+            <div class="col-sm">
+                <div class="mb-3">
+                    <label>City</label>
+                    <TextInput @bind-Value=studentModel.City class="form-control" id="city" />
+                    <ValidationMessage For="() => studentModel.City" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="mb-3">
+                    <label>State</label>
+                    <TextInput @bind-Value=studentModel.State class="form-control" id="state" />
+                    <ValidationMessage For="() => studentModel.State" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 text-right">
+                <Button Type="ButtonType.Button" Color="ButtonColor.Secondary" Class="float-end" @onclick="ResetForm">Reset</Button>
+                <Button Type="ButtonType.Submit" Color="ButtonColor.Success" Class="float-end me-2">Submit</Button>
+            </div>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    private DateTime studentMaxDob = DateTime.Now.Date;
+    private DateTime studentMinDob = new DateTime(DateTime.Now.Date.AddYears(-25).Date.Year, 01, 1);
+    private StudentAddReqDTO studentModel = new StudentAddReqDTO();
+    private HttpResponseDTO<List<SelectOptionDTO>> classList = new HttpResponseDTO<List<SelectOptionDTO>>();
+    private HttpResponseDTO<List<SelectOptionDTO>> divisionList = new HttpResponseDTO<List<SelectOptionDTO>>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        classList = await _common.GetAllClassesAsync();
+        divisionList = await _common.GetDivisionsByClassAsync(classList.Data.First().Id);
+    }
+
+
+    private async Task GetDivisionData()
+    {
+        divisionList = await _common.GetDivisionsByClassAsync(studentModel.ClassId);
+        studentModel.DivisionId = divisionList.Data[0].Id;
+    }
+
+    private async Task ResetForm()
+    {
+        studentModel = new();
+        if(classList.Data.Any()){
+            studentModel.ClassId = classList.Data[0].Id;
+            await GetDivisionData();
+        }
+    }
+
+    private async Task StudentSaveClick()
+    {
+        //save api
+    }
+
+    private void BackClick()
+    {
+        navigationManager.NavigateTo(Page_Routes.Student);
+    }
+}
