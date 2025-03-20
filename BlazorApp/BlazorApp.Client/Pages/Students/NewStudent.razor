@@ -34,6 +34,18 @@
         <div class="row">
             <div class="col-sm">
                 <div class="mb-3">
+                    <label>Gender</label>
+                    <InputSelect class="form-select" aria-label="Default select example" @bind-Value="studentModel.Gender">
+                        <option selected disabled>select gender</option>
+                        <option value="1">Male</option>
+                        <option value="2">Female</option>
+                        <option value="3">Other</option>
+                    </InputSelect>
+                    <ValidationMessage For="() => studentModel.Gender" />
+                </div>
+            </div>
+            <div class="col-sm">
+                <div class="mb-3">
                     <label>Date Of Birth</label>
                     <DateInput @bind-Value="studentModel.DateOfBirth" Placeholder="Enter Date" EnableMinMax="true" Min="studentMinDob" Max="studentMaxDob" />
                     <ValidationMessage For="() => studentModel.DateOfBirth" />
@@ -44,13 +56,6 @@
                     <label>Email</label>
                     <TextInput @bind-Value=studentModel.Email class="form-control" id="email" />
                     <ValidationMessage For="() => studentModel.Email" />
-                </div>
-            </div>
-            <div class="col-sm">
-                <div class="mb-3">
-                    <label>Phone</label>
-                    <TextInput @bind-Value=studentModel.Phone class="form-control" id="phone" type="number" />
-                    <ValidationMessage For="() => studentModel.Phone" />
                 </div>
             </div>
         </div>
@@ -98,14 +103,21 @@
             </div>
             <div class="col-sm">
                 <div class="mb-3">
+                    <label>Phone</label>
+                    <TextInput @bind-Value=studentModel.Phone class="form-control" id="phone" type="number" />
+                    <ValidationMessage For="() => studentModel.Phone" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm">
+                <div class="mb-3">
                     <label>City</label>
                     <TextInput @bind-Value=studentModel.City class="form-control" id="city" />
                     <ValidationMessage For="() => studentModel.City" />
                 </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-sm-6">
+            <div class="col-sm">
                 <div class="mb-3">
                     <label>State</label>
                     <TextInput @bind-Value=studentModel.State class="form-control" id="state" />
@@ -113,6 +125,16 @@
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="mb-3">
+                    <label>Zipcode</label>
+                    <TextInput @bind-Value=studentModel.ZipCode class="form-control" id="zipcode" type="number" />
+                    <ValidationMessage For="() => studentModel.ZipCode" />
+                </div>
+            </div>
+        </div>
+
         <div class="row">
             <div class="col-md-12 text-right">
                 <Button Type="ButtonType.Button" Color="ButtonColor.Secondary" Class="float-end" @onclick="ResetForm">Reset</Button>

@@ -13,10 +13,26 @@
         public static string msgTryAgain = "Plaese try again !";
     }
 
-
-
     public static class DateFormat
     {
         public static string ddMMMyyyy = "dd MMM, yyyy";
+    }
+
+
+
+    //regEx
+    public static class FormRegEx
+    {
+        public const string OnlyString = @"^[a-zA-Z]+$";
+        public const string Phone = @"^(\d{10})$";
+        public const string ZipCode = @"^\d{5}(-\d{4})?$";
+    }
+
+    public static class ErrorMessage
+    {
+        public const string RequiredMsg = "{0} feild is required.";
+        public const string InValidMsg = "please enter a valid {0} feild.";
+        public const string OnlyAlphabetMsg = "please enter only alphabets.";
+        public const string WrongLengthMsg = "{0} length must be between 2 and 25 character.";
     }
 }

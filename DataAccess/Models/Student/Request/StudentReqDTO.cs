@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using SMS.Shared.Static.Constants;
+using System.ComponentModel.DataAnnotations;
 
 namespace SMS.DataAccess.Models.Student.Request
 {
@@ -15,40 +16,58 @@ namespace SMS.DataAccess.Models.Student.Request
 
     public class StudentAddReqDTO
     {
-        [Required(ErrorMessage = "FirstName is required")]
-        [StringLength(25, ErrorMessage = "FirstName length must be between 2 and 25 character.", MinimumLength = 2)]
-        [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = "Use letters only please")]
-        public string FirstName {  get; set; }
+        [Display(Name = "first name")]
+        [Required(ErrorMessage = ErrorMessage.RequiredMsg)]
+        [StringLength(25, ErrorMessage = ErrorMessage.WrongLengthMsg, MinimumLength = 2)]
+        [RegularExpression(FormRegEx.OnlyString, ErrorMessage = ErrorMessage.OnlyAlphabetMsg)]
+        public string FirstName { get; set; }
 
-        [Required(ErrorMessage = "LastName is required")]
-        [StringLength(25, ErrorMessage = "LastName length must be between 2 and 25 character.", MinimumLength = 2)]
-        [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = "Use letters only please")]
+        [Display(Name = "last name")]
+        [Required(ErrorMessage = ErrorMessage.RequiredMsg)]
+        [StringLength(25, ErrorMessage = ErrorMessage.WrongLengthMsg, MinimumLength = 2)]
+        [RegularExpression(FormRegEx.OnlyString, ErrorMessage = ErrorMessage.OnlyAlphabetMsg)]
         public string LastName { get; set; }
 
         public DateTime DateOfBirth { get; set; }
 
-        [Required(ErrorMessage = "Email is required")]
-        [EmailAddress(ErrorMessage = "Invalid Email Address")]
+        [Display(Name = "gender")]
+        [Required(ErrorMessage = ErrorMessage.RequiredMsg)]
+        public int? Gender { get; set; }
+
+        [Display(Name = "email")]
+        [Required(ErrorMessage = ErrorMessage.RequiredMsg)]
+        [EmailAddress(ErrorMessage = ErrorMessage.InValidMsg)]
         public string Email { get; set; }
 
-        [Required(ErrorMessage = "Phone no is required")]
-        [RegularExpression(@"^(\d{10})$", ErrorMessage = "Wrong mobile")]
+        [Display(Name = "phone no")]
+        [Required(ErrorMessage = ErrorMessage.RequiredMsg)]
+        [RegularExpression(FormRegEx.Phone, ErrorMessage = ErrorMessage.InValidMsg)]
         public string Phone { get; set; }
 
-        [Required(ErrorMessage = "Class is required")]
+        [Display(Name = "class")]
+        [Required(ErrorMessage = ErrorMessage.RequiredMsg)]
         public int ClassId { get; set; }
-        [Required(ErrorMessage = "Division is required")]
+
+        [Display(Name = "division")]
+        [Required(ErrorMessage = ErrorMessage.RequiredMsg)]
         public int DivisionId { get; set; }
         public DateTime AdmissionDate { get; set; } = DateTime.Now.Date;
 
-        [Required(ErrorMessage = "City is required")]
-        [StringLength(20, ErrorMessage = "Invalid city name", MinimumLength = 2)]
-        [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = "Use letters only please")]
+        [Display(Name = "city")]
+        [Required(ErrorMessage = ErrorMessage.RequiredMsg)]
+        [StringLength(20, ErrorMessage = ErrorMessage.InValidMsg, MinimumLength = 2)]
+        [RegularExpression(FormRegEx.OnlyString, ErrorMessage = ErrorMessage.OnlyAlphabetMsg)]
         public string City { get; set; }
-        
-        [Required(ErrorMessage = "State is required")]
-        [StringLength(20, ErrorMessage = "Invalid state name.", MinimumLength = 2)]
-        [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = "Use letters only please")]
+
+        [Display(Name = "state")]
+        [Required(ErrorMessage = ErrorMessage.RequiredMsg)]
+        [StringLength(20, ErrorMessage = ErrorMessage.InValidMsg, MinimumLength = 2)]
+        [RegularExpression(FormRegEx.OnlyString, ErrorMessage = ErrorMessage.OnlyAlphabetMsg)]
         public string State { get; set; }
+
+        [Display(Name = "zipcode")]
+        [Required(ErrorMessage = ErrorMessage.RequiredMsg)]
+        [RegularExpression(FormRegEx.ZipCode, ErrorMessage = ErrorMessage.InValidMsg)]
+        public string ZipCode { get; set; }
     }
 }
