@@ -154,20 +154,26 @@
     protected override async Task OnInitializedAsync()
     {
         classList = await _common.GetAllClassesAsync();
-        divisionList = await _common.GetDivisionsByClassAsync(classList.Data.First().Id);
+        if (classList.Result)
+        {
+            divisionList = await _common.GetDivisionsByClassAsync(classList.Data.First().Id);
+        }
     }
 
 
     private async Task GetDivisionData()
     {
         divisionList = await _common.GetDivisionsByClassAsync(studentModel.ClassId);
-        studentModel.DivisionId = divisionList.Data[0].Id;
+        if(divisionList.Result){
+            studentModel.DivisionId = divisionList.Data[0].Id;
+        }
     }
 
     private async Task ResetForm()
     {
         studentModel = new();
-        if(classList.Data.Any()){
+        if (classList.Data.Any())
+        {
             studentModel.ClassId = classList.Data[0].Id;
             await GetDivisionData();
         }

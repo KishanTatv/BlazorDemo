@@ -1,5 +1,11 @@
-﻿@inherits LayoutComponentBase
+﻿@using Blazored.Toast.Configuration
+@inherits LayoutComponentBase
 
 @Body
 
-<Toasts class="p-3" AutoHide="true" Delay="4000" Placement="ToastsPlacement.TopRight" />
+<Blazored.Toast.BlazoredToasts Position="ToastPosition.BottomCenter"
+                               Timeout="2"
+                               IconType="IconType.FontAwesome"
+                               SuccessClass="success-toast-override"
+                               SuccessIcon="fa fa-check"
+                               ErrorIcon="fa fa-triangle-exclamation" />

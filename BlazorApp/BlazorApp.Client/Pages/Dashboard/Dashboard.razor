@@ -1,17 +1,12 @@
 ﻿@page "/"
 @rendermode InteractiveWebAssembly
 @using Blazored.Toast.Configuration
+@using Blazored.Toast.Services
 
-@inject ITokenService tokenService;
-@inject NavigationManager _navigationManager;
-
-@* 
-<Blazored.Toast.BlazoredToasts Position="ToastPosition.TopRight"
-                               Timeout="5"
-                               IconType="IconType.FontAwesome"
-                               SuccessClass="success-toast-override"
-                               SuccessIcon="fa fa-check"
-                               ErrorIcon="fa fa-triangle-exclamation" /> *@
+@inject ITokenService tokenService
+@inject NavigationManager _navigationManager
+@inject IToastService ToastService
+@inject PreloadService PreloadService
 
 <h3>Dashboard</h3>
 @{
@@ -27,9 +22,14 @@
 <button class="btn btn-info" id="InfoButton" @onclick="showToastMsg">Info Toast</button>
 
 @code {
-     [Inject] protected ToastService ToastService { get; set; } = default!;
 
     private JwtDTO? tokenData;
+    private int? x = 0;
+
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     x = tokenService.TokenData?.CurrentYearId;
+    // }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -53,15 +53,8 @@
         }
     }
 
-    private async Task showToastMsg()
+    private void showToastMsg()
     {
-        try
-        {
-            ToastService.Notify(new(ToastType.Success, "Yes, Welcome!!"));
-        }
-        catch (Exception ex)
-        {
-            ToastService.Notify(new(ToastType.Danger, $"Error: {ex.Message}."));
-        }
+        ToastService.ShowToast(ToastLevel.Success, "This is a success message!");
     }
 }

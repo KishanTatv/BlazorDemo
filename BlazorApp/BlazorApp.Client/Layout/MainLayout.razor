@@ -1,0 +1,72 @@
+﻿@using Blazored.Toast.Configuration
+@using SMS.Shared.JWTToken
+@using SMS.Shared.Loader
+@using SMS.Shared.Static.Routes
+@using Blazored.Toast
+@inherits LayoutComponentBase
+
+@inject NavigationManager _navigationManager
+@inject ITokenService tokenService
+@inject LoaderService LoaderService
+
+<Blazored.Toast.BlazoredToasts Position="ToastPosition.TopRight"
+Timeout="2"
+IconType="IconType.FontAwesome"
+SuccessClass="success-toast-override"
+SuccessIcon="fa fa-check"
+ErrorIcon="fa fa-triangle-exclamation"  />
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+            <a href="@Page_Routes.Login">LogOut</a>
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+    <Preload LoadingText="Loading..." />
+</div>
+
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>
+
+@code{
+    private JwtDTO? tokenData;
+
+    protected override void OnInitialized()
+    {
+        LoaderService.OnLoaderStateChanged += () => InvokeAsync(StateHasChanged);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await getTokenData();
+            StateHasChanged();
+        }
+    }
+
+    public async Task getTokenData()
+    {
+        tokenData = await tokenService.GetClaimFromToken();
+        if (tokenData == null)
+        {
+            _navigationManager.NavigateTo(Page_Routes.Login);
+        }
+        else
+        {
+            tokenService.SetTokenData(tokenData);
+        }
+    }
+
+}

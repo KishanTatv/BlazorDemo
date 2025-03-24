@@ -12,6 +12,7 @@ namespace SMS.Shared.JWTToken
         public static readonly string TOKEN_KEY = "token";
         public static readonly string REFRESH_TOKEN_KEY = "refreshToken";
         private readonly ILocalStorageService _localStorage;
+
         public TokenService(ILocalStorageService localStorage)
         {
             _localStorage = localStorage;

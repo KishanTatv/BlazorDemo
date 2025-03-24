@@ -35,6 +35,8 @@ DataProvider="StudentDataProvider">
 
 <p>@Id</p>
 
+<Preload LoadingText="Loading..." />
+
 
 @code {
     [Parameter] public int? Id { get; set; }
@@ -49,13 +51,20 @@ DataProvider="StudentDataProvider">
 
     private HttpResponseDTO<StudentListResponceVM> studentData = new HttpResponseDTO<StudentListResponceVM>();
 
-    // protected override async Task OnInitializedAsync()
-    // {
-    //     tokenData = tokenService.TokenData;
-    // }
+    protected override async Task OnInitializedAsync()
+    {
+        tokenData = tokenService.TokenData;
+        if (tokenData == null && OperatingSystem.IsBrowser())
+        {
+            tokenData = await tokenService.GetClaimFromToken();
+        }
+    }
 
     private async Task<GridDataProviderResult<StudentListDTO>> StudentDataProvider(GridDataProviderRequest<StudentListDTO> request)
     {
+        if(tokenData != null){
+            studentReq.YearId = tokenData.CurrentYearId;
+        }
         if (request.Sorting is not null && request.Sorting.Any())
         {
             studentReq.SortCol = request.Sorting.FirstOrDefault()!.SortString;
@@ -66,11 +75,21 @@ DataProvider="StudentDataProvider">
 
         await getStudentData();
 
-        return await Task.FromResult(new GridDataProviderResult<StudentListDTO>
-            {
-                Data = studentData.Data.Students,
-                TotalCount = studentData.Data.TotalItemCount
-            });
+        if(studentData.Result)
+        {
+            return await Task.FromResult(new GridDataProviderResult<StudentListDTO>
+                {
+                    Data = studentData.Data.Students,
+                    TotalCount = studentData.Data.TotalItemCount
+                });
+        }
+        else{
+            return await Task.FromResult(new GridDataProviderResult<StudentListDTO>
+                {
+                    Data = [],
+                    TotalCount = 0
+                });
+        }
     }
 
     private async Task getStudentData()

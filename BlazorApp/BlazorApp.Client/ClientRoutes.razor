@@ -1,19 +1,6 @@
-﻿@namespace BlazorApp.Client
-@using Blazored.Toast.Configuration
-
-<Router AppAssembly="@typeof(Program).Assembly">
+﻿<Router AppAssembly="typeof(Program).Assembly" AdditionalAssemblies="new[] { typeof(Client._Imports).Assembly }">
     <Found Context="routeData">
-        <RouteView RouteData="routeData"/>
+        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
         <FocusOnNavigate RouteData="routeData" Selector="h1" />
     </Found>
-    <NotFound>
-        <h3>Page Not Found</h3>
-    </NotFound>
 </Router>
-
-<Blazored.Toast.BlazoredToasts Position="ToastPosition.TopRight"
-                               Timeout="5"
-                               IconType="IconType.FontAwesome"
-                               SuccessClass="success-toast-override"
-                               SuccessIcon="fa fa-check"
-                               ErrorIcon="fa fa-triangle-exclamation" />
