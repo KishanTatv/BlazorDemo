@@ -8,7 +8,6 @@ namespace SMS.DataAccess.Models.Student.Request
         public int YearId { get; set; }
         public int DisplayStart { get; set; }
         public int DisplayLength { get; set; }
-        public string StudentName { get; set; }
         public string SortCol {  get; set; }
         public string SortDir { get; set; }
         public string? SearchByName { get; set; }

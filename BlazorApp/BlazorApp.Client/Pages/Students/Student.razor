@@ -8,15 +8,23 @@
 @inject IStudent _student;
 @inject ITokenService tokenService;
 @inject NavigationManager navigationManager;
-
 <div class="d-flex justify-content-between border-bottom border-4 border-secondary pb-1 mb-3">
     <h2 class="m-0">Student</h2>
-    <Button class="p-3 py-0" Color="ButtonColor.Secondary"  Size="ButtonSize.Small"  @onclick="AddStudentClick"> + Add </Button>
+    <Button class="py-0" Color="ButtonColor.Secondary"  Size="ButtonSize.Large"  @onclick="AddStudentClick"> + Add </Button>
 </div>
 
-<Grid TItem="StudentListDTO" AllowPaging="true" AllowSorting="true" PageSize="10"
+<div class="row mb-3">
+    <div class="col-md-3">
+        <TextInput @bind-Value="@studentReq.SearchByName" Placeholder="Enter first name " />
+    </div>
+    <div class="col-md-2">
+        <Button class="p-3 py-0" Color="ButtonColor.Dark" Size="ButtonSize.Large" @onclick="GetStudentDataOnSearch"> Search </Button>
+    </div>
+</div>
+
+<Grid @ref="studentGrid" TItem="StudentListDTO" AllowPaging="true" AllowSorting="true" PageSize="10"
 FixedHeader="true"
-Height="400"
+Height="466"
 PageSizeSelectorVisible="true"
 PageSizeSelectorItems="@(new int[] { 5,10,20 })"
 Responsive="true"
@@ -42,6 +50,7 @@ DataProvider="StudentDataProvider">
     [Parameter] public int? Id { get; set; }
     private int currentPageNumber = 0;
     private JwtDTO? tokenData;
+    private Grid<StudentListDTO> studentGrid;
     private StudentListReqDTO studentReq = new StudentListReqDTO()
         {
             YearId = 1,
@@ -73,7 +82,7 @@ DataProvider="StudentDataProvider">
         studentReq.DisplayLength = request.PageSize;
         studentReq.DisplayStart = request.PageNumber - 1;
 
-        await getStudentData();
+        await GetStudentData();
 
         if(studentData.Result)
         {
@@ -92,18 +101,16 @@ DataProvider="StudentDataProvider">
         }
     }
 
-    private async Task getStudentData()
+    private async Task GetStudentData()
     {
         studentData = await _student.GetStudentList(studentReq);
     }
 
-
-    private async Task OnPageChangedAsync(int newPageNumber)
-    {
-        await Task.Run(() => { currentPageNumber = newPageNumber; });
-        studentReq.DisplayStart = newPageNumber - 1;
-        studentData = await _student.GetStudentList(studentReq);
+    private async Task GetStudentDataOnSearch(){
+        await GetStudentData();
+        await studentGrid.RefreshDataAsync();
     }
+
 
     private void AddStudentClick(){
         navigationManager.NavigateTo(Page_Routes.AddStudent);
