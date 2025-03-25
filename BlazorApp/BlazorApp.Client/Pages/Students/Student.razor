@@ -18,7 +18,7 @@
         <TextInput @bind-Value="@studentReq.SearchByName" Placeholder="Enter first name " />
     </div>
     <div class="col-md-2">
-        <Button class="p-3 py-0" Color="ButtonColor.Dark" Size="ButtonSize.Large" @onclick="GetStudentDataOnSearch"> Search </Button>
+        <Button class="p-3 py-0" Color="ButtonColor.Dark" Size="ButtonSize.Large" Outline="true" @onclick="GetStudentDataOnSearch"> Search </Button>
     </div>
 </div>
 
@@ -43,14 +43,12 @@ DataProvider="StudentDataProvider">
 
 <p>@Id</p>
 
-<Preload LoadingText="Loading..." />
 
 
 @code {
     [Parameter] public int? Id { get; set; }
-    private int currentPageNumber = 0;
     private JwtDTO? tokenData;
-    private Grid<StudentListDTO> studentGrid;
+    private Grid<StudentListDTO>? studentGrid;
     private StudentListReqDTO studentReq = new StudentListReqDTO()
         {
             YearId = 1,
@@ -108,7 +106,9 @@ DataProvider="StudentDataProvider">
 
     private async Task GetStudentDataOnSearch(){
         await GetStudentData();
-        await studentGrid.RefreshDataAsync();
+        if(studentGrid?.Data != null){
+            await studentGrid.RefreshDataAsync();
+        }
     }
 
 

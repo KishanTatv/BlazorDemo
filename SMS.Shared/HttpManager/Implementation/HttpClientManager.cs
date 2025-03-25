@@ -27,7 +27,7 @@ namespace SMS.Shared.HttpManager.Implementation
                     return HttpResponseUtility.HttpRequestFailedErrorResponse<T>();
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return HttpResponseUtility.HttpConnectionErrorResponse<T>();
             }

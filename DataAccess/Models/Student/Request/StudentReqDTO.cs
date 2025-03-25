@@ -52,6 +52,8 @@ namespace SMS.DataAccess.Models.Student.Request
         public int DivisionId { get; set; }
         public DateTime AdmissionDate { get; set; } = DateTime.Now.Date;
 
+        public string BuildingName { get; set; }
+
         [Display(Name = "city")]
         [Required(ErrorMessage = ErrorMessage.RequiredMsg)]
         [StringLength(20, ErrorMessage = ErrorMessage.InValidMsg, MinimumLength = 2)]

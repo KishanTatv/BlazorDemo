@@ -1,29 +1,18 @@
-﻿using BlazorBootstrap;
-using Microsoft.AspNetCore.Components;
-
-namespace SMS.Shared.Loader
+﻿namespace SMS.Shared.Loader
 {
     public class LoaderService
     {
-
-        private PreloadService? _preloadService;
-        public event Action? OnLoaderStateChanged;
-        public void Initialize(PreloadService preloadService)
-        {
-            _preloadService = preloadService;
-        }
+        public event Action<bool>? OnLoaderStateChanged;
 
         public void ShowLoader()
         {
-            _preloadService?.Show();
-            OnLoaderStateChanged?.Invoke(); 
+            OnLoaderStateChanged?.Invoke(true);
         }
 
         public async void HideLoader()
         {
-            await Task.Delay(1600); 
-            _preloadService?.Hide();
-            OnLoaderStateChanged?.Invoke(); 
+            await Task.Delay(500);
+            OnLoaderStateChanged?.Invoke(false);
         }
     }
 

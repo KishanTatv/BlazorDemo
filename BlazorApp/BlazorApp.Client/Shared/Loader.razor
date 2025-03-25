@@ -1,0 +1,26 @@
+﻿@using SMS.Shared.Loader
+@inject LoaderService LoaderService
+
+<Preload LoadingText="Loading..." />
+
+@code {
+    [Inject] protected PreloadService PreloadService { get; set; } = default!;
+    private bool IsLoading = false;
+
+    protected override void OnInitialized()
+    {
+        LoaderService.OnLoaderStateChanged += (loading) =>
+        {
+            IsLoading = loading;
+            if(IsLoading){
+                PreloadService.Show();
+            }
+            else{
+                PreloadService.Hide();
+            }
+            StateHasChanged();
+        };
+
+    }
+
+}

@@ -112,11 +112,20 @@
         <div class="row">
             <div class="col-sm">
                 <div class="mb-3">
+                    <label>Building</label>
+                    <TextInput @bind-Value=studentModel.BuildingName class="form-control" id="building" />
+                    <ValidationMessage For="() => studentModel.BuildingName" />
+                </div>
+            </div>
+            <div class="col-sm">
+                <div class="mb-3">
                     <label>City</label>
                     <TextInput @bind-Value=studentModel.City class="form-control" id="city" />
                     <ValidationMessage For="() => studentModel.City" />
                 </div>
             </div>
+        </div>
+        <div class="row">
             <div class="col-sm">
                 <div class="mb-3">
                     <label>State</label>
@@ -124,9 +133,7 @@
                     <ValidationMessage For="() => studentModel.State" />
                 </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-sm-6">
+            <div class="col-sm">
                 <div class="mb-3">
                     <label>Zipcode</label>
                     <TextInput @bind-Value=studentModel.ZipCode class="form-control" id="zipcode" type="number" />

@@ -7,7 +7,6 @@
 
 @inject NavigationManager _navigationManager
 @inject ITokenService tokenService
-@inject LoaderService LoaderService
 
 <Blazored.Toast.BlazoredToasts Position="ToastPosition.TopRight"
 Timeout="2"
@@ -31,6 +30,7 @@ ErrorIcon="fa fa-triangle-exclamation"  />
         </article>
     </main>
     <Preload LoadingText="Loading..." />
+    <BlazorApp.Client.Shared.Loader />
 </div>
 
 <div id="blazor-error-ui">
@@ -41,11 +41,6 @@ ErrorIcon="fa fa-triangle-exclamation"  />
 
 @code{
     private JwtDTO? tokenData;
-
-    protected override void OnInitialized()
-    {
-        LoaderService.OnLoaderStateChanged += () => InvokeAsync(StateHasChanged);
-    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
