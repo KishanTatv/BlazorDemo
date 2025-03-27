@@ -53,25 +53,18 @@
 
     private async Task LogInClick()
     {
-        try
+        HttpResponseDTO<List<string>> res = await _auth.Login(loginModel);
+
+        if (res.Result && res.Data != null)
         {
-            HttpResponseDTO<List<string>> res = await _auth.Login(loginModel);
-
-            if (res.Result && res.Data != null)
-            {
-                await tokenService.StoreTokensAsync(res.Data[0], res.Data[1]);
-                toastService.ShowSuccess(res.Message);
-                _navigationManager.NavigateTo(Page_Routes.Dashboard);
-            }
-            else
-            {
-                toastService.ShowError(res.Message);
-
-            }
+            await tokenService.StoreTokensAsync(res.Data[0], res.Data[1]);
+            toastService.ShowSuccess(res.Message);
+            _navigationManager.NavigateTo(Page_Routes.Dashboard);
         }
-        catch (Exception e)
+        else
         {
-            Console.WriteLine(e);
+            toastService.ShowError(res.Message);
+
         }
     }
 

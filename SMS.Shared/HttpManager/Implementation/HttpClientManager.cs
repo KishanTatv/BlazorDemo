@@ -27,7 +27,7 @@ namespace SMS.Shared.HttpManager.Implementation
                     return HttpResponseUtility.HttpRequestFailedErrorResponse<T>();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return HttpResponseUtility.HttpConnectionErrorResponse<T>();
             }
@@ -53,5 +53,27 @@ namespace SMS.Shared.HttpManager.Implementation
                 return HttpResponseUtility.HttpConnectionErrorResponse<T>();
             }
         }
+
+
+        public async Task<HttpResponseDTO<T>> DeleteAsync<T>(string url)
+        {
+            try
+            {
+                HttpResponseMessage response = await _httpClient.DeleteAsync(url);
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<HttpResponseDTO<T>>() ?? HttpResponseUtility.HttpRequestFailedErrorResponse<T>();
+                }
+                else
+                {
+                    return HttpResponseUtility.HttpRequestFailedErrorResponse<T>();
+                }
+            }
+            catch (Exception ex)
+            {
+                return HttpResponseUtility.HttpConnectionErrorResponse<T>();
+            }
+        }
+
     }
 }

@@ -1,15 +1,24 @@
 ﻿@page "/student/add"
-@using SMS.DataAccess.Data.Interfaces
-@using SMS.DataAccess.Models
+@page "/student/add/{id:int}"
+@using SMS.DataAccess.Data.Interfaces.Student
 @using SMS.DataAccess.Models.Student.Request
 @rendermode InteractiveWebAssembly
 
 @inject NavigationManager navigationManager;
 @inject ICommon _common;
+@inject IStudent _student;
+@inject IToastService ToastService
+@inject ITokenService TokenService
 
 <div class="d-flex justify-content-between border-bottom border-4 border-secondary pb-1 mb-3">
-    <h2 class="m-0">Add Student</h2>
-    <Button class="p-3 py-0" Color="ButtonColor.Secondary" Size="ButtonSize.Large" @onclick="BackClick"> Back </Button>
+    <h2 class="m-0">
+        @if(id != null){
+            <span>Edit</span>
+        }else{
+            <span>Add</span>
+        }
+        Student</h2>
+    <Button class="p-3 py-0" Color="ButtonColor.Secondary" Size="ButtonSize.Large" @onclick="BackClick"> <Icon Name="IconName.ArrowReturnLeft" /> Back </Button>
 </div>
 
 <div class="container">
@@ -113,8 +122,8 @@
             <div class="col-sm">
                 <div class="mb-3">
                     <label>Building</label>
-                    <TextInput @bind-Value=studentModel.BuildingName class="form-control" id="building" />
-                    <ValidationMessage For="() => studentModel.BuildingName" />
+                    <TextInput @bind-Value=studentModel.Building class="form-control" id="building" />
+                    <ValidationMessage For="() => studentModel.Building" />
                 </div>
             </div>
             <div class="col-sm">
@@ -142,9 +151,12 @@
             </div>
         </div>
 
+        <br />
         <div class="row">
             <div class="col-md-12 text-right">
-                <Button Type="ButtonType.Button" Color="ButtonColor.Secondary" Class="float-end" @onclick="ResetForm">Reset</Button>
+                @if(id == null){
+                    <Button Type="ButtonType.Button" Color="ButtonColor.Secondary" Class="float-end" @onclick="ResetForm">Reset</Button>
+                }
                 <Button Type="ButtonType.Submit" Color="ButtonColor.Success" Class="float-end me-2">Submit</Button>
             </div>
         </div>
@@ -152,6 +164,9 @@
 </div>
 
 @code {
+    [Parameter] public int? id { get; set; }
+
+    private JwtDTO? tokenData;
     private DateTime studentMaxDob = DateTime.Now.Date;
     private DateTime studentMinDob = new DateTime(DateTime.Now.Date.AddYears(-25).Date.Year, 01, 1);
     private StudentAddReqDTO studentModel = new StudentAddReqDTO();
@@ -160,10 +175,51 @@
 
     protected override async Task OnInitializedAsync()
     {
+        tokenData = TokenService.TokenData;
         classList = await _common.GetAllClassesAsync();
-        if (classList.Result)
-        {
-            divisionList = await _common.GetDivisionsByClassAsync(classList.Data.First().Id);
+        if(id != null){
+            await GetStudentData();
+        }
+        else{
+            if (classList.Result)
+            {
+                divisionList = await _common.GetDivisionsByClassAsync(classList.Data.First().Id);
+            }
+        }
+
+        if(tokenData != null){
+            studentModel.CreatedBy = studentModel.ModifiedBy = tokenData.UserId;
+            studentModel.YearId = tokenData.CurrentYearId;
+        }
+    }
+
+    private async Task GetStudentData(){
+        if(id != null){
+            var res = await _student.GetStudentInfo(id.Value);
+            if(res.Result && res.Data != null){
+                var Data = res.Data;
+                studentModel = new StudentAddReqDTO()
+                {
+                    StudentId = Data.StudentId,
+                    FirstName = Data.FirstName,
+                    LastName = Data.LastName,
+                    Gender = Data.Gender,
+                    DateOfBirth = Data.DateOfBirth,
+                    Email = Data.Email,
+                    Phone = Data.Mobile,
+                    ClassId = Data.ClassId,
+                    AdmissionDate = Data.AdmissionDate,
+                    Building = Data.BuildingName,
+                    City = Data.City,
+                    State = Data.State,
+                    ZipCode =  Data.ZipCode.ToString()
+                };
+                await GetDivisionData();
+                studentModel.DivisionId = Data.DivisionId;
+            }
+            else{
+                ToastService.ShowError(res.Message);
+            }
         }
     }
 
@@ -188,7 +244,14 @@
 
     private async Task StudentSaveClick()
     {
-        //save api
+        HttpResponseDTO<bool> responseDTO = await _student.AddStudent(studentModel);
+        if(responseDTO.Result){
+            ToastService.ShowSuccess(responseDTO.Message);
+            BackClick();
+        }
+        else{
+            ToastService.ShowError(responseDTO.Message);
+        }
     }
 
     private void BackClick()

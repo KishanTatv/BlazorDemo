@@ -17,6 +17,10 @@
         public class Student
         {
             public const string StudentList = "Student/GetStudentList";
+            public const string AddStudent = "Student/AddStudentSave";
+            public const string GetStudent = "Student/GetStudentById";
+            public const string TransferDivision = "Student/AllocateStudentRollNumber";
+            public const string DeleteStudent = "Student/DeleteStudent";
         }
     }
 }

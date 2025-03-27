@@ -15,6 +15,8 @@ namespace SMS.DataAccess.Models.Student.Request
 
     public class StudentAddReqDTO
     {
+        public int StudentId { get; set; }
+
         [Display(Name = "first name")]
         [Required(ErrorMessage = ErrorMessage.RequiredMsg)]
         [StringLength(25, ErrorMessage = ErrorMessage.WrongLengthMsg, MinimumLength = 2)]
@@ -52,7 +54,7 @@ namespace SMS.DataAccess.Models.Student.Request
         public int DivisionId { get; set; }
         public DateTime AdmissionDate { get; set; } = DateTime.Now.Date;
 
-        public string BuildingName { get; set; }
+        public string Building { get; set; }
 
         [Display(Name = "city")]
         [Required(ErrorMessage = ErrorMessage.RequiredMsg)]
@@ -70,5 +72,23 @@ namespace SMS.DataAccess.Models.Student.Request
         [Required(ErrorMessage = ErrorMessage.RequiredMsg)]
         [RegularExpression(FormRegEx.ZipCode, ErrorMessage = ErrorMessage.InValidMsg)]
         public string ZipCode { get; set; }
+        public int CreatedBy { get; set; }
+        public int ModifiedBy { get; set; }
+        public int YearId { get; set; }
+
+    }
+
+    public class DivisionDrop
+    {
+        [Display(Name = "division")]
+        [Required(ErrorMessage = ErrorMessage.RequiredMsg)]
+        public int DivisionId { get; set; }
+
+        public int RollNumberGenerationId { get; set; } = 1;
+        public int RollNumber { get; set; } = 1;
+        public int StudentId { get; set; }
+        public int YearId { get; set; }
+        public int? CreatedBy { get; set; }
+        public int? ModifiedBy { get; set; }
     }
 }

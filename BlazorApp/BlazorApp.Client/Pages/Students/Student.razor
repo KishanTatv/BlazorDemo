@@ -1,5 +1,4 @@
 ﻿@page "/student"
-@page "/student/{id:int}"
 @rendermode InteractiveWebAssembly
 @using SMS.DataAccess.Data.Interfaces.Student
 @using SMS.DataAccess.Models.Student.Request
@@ -10,12 +9,12 @@
 @inject NavigationManager navigationManager;
 <div class="d-flex justify-content-between border-bottom border-4 border-secondary pb-1 mb-3">
     <h2 class="m-0">Student</h2>
-    <Button class="py-0" Color="ButtonColor.Secondary"  Size="ButtonSize.Large"  @onclick="AddStudentClick"> + Add </Button>
+    <Button class="p-3 py-0" Color="ButtonColor.Secondary" Size="ButtonSize.Large" @onclick="AddStudentClick"> <Icon Name="IconName.Plus" /> Add </Button>
 </div>
 
-<div class="row mb-3">
+<div class="row mb-3 align-items-center">
     <div class="col-md-3">
-        <TextInput @bind-Value="@studentReq.SearchByName" Placeholder="Enter first name " />
+        <TextInput @bind-Value="@studentReq.SearchByName" Placeholder="Search here.." />
     </div>
     <div class="col-md-2">
         <Button class="p-3 py-0" Color="ButtonColor.Dark" Size="ButtonSize.Large" Outline="true" @onclick="GetStudentDataOnSearch"> Search </Button>
@@ -38,17 +37,27 @@ DataProvider="StudentDataProvider">
         <GridColumn TItem="StudentListDTO" HeaderText="Class / Division" PropertyName="ClassName" SortString="ClassName" SortKeySelector="item => item.ClassName">@context.ClassName / @context.DivisionName</GridColumn>
         <GridColumn TItem="StudentListDTO" HeaderText="Admission Date" PropertyName="AdmissionDate" SortString="AdmissionDate" SortKeySelector="item => item.AdmissionDate">@context.AdmissionDate.ToString(DateFormat.ddMMMyyyy)</GridColumn>
         <GridColumn TItem="StudentListDTO" HeaderText="Address" PropertyName="Address" SortString="State" SortKeySelector="item => item.State"> @context.City , @context.State</GridColumn>
+        <GridColumn TItem="StudentListDTO" HeaderText="Action" PropertyName="Action">
+            <Button Type="ButtonType.Button" Color="ButtonColor.Secondary" TooltipTitle="Edit" @onclick="() => EditAction(context.StudentId)">
+                <Icon Name="IconName.PenFill"></Icon>
+            </Button>
+            <Button Type="ButtonType.Button" Color="ButtonColor.Secondary" TooltipTitle="Transfer" @onclick="() => TransferAction(context.StudentId)">
+                <Icon Name="IconName.ListNested"></Icon>
+            </Button>
+            <Button Type="ButtonType.Button" Color="ButtonColor.Secondary" TooltipTitle="Delete" @onclick="async () => await DeleteAction(context.StudentId)">
+                <Icon Name="IconName.Dash"></Icon>
+            </Button>
+        </GridColumn>
     </GridColumns>
 </Grid>
 
-<p>@Id</p>
-
+<Modal @ref="modal" IsVerticallyCentered="true" />
 
 
 @code {
-    [Parameter] public int? Id { get; set; }
+    private Modal modal = default!;
     private JwtDTO? tokenData;
-    private Grid<StudentListDTO>? studentGrid;
+    private Grid<StudentListDTO> studentGrid = default!;
     private StudentListReqDTO studentReq = new StudentListReqDTO()
         {
             YearId = 1,
@@ -105,14 +114,51 @@ DataProvider="StudentDataProvider">
     }
 
     private async Task GetStudentDataOnSearch(){
+        await studentGrid.ResetPageNumber();
         await GetStudentData();
-        if(studentGrid?.Data != null){
-            await studentGrid.RefreshDataAsync();
-        }
+        await studentGrid.RefreshDataAsync();
     }
-
 
     private void AddStudentClick(){
         navigationManager.NavigateTo(Page_Routes.AddStudent);
+    }
+
+    private void EditAction(int studentId){
+        navigationManager.NavigateTo(Page_Routes.AddStudent + "/" + studentId);
+    }
+
+    private async Task DeleteAction(int studentId)
+    {
+        var student = studentData.Data.Students.First(x => x.StudentId == studentId);
+        var parameters = new Dictionary<string, object>();
+        parameters.Add("StudentId", studentId);
+        parameters.Add("Name", new List<string>(){student.FirstName, student.LastName});
+        parameters.Add("Standard", new List<string>() { student.ClassName, student.DivisionName });
+        parameters.Add("OnCloseClick", EventCallback.Factory.Create<MouseEventArgs>(this, ModelClosed));
+        parameters.Add("DataUpdate", EventCallback.Factory.Create<MouseEventArgs>(this, DataUpdateCall));
+        await modal.ShowAsync<_DeleteStudent>(title: "Delete Student", parameters: parameters);
+    }
+
+    private async Task TransferAction(int studentId)
+    {
+        var student = studentData.Data.Students.First(x => x.StudentId == studentId);
+        var parameters = new Dictionary<string, object>();
+        parameters.Add("StudentId", studentId);
+        parameters.Add("Name", new List<string>() { student.FirstName, student.LastName });
+        parameters.Add("Class", new KeyValuePair<int, string>(student.ClassId, student.ClassName));
+        parameters.Add("Division", new KeyValuePair<int, string>(student.DivisionId, student.DivisionName));
+        parameters.Add("OnCloseClick", EventCallback.Factory.Create<MouseEventArgs>(this, ModelClosed));
+        parameters.Add("DataUpdate", EventCallback.Factory.Create<MouseEventArgs>(this, DataUpdateCall));
+        await modal.ShowAsync<_TransferStudent>(title: "Transfer Student", parameters: parameters);
+    }
+
+    private async Task ModelClosed(MouseEventArgs e)
+    {
+        await modal.HideAsync();
+    }
+
+    private async Task DataUpdateCall(){
+        await GetStudentData();
+        await studentGrid.RefreshDataAsync();
     }
 }

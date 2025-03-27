@@ -1,0 +1,99 @@
+﻿@using SMS.DataAccess.Data.Interfaces.Student
+@using SMS.DataAccess.Models.Student.Request
+
+@inject ICommon _common
+@inject IStudent _student
+@inject ITokenService tokenService
+@inject IToastService ToastService
+
+<div>
+    <div style="background-color: gainsboro;">
+        <div class="row py-2 px-2">
+            <div class="col-5 col-md-4">Student Name :</div>
+            <div class="col-7 col-md-6">@Name[0] @Name[1]</div>
+        </div>
+    </div>
+    <br />
+
+    <EditForm Model="divisionDrop" FormName="divisionTransfer">
+        <div>
+            <label>From</label>
+            <TextInput @bind-Value="@DivisionName" class="form-control" Disabled id="division" />
+        </div>
+        <div>
+            <label>To</label>
+            <InputSelect class="form-select" aria-label="Default select example" @bind-Value="divisionDrop.DivisionId">
+                <option selected disabled>select division</option>
+                @if (divisionList != null)
+                {
+                    foreach (var divisionOption in divisionList)
+                    {
+                        <option value="@divisionOption.Id">@divisionOption.Value</option>
+                    }
+                }
+            </InputSelect>
+            <ValidationMessage For="() => divisionDrop.DivisionId" />
+        </div>
+    </EditForm>
+</div>
+<hr />
+<div class="d-flex justify-content-end">
+    <Button Class="mr-2" Color="ButtonColor.Secondary" @onclick="OnCloseClick">Close</Button> &nbsp;
+    <Button Color="ButtonColor.Primary" @onclick="SaveClick"> Save changes </Button>
+</div>
+
+@code {
+    private string? DivisionName = null;
+    [Parameter] public int StudentId { get; set; }
+    [Parameter] public List<string> Name { get; set; }
+    [Parameter] public KeyValuePair<int, string> Class { get; set; }
+    [Parameter] public KeyValuePair<int, string> Division { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> OnCloseClick { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> DataUpdate { get; set; }
+    private JwtDTO? tokenData;
+    private DivisionDrop divisionDrop = new DivisionDrop();
+    private List<SelectOptionDTO> divisionList = new List<SelectOptionDTO>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        DivisionName = Division.Value;
+        tokenData = tokenService.TokenData;
+        if (tokenData == null && OperatingSystem.IsBrowser())
+        {
+            tokenData = await tokenService.GetClaimFromToken();
+        }
+        var res = await _common.GetDivisionsByClassAsync(Class.Key);
+        if(tokenData != null)
+        {
+            divisionDrop = new DivisionDrop()
+            {
+                StudentId = StudentId,
+                YearId = tokenData.CurrentYearId,
+                ModifiedBy = tokenData.UserId,
+            };
+        }
+        if (res.Result)
+        {
+            divisionList = res.Data.Where(x => x.Id != Division.Key).ToList();
+            divisionDrop.DivisionId = divisionList.First().Id;
+        }
+
+    }
+
+    private async Task SaveClick()
+    {
+        if(divisionDrop.DivisionId > 0){
+            var res = await _student.TransferDivision(divisionDrop);
+            if(res.Result){
+                if(res.Data > 0){
+                    ToastService.ShowSuccess(res.Message);
+                    await OnCloseClick.InvokeAsync();
+                    await DataUpdate.InvokeAsync();
+                }
+                else if(res.Data == -1){
+                    ToastService.ShowError(res.Message);
+                }
+             }
+        }
+    }
+}

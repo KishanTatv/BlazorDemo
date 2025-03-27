@@ -25,7 +25,7 @@
     {
         public const string OnlyString = @"^[a-zA-Z]+$";
         public const string Phone = @"^(\d{10})$";
-        public const string ZipCode = @"^\d{5}(-\d{4})?$";
+        public const string ZipCode = @"^\d{6}(-\d{4})?$";
     }
 
     public static class ErrorMessage
