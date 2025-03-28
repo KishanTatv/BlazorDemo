@@ -1,4 +1,5 @@
-﻿using SMS.Shared.Static.Constants;
+﻿using Microsoft.AspNetCore.Components.Forms;
+using SMS.Shared.Static.Constants;
 using System.ComponentModel.DataAnnotations;
 
 namespace SMS.DataAccess.Models.Student.Request
@@ -90,5 +91,11 @@ namespace SMS.DataAccess.Models.Student.Request
         public int YearId { get; set; }
         public int? CreatedBy { get; set; }
         public int? ModifiedBy { get; set; }
+    }
+
+    public class StudentImage()
+    {
+        public int StudentId { get; set; }
+        public IBrowserFile StudentPhoto { get; set; }
     }
 }

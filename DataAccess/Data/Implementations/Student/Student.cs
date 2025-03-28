@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.Extensions.Configuration;
 using SMS.DataAccess.Data.Interfaces.Student;
 using SMS.DataAccess.Models.Student.Request;
 using SMS.DataAccess.Models.Student.Response;
@@ -57,15 +58,26 @@ namespace SMS.DataAccess.Data.Implementations.Student
             return responceVM;
         }
 
-        public async Task<HttpResponseDTO<bool>> DeleteStudent(int studentId, int modifiedBy)
+        public async Task<HttpResponseDTO<string>> DeleteStudent(int studentId, int modifiedBy)
         {
-            HttpResponseDTO<bool> responseVM = await _httpClientManager.DeleteAsync<bool>(
+            HttpResponseDTO<string> responseVM = await _httpClientManager.DeleteAsync<string>(
                 UrlBuilderUtility.GetCombineUrl(API_Routes.Student.DeleteStudent, _APIConnection) +
                   UrlBuilderUtility.GenerateQueryString([
                       new KeyValuePair<string,string>("studentId", studentId.ToString()),
                       new KeyValuePair<string,string>("modifiedBy", modifiedBy.ToString())
                     ])
                   );
+            return responseVM;
+        }
+
+
+        public async Task<HttpResponseDTO<string>> StudentPhoto(StudentImage model)
+        {
+            HttpResponseDTO<string> responseVM = await _httpClientManager.PostAsync<string>(
+                UrlBuilderUtility.GetCombineUrl(API_Routes.Student.StudentPhoto, _APIConnection),
+                FormDataUtility.ConvertToMultipartFormData(model)
+                );
+
             return responseVM;
         }
     }

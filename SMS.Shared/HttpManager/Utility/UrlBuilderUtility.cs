@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using Microsoft.AspNetCore.Components.Forms;
+using System.Reflection;
 using System.Web;
 
 namespace SMS.Shared.HttpManager.Utility
@@ -59,5 +60,41 @@ namespace SMS.Shared.HttpManager.Utility
             return $"?{query}";
         }
     }
-    
+
+
+
+
+
+
+
+    public static class FormDataUtility
+    {
+        public static MultipartFormDataContent ConvertToMultipartFormData<T>(T model)
+        {
+            var formData = new MultipartFormDataContent();
+            var properties = typeof(T).GetProperties();
+
+            foreach (var prop in properties)
+            {
+                var value = prop.GetValue(model);
+
+                if (value == null) continue;
+
+                if (value is IBrowserFile file)
+                {
+                    var fileStream = file.OpenReadStream(maxAllowedSize: 1024 * 1024 * 10, cancellationToken: CancellationToken.None);
+                    var fileContent = new StreamContent(fileStream);
+                    fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
+
+                    formData.Add(fileContent, prop.Name, file.Name);
+                }
+                else
+                {
+                    formData.Add(new StringContent(value.ToString()), prop.Name);
+                }
+            }
+
+            return formData;
+        }
+    }
 }

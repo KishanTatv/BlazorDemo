@@ -21,6 +21,7 @@
             public const string GetStudent = "Student/GetStudentById";
             public const string TransferDivision = "Student/AllocateStudentRollNumber";
             public const string DeleteStudent = "Student/DeleteStudent";
+            public const string StudentPhoto = "Student/StudentPhoto";
         }
     }
 }

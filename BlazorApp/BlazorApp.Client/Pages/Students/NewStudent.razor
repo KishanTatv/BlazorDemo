@@ -161,7 +161,11 @@
             </div>
         </div>
     </EditForm>
+
+    <InputFile OnChange="LoadFiles" multiple />
+    <Button Type="ButtonType.Button" Color="ButtonColor.Secondary" @onclick="ImageProcess">Save Image</Button>
 </div>
+
 
 @code {
     [Parameter] public int? id { get; set; }
@@ -169,9 +173,11 @@
     private JwtDTO? tokenData;
     private DateTime studentMaxDob = DateTime.Now.Date;
     private DateTime studentMinDob = new DateTime(DateTime.Now.Date.AddYears(-25).Date.Year, 01, 1);
+    private IBrowserFile? browserFile;
     private StudentAddReqDTO studentModel = new StudentAddReqDTO();
     private HttpResponseDTO<List<SelectOptionDTO>> classList = new HttpResponseDTO<List<SelectOptionDTO>>();
     private HttpResponseDTO<List<SelectOptionDTO>> divisionList = new HttpResponseDTO<List<SelectOptionDTO>>();
+    private StudentImage? studentPhoto;
 
     protected override async Task OnInitializedAsync()
     {
@@ -257,5 +263,22 @@
     private void BackClick()
     {
         navigationManager.NavigateTo(Page_Routes.Student);
+    }
+
+    private void LoadFiles(InputFileChangeEventArgs e)
+    {
+        browserFile = e.File;
+    }
+
+    private async Task ImageProcess(){
+        if (browserFile != null && browserFile.Size > 0)
+        {
+            studentPhoto = new StudentImage(){
+                StudentId = 5,
+                StudentPhoto = browserFile
+            };
+            var httpResponse = await _student.StudentPhoto(studentPhoto);
+        }
+
     }
 }
