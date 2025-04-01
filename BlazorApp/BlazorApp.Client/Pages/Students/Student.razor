@@ -37,17 +37,19 @@ DataProvider="StudentDataProvider">
         <GridColumn TItem="StudentListDTO" HeaderText="Class / Division" PropertyName="ClassName" SortString="ClassName" SortKeySelector="item => item.ClassName">@context.ClassName / @context.DivisionName</GridColumn>
         <GridColumn TItem="StudentListDTO" HeaderText="Admission Date" PropertyName="AdmissionDate" SortString="AdmissionDate" SortKeySelector="item => item.AdmissionDate">@context.AdmissionDate.ToString(DateFormat.ddMMMyyyy)</GridColumn>
         <GridColumn TItem="StudentListDTO" HeaderText="Address" PropertyName="Address" SortString="State" SortKeySelector="item => item.State"> @context.City , @context.State</GridColumn>
-        <GridColumn TItem="StudentListDTO" HeaderText="Action" PropertyName="Action">
-            <Button Type="ButtonType.Button" Color="ButtonColor.Secondary" TooltipTitle="Edit" @onclick="() => EditAction(context.StudentId)">
-                <Icon Name="IconName.PenFill"></Icon>
-            </Button>
-            <Button Type="ButtonType.Button" Color="ButtonColor.Secondary" TooltipTitle="Transfer" @onclick="() => TransferAction(context.StudentId)">
-                <Icon Name="IconName.ListNested"></Icon>
-            </Button>
-            <Button Type="ButtonType.Button" Color="ButtonColor.Secondary" TooltipTitle="Delete" @onclick="async () => await DeleteAction(context.StudentId)">
-                <Icon Name="IconName.Dash"></Icon>
-            </Button>
-        </GridColumn>
+        @if(tokenData?.role == 2){
+            <GridColumn TItem="StudentListDTO" HeaderText="Action" PropertyName="Action">
+                <Button Class="py-1" Type="ButtonType.Button" Color="ButtonColor.Secondary" TooltipTitle="Edit" @onclick="() => EditAction(context.StudentId)">
+                    <Icon Name="IconName.PenFill"></Icon>
+                </Button>
+                <Button Class="py-1" Type="ButtonType.Button" Color="ButtonColor.Secondary" TooltipTitle="Transfer" @onclick="() => TransferAction(context.StudentId)">
+                    <Icon Name="IconName.ListNested"></Icon>
+                </Button>
+                <Button Class="py-1" Type="ButtonType.Button" Color="ButtonColor.Secondary" TooltipTitle="Delete" @onclick="async () => await DeleteAction(context.StudentId)">
+                    <Icon Name="IconName.TrashFill"></Icon>
+                </Button>
+            </GridColumn>
+        }
     </GridColumns>
 </Grid>
 
@@ -80,6 +82,7 @@ DataProvider="StudentDataProvider">
     {
         if(tokenData != null){
             studentReq.YearId = tokenData.CurrentYearId;
+            studentReq.StaffId = tokenData.StaffId;
         }
         if (request.Sorting is not null && request.Sorting.Any())
         {
@@ -115,8 +118,8 @@ DataProvider="StudentDataProvider">
 
     private async Task GetStudentDataOnSearch(){
         await studentGrid.ResetPageNumber();
-        await GetStudentData();
-        await studentGrid.RefreshDataAsync();
+        // await GetStudentData();
+        // await studentGrid.RefreshDataAsync();
     }
 
     private void AddStudentClick(){
@@ -158,7 +161,6 @@ DataProvider="StudentDataProvider">
     }
 
     private async Task DataUpdateCall(){
-        await GetStudentData();
         await studentGrid.RefreshDataAsync();
     }
 }

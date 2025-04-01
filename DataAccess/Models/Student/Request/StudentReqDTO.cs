@@ -12,6 +12,7 @@ namespace SMS.DataAccess.Models.Student.Request
         public string SortCol {  get; set; }
         public string SortDir { get; set; }
         public string? SearchByName { get; set; }
+        public int? StaffId { get; set; }
     }
 
     public class StudentAddReqDTO

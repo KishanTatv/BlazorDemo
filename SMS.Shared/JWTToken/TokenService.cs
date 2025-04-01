@@ -1,4 +1,5 @@
 ﻿using Blazored.LocalStorage;
+using SMS.Shared.Static.Enum;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
@@ -30,6 +31,7 @@ namespace SMS.Shared.JWTToken
         {
             await _localStorage.RemoveItemAsync(TOKEN_KEY);
             await _localStorage.RemoveItemAsync(REFRESH_TOKEN_KEY);
+            _tokenData = null;
         }
 
         public async Task<string> GetUserToken()
@@ -58,8 +60,13 @@ namespace SMS.Shared.JWTToken
                 {
                     role = int.Parse(claim?.FirstOrDefault(c => c.Type == "role").Value),
                     CurrentYearId = int.Parse(claim?.FirstOrDefault(c => c.Type == "CurrentYearId").Value),
-                    UserId = int.Parse(claim?.FirstOrDefault(c => c.Type == "UserId").Value),
+                    UserId = int.Parse(claim?.FirstOrDefault(c => c.Type == "UserId").Value)
                 };
+                if(jwtData.role == (int)Roles.Teacher)
+                {
+                    jwtData.TeacherId = int.Parse(claim?.FirstOrDefault(c => c.Type == "TeacherId").Value);
+                    jwtData.StaffId = int.Parse(claim?.FirstOrDefault(c => c.Type == "StaffId").Value);
+                }
                 _tokenData = jwtData;
             }
             return _tokenData;

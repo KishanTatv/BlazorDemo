@@ -5,40 +5,76 @@
 @inject ITokenService tokenService
 @inject NavigationManager _navigationManager
 @inject IToastService ToastService
-@inject PreloadService PreloadService
 
-<h3>Dashboard</h3>
+<div class="d-flex border-bottom border-4 border-secondary pb-1 mb-3">
+    <h2 class="m-0">Dashboard</h2>
+</div>
+
 @{
-    if(tokenData?.role == 2)
+    if (tokenData?.role == (int)Roles.SuperAdmin || tokenData?.role == (int)Roles.Admin)
     {
-        <p>Admin</p>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Daily Updates</h5>
+                <h6 class="card-subtitle mb-2 text-muted">Latest News</h6>
+                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                <a href="#" class="card-link">Card link</a>
+                <a href="#" class="card-link">Another link</a>
+            </div>
+        </div>
+
+        <br />
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Upcoming Exam & Events</h5>
+                        <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+                        <a href="#" class="btn btn-primary">Go somewhere</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="card">
+                    <div class="card-body">
+                        <BlazorApp.Client.Shared.Calender Data="Data" >
+                        </BlazorApp.Client.Shared.Calender>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    }
+    else if (tokenData?.role == (int)Roles.Teacher)
+    {
+        <p>Keep Wait ...!</p>
     }
     else
     {
-        <p>Not Admin</p>
+        <p>Keep Wait ...!</p>
     }
 }
-<button class="btn btn-info" id="InfoButton" @onclick="showToastMsg">Info Toast</button>
 
 @code {
 
     private JwtDTO? tokenData;
-
+    private Dictionary<DateTime, object> Data = new Dictionary<DateTime, object>();
     // protected override async Task OnInitializedAsync()
     // {
     //     x = tokenService.TokenData?.CurrentYearId;
     // }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnInitializedAsync()
     {
-        if (firstRender)
+        tokenData = tokenService.TokenData;
+        if (tokenData == null && OperatingSystem.IsBrowser())
         {
-            await getTokenData();
-            StateHasChanged();
+            tokenData = await tokenService.GetClaimFromToken();
         }
     }
 
-    public async Task getTokenData()
+
+    public async Task GetTokenData()
     {
         tokenData = await tokenService.GetClaimFromToken();
         if(tokenData == null)

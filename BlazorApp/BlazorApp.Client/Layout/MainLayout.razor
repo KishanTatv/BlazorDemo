@@ -22,14 +22,13 @@ ErrorIcon="fa fa-triangle-exclamation"  />
 
     <main>
         <div class="top-row px-4">
-            <a href="@Page_Routes.Login">LogOut</a>
+            <a @onclick="LogOutPage">LogOut</a>
         </div>
 
         <article class="content px-4">
             @Body
         </article>
     </main>
-    <Preload LoadingText="Loading..." />
     <BlazorApp.Client.Shared.Loader />
 </div>
 
@@ -42,16 +41,16 @@ ErrorIcon="fa fa-triangle-exclamation"  />
 @code{
     private JwtDTO? tokenData;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnInitializedAsync()
     {
-        if (firstRender)
+        tokenData = tokenService.TokenData;
+        if (tokenData == null && OperatingSystem.IsBrowser())
         {
-            await getTokenData();
-            StateHasChanged();
+            tokenData = await tokenService.GetClaimFromToken();
         }
     }
 
-    public async Task getTokenData()
+    public async Task GetTokenData()
     {
         tokenData = await tokenService.GetClaimFromToken();
         if (tokenData == null)
@@ -62,6 +61,11 @@ ErrorIcon="fa fa-triangle-exclamation"  />
         {
             tokenService.SetTokenData(tokenData);
         }
+    }
+
+    private async Task LogOutPage(){
+        await tokenService.RemoveTokensAsync();
+        _navigationManager.NavigateTo(Page_Routes.Login);
     }
 
 }

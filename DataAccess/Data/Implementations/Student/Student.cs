@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using SMS.DataAccess.Data.Interfaces.Student;
 using SMS.DataAccess.Models.Student.Request;
 using SMS.DataAccess.Models.Student.Response;
@@ -7,7 +6,6 @@ using SMS.Shared.HttpManager.DTO;
 using SMS.Shared.HttpManager.Interface;
 using SMS.Shared.HttpManager.Utility;
 using SMS.Shared.Static.Routes;
-using System.Reflection;
 
 namespace SMS.DataAccess.Data.Implementations.Student
 {

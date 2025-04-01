@@ -62,11 +62,6 @@ namespace SMS.Shared.HttpManager.Utility
     }
 
 
-
-
-
-
-
     public static class FormDataUtility
     {
         public static MultipartFormDataContent ConvertToMultipartFormData<T>(T model)

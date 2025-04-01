@@ -1,4 +1,7 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@inject ITokenService tokenService
+@inject NavigationManager _navigationManager
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="/">SMS</a>
     </div>
@@ -32,6 +35,39 @@
             </NavLink>
         </div>
 
+        @if (tokenData?.role == (int)Roles.SuperAdmin || tokenData?.role == (int)Roles.Admin){
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="student">
+                    <span class="bi bi-staff-fill-nav-menu" aria-hidden="true"></span> Staff
+                </NavLink>
+            </div>
+        }
+
     </nav>
 </div>
 
+@code{
+    private JwtDTO? tokenData;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await GetTokenData();
+            StateHasChanged();
+        }
+    }
+
+    public async Task GetTokenData()
+    {
+        tokenData = await tokenService.GetClaimFromToken();
+        if (tokenData == null)
+        {
+            _navigationManager.NavigateTo(Page_Routes.Login);
+        }
+        else
+        {
+            tokenService.SetTokenData(tokenData);
+        }
+    }
+}

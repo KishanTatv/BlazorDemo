@@ -21,24 +21,22 @@ builder.Services.AddBlazoredToast();
 builder.Services.AddBlazoredLocalStorage();
 
 builder.Services.AddSingleton<PreloadService>();
-var loaderService = new LoaderService();
-builder.Services.AddSingleton(loaderService);
+builder.Services.AddSingleton(new LoaderService());
 
 
 //HttpDelegator
 builder.Services.AddTransient<HttpDelegator>();
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
-//builder.Services.AddScoped(sp =>
-//{
-//    var httpClient = new HttpClient(new HttpClientHandler());
-//    var delegator = sp.GetRequiredService<HttpDelegator>();
-//    delegator.InnerHandler = new HttpClientHandler(); 
+builder.Services.AddScoped(sp =>
+{
+    var httpClient = new HttpClient(new HttpClientHandler());
+    var delegator = sp.GetRequiredService<HttpDelegator>();
+    delegator.InnerHandler = new HttpClientHandler();
 
-//    return new HttpClient(delegator)
-//    {
-//        BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
-//    };
-//});
+    return new HttpClient(delegator)
+    {
+        BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
+    };
+});
 builder.Services.AddScoped<IHttpClientManager, HttpClientManager>();
 
 builder.Services.AddScoped<ITokenService, TokenService>();
