@@ -16,6 +16,7 @@
     public static class DateFormat
     {
         public static string ddMMMyyyy = "dd MMM, yyyy";
+        public static string MMMMyyyy = "MMMM yyyy";
     }
 
 

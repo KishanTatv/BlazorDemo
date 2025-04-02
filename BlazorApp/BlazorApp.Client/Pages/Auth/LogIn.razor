@@ -32,7 +32,7 @@
             </div>
             <div class="form-group">
                 <label for="Age">Password</label>
-                <InputText @bind-Value=loginModel.Password class="form-control" Type="password" id="password" />
+                <PasswordInput @bind-Value=loginModel.Password class="form-control" id="password" />
                 <ValidationMessage For=@(() => loginModel.Password) />
             </div>
             <br />

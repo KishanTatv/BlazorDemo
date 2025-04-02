@@ -8,11 +8,11 @@
         {
             @if (IsWeekView)
             {
-                @SelectedDate.ToString("dd MMMM yyyy")
+                @SelectedDate.ToString(DateFormat.ddMMMyyyy)
             }
             else
             {
-                @MonthDate.ToString("MMMM yyyy")
+                @MonthDate.ToString(DateFormat.MMMMyyyy)
             }
         }
     </span>
@@ -23,11 +23,11 @@
             <span class="fs-6">
                 @if (IsWeekView)
                 {
-                    @SelectedDate.ToString("dd MMM yyyy")
+                    @SelectedDate.ToString(DateFormat.ddMMMyyyy)
                 }
                 else
                 {
-                    @MonthDate.ToString("MMMM yyyy")
+                    @MonthDate.ToString(DateFormat.MMMMyyyy)
                 }
             </span>
         }
@@ -44,7 +44,7 @@
     </div>
     @if (IsWeekView)
     {
-        <div class="d-flex justify-content-around  text-dark">
+        <div class="d-flex justify-content-around">
             @for (int i = 0; i < 7; i++)
             {
                 var tempIndex = i;
@@ -58,7 +58,7 @@
     {
         @while (date <= DateTime.DaysInMonth(MonthDate.Year, MonthDate.Month))
         {
-            <div class="d-flex justify-content-around  text-dark">
+            <div class="d-flex justify-content-around">
                 @for (int i = 0; i < 7; i++)
                 {
                     <div class="col d-flex align-items-center justify-content-center my-2 py-2 px-2 @((i == 0 || i == 6) && date > 0 && date <= DateTime.DaysInMonth(MonthDate.Year, MonthDate.Month) ? "bg-lightgrey" : "") @(date <= DateTime.DaysInMonth(MonthDate.Year, MonthDate.Month) && date > 0 ? Data.FirstOrDefault(x => x.Key == new DateTime(MonthDate.Year, MonthDate.Month, date)).Value : "") rounded-circle" style="height: 45px; max-width: 45px;">

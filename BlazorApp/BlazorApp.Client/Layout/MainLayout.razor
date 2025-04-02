@@ -4,6 +4,7 @@
 @using SMS.Shared.Static.Routes
 @using Blazored.Toast
 @inherits LayoutComponentBase
+@rendermode InteractiveWebAssembly
 
 @inject NavigationManager _navigationManager
 @inject ITokenService tokenService
@@ -16,13 +17,25 @@ SuccessIcon="fa fa-check"
 ErrorIcon="fa fa-triangle-exclamation"  />
 
 <div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+    <Sidebar @ref="sidebar"
+    Href="/"
+    IconName="IconName.BuildingFillGear"
+    Title="SMS"
+    DataProvider="SidebarDataProvider" />
 
     <main>
-        <div class="top-row px-4">
-            <a @onclick="LogOutPage">LogOut</a>
+        <div class="d-flex justify-content-between px-4 py-2 border-bottom">
+            <Icon Class="pt-2" Name="IconName.List" role="button" @onclick="ToggleSidebar" />
+            <div class="d-flex">
+                <ThemeSwitcher />
+                <Dropdown Color="DropdownColor.None">
+                    <DropdownToggleButton><span class="mx-3">@tokenData?.UserName</span></DropdownToggleButton>
+                    <DropdownMenu>
+                        <DropdownItem To="#" Type="DropdownItemType.Button">Action</DropdownItem>
+                        <DropdownItem @onclick="LogOutPage" Type="DropdownItemType.Button">LogOut</DropdownItem>
+                    </DropdownMenu>
+                </Dropdown>
+            </div>
         </div>
 
         <article class="content px-4">
@@ -40,13 +53,27 @@ ErrorIcon="fa fa-triangle-exclamation"  />
 
 @code{
     private JwtDTO? tokenData;
+    Sidebar sidebar = default!;
+    IEnumerable<NavItem>? navItems;
 
-    protected override async Task OnInitializedAsync()
+    private async Task<SidebarDataProviderResult> SidebarDataProvider(SidebarDataProviderRequest request)
     {
-        tokenData = tokenService.TokenData;
-        if (tokenData == null && OperatingSystem.IsBrowser())
+        if (navItems is null)
+            navItems = GetNavItems();
+
+        return await Task.FromResult(request.ApplyTo(navItems));
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
         {
-            tokenData = await tokenService.GetClaimFromToken();
+            tokenData = tokenService.TokenData;
+            if (tokenData == null && OperatingSystem.IsBrowser())
+            {
+                await GetTokenData();
+            }
+            StateHasChanged();
         }
     }
 
@@ -68,4 +95,49 @@ ErrorIcon="fa fa-triangle-exclamation"  />
         _navigationManager.NavigateTo(Page_Routes.Login);
     }
 
+
+    private IEnumerable<NavItem> GetNavItems()
+    {
+        navItems = new List<NavItem>
+        {
+            new NavItem { Id = "4", IconName = IconName.LayersHalf, Text = "Section", IconColor = IconColor.Success },
+            new NavItem { Id = "6", Href = "/home", IconName = IconName.HouseDoor, Text = "home", ParentId="4" },
+            new NavItem { Id = "7", Href = "/weather", IconName = IconName.CloudHaze2, Text = "Weather", ParentId="4" },
+
+            new NavItem { Id = "8", IconName = IconName.Newspaper, Text = "Users", IconColor = IconColor.Danger },
+            new NavItem { Id = "11", Href = "/student", IconName = IconName.PersonBadge, Text = "Student", ParentId="8" },
+            new NavItem { Id = "12", Href = "/staff", IconName = IconName.PersonGear, Text = "Staff", ParentId="8" },
+        };
+
+        return navItems;
+    }
+
+
+    private void ToggleSidebar() => sidebar.ToggleSidebar();
+
 }
+
+@* <style>
+    :root {
+        --bb-sidebar-width: 270px;
+        --bb-sidebar-collapsed-width: 50px;
+        --bb-sidebar-background-color: rgba(234, 234, 234, 1);
+        --bb-sidebar-top-row-background-color: rgba(0,0,0,0.08);
+        --bb-sidebar-top-row-border-color: rgb(194,192,192);
+        --bb-sidebar-title-text-color: rgb(0,0,0);
+        --bb-sidebar-brand-icon-color: #6f42c1;
+        --bb-sidebar-brand-image-width: 24px;
+        --bb-sidebar-brand-image-height: 24px;
+        --bb-sidebar-title-badge-text-color: rgb(255,255,255);
+        --bb-sidebar-title-badge-background-color: rgba(25,135,84,var(--bs-bg-opacity,1));
+        --bb-sidebar-navbar-toggler-icon-color: rgb(0,0,0);
+        --bb-sidebar-navbar-toggler-background-color: rgba(0,0,0,0.08);
+        --bb-sidebar-content-border-color: rgb(194,192,192);
+        --bb-sidebar-nav-item-text-color: rgba(0,0,0,0.9);
+        --bb-sidebar-nav-item-text-active-color-rgb: 0,0,0;
+        --bb-sidebar-nav-item-text-hover-color: rgba(var(--bb-sidebar-nav-item-text-active-color-rgb),0.9);
+        --bb-sidebar-nav-item-text-active-color: rgba(var(--bb-sidebar-nav-item-text-active-color-rgb),0.9);
+        --bb-sidebar-nav-item-background-hover-color: rgba(var(--bb-sidebar-nav-item-text-active-color-rgb),0.08);
+        --bb-sidebar-nav-item-group-background-color: rgba(var(--bb-sidebar-nav-item-text-active-color-rgb),0.08);
+    }
+</style> *@
