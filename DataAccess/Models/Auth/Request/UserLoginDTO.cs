@@ -10,4 +10,11 @@ namespace SMS.DataAccess.Models.Auth.Request
         [Required(ErrorMessage = "Password is required")]
         public string Password { get; set; }
     }
+
+
+    public class UserPhoto
+    {
+        public int UserId { get; set; }
+        public int RoleId { get; set; }
+    }
 }

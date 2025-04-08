@@ -4,21 +4,31 @@
 @using SMS.DataAccess.Models.Student.Request
 @rendermode InteractiveWebAssembly
 
-@inject NavigationManager navigationManager;
-@inject ICommon _common;
-@inject IStudent _student;
+@inject NavigationManager navigationManager
+@inject ICommon _common
+@inject IStudent _student
 @inject IToastService ToastService
 @inject ITokenService TokenService
 
 <div class="d-flex justify-content-between border-bottom border-4 border-secondary pb-1 mb-3">
     <h2 class="m-0">
-        @if(id != null){
+        @if (id != null)
+        {
             <span>Edit</span>
-        }else{
+        }
+        else
+        {
             <span>Add</span>
         }
-        Student</h2>
-    <Button class="p-3 py-0" Color="ButtonColor.Secondary" Size="ButtonSize.Large" @onclick="BackClick"> <Icon Name="IconName.ArrowReturnLeft" /> Back </Button>
+        Student
+    </h2>
+    <Button class="p-3 py-0"
+            Color="ButtonColor.Secondary"
+            Size="ButtonSize.Large"
+            @onclick="BackClick">
+        <Icon Name="IconName.ArrowReturnLeft" />
+        Back
+    </Button>
 </div>
 
 <div class="container">
@@ -154,7 +164,8 @@
         <br />
         <div class="row">
             <div class="col-md-12 text-right">
-                @if(id == null){
+                @if (id == null)
+                {
                     <Button Type="ButtonType.Button" Color="ButtonColor.Secondary" Class="float-end" @onclick="ResetForm">Reset</Button>
                 }
                 <Button Type="ButtonType.Submit" Color="ButtonColor.Success" Class="float-end me-2">Submit</Button>
@@ -162,8 +173,8 @@
         </div>
     </EditForm>
 
-    <InputFile OnChange="LoadFiles" multiple />
-    <Button Type="ButtonType.Button" Color="ButtonColor.Secondary" @onclick="ImageProcess">Save Image</Button>
+    @* <InputFile OnChange="LoadFiles" multiple />
+    <Button Type="ButtonType.Button" Color="ButtonColor.Secondary" @onclick="ImageProcess">Save Image</Button> *@
 </div>
 
 
@@ -183,47 +194,54 @@
     {
         tokenData = TokenService.TokenData;
         classList = await _common.GetAllClassesAsync();
-        if(id != null){
+        if (id != null)
+        {
             await GetStudentData();
         }
-        else{
+        else
+        {
             if (classList.Result)
             {
                 divisionList = await _common.GetDivisionsByClassAsync(classList.Data.First().Id);
             }
         }
 
-        if(tokenData != null){
+        if (tokenData != null)
+        {
             studentModel.CreatedBy = studentModel.ModifiedBy = tokenData.UserId;
             studentModel.YearId = tokenData.CurrentYearId;
         }
     }
 
-    private async Task GetStudentData(){
-        if(id != null){
+    private async Task GetStudentData()
+    {
+        if (id != null)
+        {
             var res = await _student.GetStudentInfo(id.Value);
-            if(res.Result && res.Data != null){
+            if (res.Result && res.Data != null)
+            {
                 var Data = res.Data;
                 studentModel = new StudentAddReqDTO()
-                {
-                    StudentId = Data.StudentId,
-                    FirstName = Data.FirstName,
-                    LastName = Data.LastName,
-                    Gender = Data.Gender,
-                    DateOfBirth = Data.DateOfBirth,
-                    Email = Data.Email,
-                    Phone = Data.Mobile,
-                    ClassId = Data.ClassId,
-                    AdmissionDate = Data.AdmissionDate,
-                    Building = Data.BuildingName,
-                    City = Data.City,
-                    State = Data.State,
-                    ZipCode =  Data.ZipCode.ToString()
-                };
+                    {
+                        StudentId = Data.StudentId,
+                        FirstName = Data.FirstName,
+                        LastName = Data.LastName,
+                        Gender = Data.Gender,
+                        DateOfBirth = Data.DateOfBirth,
+                        Email = Data.Email,
+                        Phone = Data.Mobile,
+                        ClassId = Data.ClassId,
+                        AdmissionDate = Data.AdmissionDate,
+                        Building = Data.BuildingName,
+                        City = Data.City,
+                        State = Data.State,
+                        ZipCode = Data.ZipCode.ToString()
+                    };
                 await GetDivisionData();
                 studentModel.DivisionId = Data.DivisionId;
             }
-            else{
+            else
+            {
                 ToastService.ShowError(res.Message);
             }
         }
@@ -233,7 +251,8 @@
     private async Task GetDivisionData()
     {
         divisionList = await _common.GetDivisionsByClassAsync(studentModel.ClassId);
-        if(divisionList.Result){
+        if (divisionList.Result)
+        {
             studentModel.DivisionId = divisionList.Data[0].Id;
         }
     }
@@ -251,11 +270,13 @@
     private async Task StudentSaveClick()
     {
         HttpResponseDTO<bool> responseDTO = await _student.AddStudent(studentModel);
-        if(responseDTO.Result){
+        if (responseDTO.Result)
+        {
             ToastService.ShowSuccess(responseDTO.Message);
             BackClick();
         }
-        else{
+        else
+        {
             ToastService.ShowError(responseDTO.Message);
         }
     }
@@ -270,13 +291,15 @@
         browserFile = e.File;
     }
 
-    private async Task ImageProcess(){
+    private async Task ImageProcess()
+    {
         if (browserFile != null && browserFile.Size > 0)
         {
-            studentPhoto = new StudentImage(){
-                StudentId = 5,
-                StudentPhoto = browserFile
-            };
+            studentPhoto = new StudentImage()
+                {
+                    StudentId = 5,
+                    StudentPhoto = browserFile
+                };
             var httpResponse = await _student.StudentPhoto(studentPhoto);
         }
 

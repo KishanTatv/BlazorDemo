@@ -1,0 +1,159 @@
+﻿@page "/study-material"
+@using SMS.DataAccess.Models.StudyMaterial
+@rendermode InteractiveWebAssembly
+
+@inject ITokenService tokenService
+@inject ICommon _common
+
+<div class="d-flex justify-content-between border-bottom border-4 border-secondary pb-1 mb-3">
+    <h2 class="m-0">Study Material</h2>
+</div>
+
+<div class="row align-items-end">
+    <div class="col-sm-2 mb-3">
+        <label>Class</label>
+        <InputSelect class="form-select" aria-label="Default select example" @bind-Value="filters.ClassId" @bind-Value:after="GetSubjectData">
+            <option selected disabled>select class</option>
+            @if (classList.Data != null)
+            {
+                foreach (var classOption in classList.Data)
+                {
+                    <option value="@classOption.Id">@classOption.Value</option>
+                }
+            }
+        </InputSelect>
+    </div>
+    <div class="col-sm-2 mb-3">
+        <label>Subject</label>
+        <InputSelect class="form-select" aria-label="Default select example" @bind-Value="filters.SubjectId">
+            <option selected disabled>select division</option>
+            @if (subjectList.Data != null)
+            {
+                foreach (var subjectOption in subjectList.Data)
+                {
+                    <option value="@subjectOption.Id">@subjectOption.Value</option>
+                }
+            }
+        </InputSelect>
+    </div>
+    <div class="col-sm-2 mb-3">
+        <label>File Name</label>
+        <TextInput @bind-Value="@filters.Name" Placeholder="Search file.." />
+    </div>
+    <div class="col-sm mb-3">
+        <Button class="p-3 py-0" Color="ButtonColor.Secondary" Size="ButtonSize.Large" Outline="true"> Search </Button>
+        <Button class="p-3 py-0" Color="ButtonColor.Secondary" Size="ButtonSize.Large" Outline="true"> Clear </Button>
+    </div>
+</div>
+
+<br />
+<div>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>File/Folder Name</th>
+                <th>Description</th>
+                <th>Size</th>
+                <th>Uploaded Date</th>
+                <th>Uploaded By</th>
+                <th>Download</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in result)
+            {
+                <tr>
+                    <td @onclick="async () => await OpenFolder(item.studyMaterialId, item.parentMaterialId, item.materialType)">
+                        @if (string.IsNullOrEmpty(item.materialType))
+                        {
+                            <span class="bi bi-folder-fill px-1"></span>
+                        }
+                        else
+                        {
+                            <span class="bi bi-file-earmark-fill px-1"></span>
+                        }
+                        @if (item.fileName?.Length > 16)
+                        {
+                            @string.Concat(item.fileName.Substring(0, 16), "..")
+                        }
+                        else
+                        {
+                            @item.fileName?.ToString()
+                        }
+                    </td>
+                    <td class="text-center">@item.uploadedDate.Date.ToString(DateFormat.ddMMMyyyy)</td>
+                    <td class="text-center">
+                        <span>
+                            @if ((item.studyMaterialId == filters.ParentMaterialId) && item.parentMaterialId >= 0)
+                            {
+                                <span></span>
+                            }
+                            else
+                            {
+                                <span class="bi bi-cloud-arrow-down-fill" @onclick="async () => await DownloadMaterial(item.studyMaterialId, item.fileName, item.materialType)"></span>
+                            }
+                        </span>
+                    </td>
+                </tr>
+            }
+            @if (result.Count <= 0)
+            {
+                <tr>
+                    <td class="text-center py-5" colspan="6">
+                        <span>
+                            No Material Found
+                        </span>
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+</div>
+
+
+@code {
+    private JwtDTO? tokenData;
+    private StudyMaterialFilterDTO filters = new StudyMaterialFilterDTO();
+    private List<StudyMaterialResponceDTO> result = new List<StudyMaterialResponceDTO>();
+    private HttpResponseDTO<List<SelectOptionDTO>> classList = new HttpResponseDTO<List<SelectOptionDTO>>();
+    private HttpResponseDTO<List<SelectOptionDTO>> subjectList = new HttpResponseDTO<List<SelectOptionDTO>>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        tokenData = tokenService.TokenData;
+        if (tokenData == null && OperatingSystem.IsBrowser())
+        {
+            tokenData = await tokenService.GetClaimFromToken();
+        }
+        await GetAllClasses();
+        filters.ClassId = classList.Data[0].Id;
+        await GetSubjectData();
+        filters.SubjectId = subjectList.Data[0].Id;
+        await GetMaterialData();
+    }
+
+    private async Task GetAllClasses(){
+        classList = await _common.GetAllClassesAsync();
+    }
+
+
+    private async Task GetSubjectData(){
+        subjectList = await _common.GetSubjectByClassAsync(filters.ClassId, tokenData.CurrentYearId);
+    }
+
+    private async Task GetMaterialData()
+    {
+        subjectList = await _common.GetSubjectByClassAsync(filters.ClassId, tokenData.CurrentYearId);
+    }
+
+    private async Task OpenFolder(int materialId, int parentMaterialId, string? materialType)
+    {
+
+    }
+
+    private async Task DownloadMaterial(int studyMaterialId, string fileName, string materialType)
+    {
+
+    }
+}

@@ -6,12 +6,14 @@
         {
             public const string GetAllClasses = "common/GetClassList";
             public const string GetDivisionsByClass = "common/GetDivisionListByClass";
+            public const string GetSubjectListByClass = "common/GetSubjectListByClassId";
         }
 
         public class Auth
         {
             public const string LoginRoute = "Auth/Login";
             public const string ForgetPassword = "Auth/ForgetPassword";
+            public const string UserPhoto = "Auth/GetUserPhoto";
         }
 
         public class Student
@@ -22,6 +24,11 @@
             public const string TransferDivision = "Student/AllocateStudentRollNumber";
             public const string DeleteStudent = "Student/DeleteStudent";
             public const string StudentPhoto = "Student/StudentPhoto";
+        }
+
+        public class StudyMaterial
+        {
+            public const string MaterialList = "StudyMaterial/GetStudyMaterial";
         }
     }
 }

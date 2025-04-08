@@ -4,9 +4,10 @@
 @using SMS.DataAccess.Models.Student.Request
 @using SMS.DataAccess.Models.Student.Response
 
-@inject IStudent _student;
-@inject ITokenService tokenService;
-@inject NavigationManager navigationManager;
+@inject IStudent _student
+@inject ITokenService tokenService
+@inject NavigationManager navigationManager
+
 <div class="d-flex justify-content-between border-bottom border-4 border-secondary pb-1 mb-3">
     <h2 class="m-0">Student</h2>
     <Button class="p-3 py-0" Color="ButtonColor.Secondary" Size="ButtonSize.Large" @onclick="AddStudentClick"> <Icon Name="IconName.Plus" /> Add </Button>
@@ -17,35 +18,76 @@
         <TextInput @bind-Value="@studentReq.SearchByName" Placeholder="Search here.." />
     </div>
     <div class="col-md-2">
-        <Button class="p-3 py-0" Color="ButtonColor.Dark" Size="ButtonSize.Large" Outline="true" @onclick="GetStudentDataOnSearch"> Search </Button>
+        <Button class="p-3 py-0" Color="ButtonColor.Secondary" Size="ButtonSize.Large" Outline="true" @onclick="GetStudentDataOnSearch"> Search </Button>
     </div>
 </div>
 
-<Grid @ref="studentGrid" TItem="StudentListDTO" AllowPaging="true" AllowSorting="true" PageSize="10"
-FixedHeader="true"
-Height="466"
-PageSizeSelectorVisible="true"
-PageSizeSelectorItems="@(new int[] { 5,10,20 })"
-Responsive="true"
-Class="table table-hover table-bordered thead-light"
-DataProvider="StudentDataProvider">
+<Grid @ref="studentGrid" TItem="StudentListDTO"
+      AllowPaging="true" AllowSorting="true" PageSize="10"
+      AllowRowClick="true"
+      FixedHeader="true"
+      Height="466"
+      Class="table table-hover table-bordered"
+      DataProvider="StudentDataProvider"
+      PageSizeSelectorVisible="true"
+      PageSizeSelectorItems="@(new int[] { 5,10,20 })"
+      OnRowClick="OnRowClick"
+      Responsive="true">
     <GridColumns>
-        <GridColumn TItem="StudentListDTO" HeaderText="Student Name" PropertyName="FirstName" SortString="FirstName" SortKeySelector="item => item.FirstName">@context.FirstName @context.LastName</GridColumn>
-        <GridColumn TItem="StudentListDTO" HeaderText="Date Of Birth" PropertyName="DateOfBirth" SortString="DateOfBirth" SortKeySelector="item => item.DateOfBirth">@context.DateOfBirth.ToString(DateFormat.ddMMMyyyy)</GridColumn>
-        <GridColumn TItem="StudentListDTO" HeaderText="Email" PropertyName="Email" SortString="Email" SortKeySelector="item => item.Email">@context.Email</GridColumn>
-        <GridColumn TItem="StudentListDTO" HeaderText="Mobile" PropertyName="Mobile" SortString="Mobile" SortKeySelector="item => item.Mobile">@context.Mobile</GridColumn>
-        <GridColumn TItem="StudentListDTO" HeaderText="Class / Division" PropertyName="ClassName" SortString="ClassName" SortKeySelector="item => item.ClassName">@context.ClassName / @context.DivisionName</GridColumn>
-        <GridColumn TItem="StudentListDTO" HeaderText="Admission Date" PropertyName="AdmissionDate" SortString="AdmissionDate" SortKeySelector="item => item.AdmissionDate">@context.AdmissionDate.ToString(DateFormat.ddMMMyyyy)</GridColumn>
-        <GridColumn TItem="StudentListDTO" HeaderText="Address" PropertyName="Address" SortString="State" SortKeySelector="item => item.State"> @context.City , @context.State</GridColumn>
-        @if(tokenData?.role == 2){
+        <GridColumn TItem="StudentListDTO"
+                    HeaderText="Student Name" PropertyName="FirstName"
+                    SortString="FirstName" SortKeySelector="item => item.FirstName">
+            @context.FirstName @context.LastName
+        </GridColumn>
+        <GridColumn TItem="StudentListDTO"
+                    HeaderText="Date Of Birth" PropertyName="DateOfBirth"
+                    SortString="DateOfBirth" SortKeySelector="item => item.DateOfBirth">
+            @context.DateOfBirth.ToString(DateFormat.ddMMMyyyy)
+        </GridColumn>
+        <GridColumn TItem="StudentListDTO"
+                    HeaderText="Email" PropertyName="Email"
+                    SortString="Email" SortKeySelector="item => item.Email">
+            @context.Email
+        </GridColumn>
+        <GridColumn TItem="StudentListDTO"
+                    HeaderText="Mobile" PropertyName="Mobile"
+                    SortString="Mobile" SortKeySelector="item => item.Mobile">
+            @context.Mobile
+        </GridColumn>
+        <GridColumn TItem="StudentListDTO"
+                    HeaderText="Class / Division" PropertyName="ClassName"
+                    SortString="ClassName" SortKeySelector="item => item.ClassName">
+            @context.ClassName / @context.DivisionName
+        </GridColumn>
+        <GridColumn TItem="StudentListDTO"
+                    HeaderText="Admission Date" PropertyName="AdmissionDate"
+                    SortString="AdmissionDate" SortKeySelector="item => item.AdmissionDate">
+            @context.AdmissionDate.ToString(DateFormat.ddMMMyyyy)
+        </GridColumn>
+        <GridColumn TItem="StudentListDTO"
+                    HeaderText="Address" PropertyName="Address"
+                    SortString="State" SortKeySelector="item => item.State">
+            @context.City , @context.State
+        </GridColumn>
+        @if (tokenData?.role == 2)
+        {
             <GridColumn TItem="StudentListDTO" HeaderText="Action" PropertyName="Action">
-                <Button Class="py-1" Type="ButtonType.Button" Color="ButtonColor.Secondary" TooltipTitle="Edit" @onclick="() => EditAction(context.StudentId)">
+                <Button Class="py-1"
+                        Type="ButtonType.Button" Color="ButtonColor.Secondary"
+                        TooltipTitle="Edit"
+                        @onclick="() => EditAction(context.StudentId)">
                     <Icon Name="IconName.PenFill"></Icon>
                 </Button>
-                <Button Class="py-1" Type="ButtonType.Button" Color="ButtonColor.Secondary" TooltipTitle="Transfer" @onclick="() => TransferAction(context.StudentId)">
+                <Button Class="py-1"
+                        Type="ButtonType.Button" Color="ButtonColor.Secondary"
+                        TooltipTitle="Transfer"
+                        @onclick="() => TransferAction(context.StudentId)">
                     <Icon Name="IconName.ListNested"></Icon>
                 </Button>
-                <Button Class="py-1" Type="ButtonType.Button" Color="ButtonColor.Secondary" TooltipTitle="Delete" @onclick="async () => await DeleteAction(context.StudentId)">
+                <Button Class="py-1"
+                        Type="ButtonType.Button" Color="ButtonColor.Secondary"
+                        TooltipTitle="Delete"
+                        @onclick="async () => await DeleteAction(context.StudentId)">
                     <Icon Name="IconName.TrashFill"></Icon>
                 </Button>
             </GridColumn>
@@ -57,6 +99,7 @@ DataProvider="StudentDataProvider">
 
 
 @code {
+    [Inject] ModalService ModalService { get; set; } = default!;
     private Modal modal = default!;
     private JwtDTO? tokenData;
     private Grid<StudentListDTO> studentGrid = default!;
@@ -80,7 +123,8 @@ DataProvider="StudentDataProvider">
 
     private async Task<GridDataProviderResult<StudentListDTO>> StudentDataProvider(GridDataProviderRequest<StudentListDTO> request)
     {
-        if(tokenData != null){
+        if (tokenData != null)
+        {
             studentReq.YearId = tokenData.CurrentYearId;
             studentReq.StaffId = tokenData.StaffId;
         }
@@ -94,7 +138,7 @@ DataProvider="StudentDataProvider">
 
         await GetStudentData();
 
-        if(studentData.Result)
+        if (studentData.Result)
         {
             return await Task.FromResult(new GridDataProviderResult<StudentListDTO>
                 {
@@ -102,7 +146,8 @@ DataProvider="StudentDataProvider">
                     TotalCount = studentData.Data.TotalItemCount
                 });
         }
-        else{
+        else
+        {
             return await Task.FromResult(new GridDataProviderResult<StudentListDTO>
                 {
                     Data = [],
@@ -116,17 +161,25 @@ DataProvider="StudentDataProvider">
         studentData = await _student.GetStudentList(studentReq);
     }
 
-    private async Task GetStudentDataOnSearch(){
+    private async Task OnRowClick(GridRowEventArgs<StudentListDTO> args)
+    {
+        await ModalService.ShowAsync(new ModalOption { Type = ModalType.Primary, Title = "Event: Row Click", Message = $"First Name: {args.Item.FirstName}, Last Name: {args.Item.LastName}" });
+    }
+
+    private async Task GetStudentDataOnSearch()
+    {
         await studentGrid.ResetPageNumber();
         // await GetStudentData();
         // await studentGrid.RefreshDataAsync();
     }
 
-    private void AddStudentClick(){
+    private void AddStudentClick()
+    {
         navigationManager.NavigateTo(Page_Routes.AddStudent);
     }
 
-    private void EditAction(int studentId){
+    private void EditAction(int studentId)
+    {
         navigationManager.NavigateTo(Page_Routes.AddStudent + "/" + studentId);
     }
 
@@ -135,7 +188,7 @@ DataProvider="StudentDataProvider">
         var student = studentData.Data.Students.First(x => x.StudentId == studentId);
         var parameters = new Dictionary<string, object>();
         parameters.Add("StudentId", studentId);
-        parameters.Add("Name", new List<string>(){student.FirstName, student.LastName});
+        parameters.Add("Name", new List<string>() { student.FirstName, student.LastName });
         parameters.Add("Standard", new List<string>() { student.ClassName, student.DivisionName });
         parameters.Add("OnCloseClick", EventCallback.Factory.Create<MouseEventArgs>(this, ModelClosed));
         parameters.Add("DataUpdate", EventCallback.Factory.Create<MouseEventArgs>(this, DataUpdateCall));
@@ -160,7 +213,8 @@ DataProvider="StudentDataProvider">
         await modal.HideAsync();
     }
 
-    private async Task DataUpdateCall(){
+    private async Task DataUpdateCall()
+    {
         await studentGrid.RefreshDataAsync();
     }
 }

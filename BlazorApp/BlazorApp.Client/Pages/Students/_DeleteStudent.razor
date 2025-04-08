@@ -46,8 +46,8 @@
         var res = await _student.DeleteStudent(StudentId, tokenData.UserId);
         if(res.Result){
             ToastService.ShowSuccess(res.Message);
-            await OnCloseClick.InvokeAsync();
             await DataUpdate.InvokeAsync();
+            await OnCloseClick.InvokeAsync();
         }
         else{
             ToastService.ShowError(res.Message);

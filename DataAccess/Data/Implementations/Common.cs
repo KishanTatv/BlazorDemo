@@ -37,5 +37,15 @@ namespace SMS.DataAccess.Data.Implementations
                    ]
                ));
         }
+
+        public async Task<HttpResponseDTO<List<SelectOptionDTO>>> GetSubjectByClassAsync(int classId, int yearId)
+        {
+            return await _httpClientManager.GetAsync<List<SelectOptionDTO>>(
+               UrlBuilderUtility.GetCombineUrl(API_Routes.Common.GetSubjectListByClass, _APIConnection) +
+               UrlBuilderUtility.GenerateQueryString([
+                   new KeyValuePair<string,string>("classId", classId.ToString()),
+                   new KeyValuePair<string,string>("yearId", classId.ToString()),
+               ]));
+        }
     }
 }

@@ -7,5 +7,6 @@ namespace BlazorApp.Data.Interfaces.Auth
     {
         Task<HttpResponseDTO<List<string>>> Login(UserLoginDTO model);
 
+        Task<HttpResponseDTO<string>> GetUserPhoto(UserPhoto model);
     }
 }

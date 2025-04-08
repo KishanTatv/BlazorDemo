@@ -86,8 +86,8 @@
             if(res.Result){
                 if(res.Data > 0){
                     ToastService.ShowSuccess(res.Message);
-                    await OnCloseClick.InvokeAsync();
                     await DataUpdate.InvokeAsync();
+                    await OnCloseClick.InvokeAsync();
                 }
                 else if(res.Data == -1){
                     ToastService.ShowError(res.Message);

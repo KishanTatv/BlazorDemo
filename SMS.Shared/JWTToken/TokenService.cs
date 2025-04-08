@@ -61,7 +61,8 @@ namespace SMS.Shared.JWTToken
                     UserName = claim?.FirstOrDefault(c => c.Type == "unique_name").Value,
                     role = int.Parse(claim?.FirstOrDefault(c => c.Type == "role").Value),
                     CurrentYearId = int.Parse(claim?.FirstOrDefault(c => c.Type == "CurrentYearId").Value),
-                    UserId = int.Parse(claim?.FirstOrDefault(c => c.Type == "UserId").Value)
+                    UserId = int.Parse(claim?.FirstOrDefault(c => c.Type == "UserId").Value),
+                    Email = claim?.FirstOrDefault(c => c.Type == "email").Value
                 };
                 if(jwtData.role == (int)Roles.Teacher)
                 {

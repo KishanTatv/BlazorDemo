@@ -6,6 +6,7 @@ using SMS.Shared.HttpManager.DTO;
 using SMS.Shared.HttpManager.Interface;
 using SMS.Shared.HttpManager.Utility;
 using SMS.Shared.Static.Routes;
+using System.Reflection;
 
 namespace BlazorApp.Data.Implementations.Auth
 {
@@ -25,6 +26,15 @@ namespace BlazorApp.Data.Implementations.Auth
             HttpResponseDTO<List<string>> responseVM = await _httpClientManager.PostAsync<List<string>>(
                 UrlBuilderUtility.GetCombineUrl(API_Routes.Auth.LoginRoute, _APIConnection),
                 TypeConversionUtility.ConvertToStringContent(model)
+                );
+            return responseVM;
+        }
+
+        public async Task<HttpResponseDTO<string>> GetUserPhoto(UserPhoto model)
+        {
+            HttpResponseDTO<string> responseVM = await _httpClientManager.GetAsync<string>(
+                UrlBuilderUtility.GetCombineUrl(API_Routes.Auth.UserPhoto, _APIConnection) +
+                UrlBuilderUtility.GenerateQueryStringFromDTO(model)
                 );
             return responseVM;
         }

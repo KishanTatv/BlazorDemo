@@ -1,14 +1,15 @@
 ﻿@page "/login"
+@rendermode InteractiveWebAssembly
+@layout Layout.EmptyLayout
 @using BlazorApp.Data.Interfaces.Auth
 @using Blazored.Toast.Configuration
 @using Blazored.Toast.Services
+@using Microsoft.AspNetCore.Components.Authorization
 @using SMS.DataAccess.Models.Auth.Request
 @using SMS.Shared.JWTToken
 
-@rendermode InteractiveWebAssembly
-@layout Layout.EmptyLayout
 
-
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IAuth _auth;
 @inject NavigationManager _navigationManager;
 @inject IToastService toastService
@@ -57,14 +58,16 @@
 
         if (res.Result && res.Data != null)
         {
-            await tokenService.StoreTokensAsync(res.Data[0], res.Data[1]);
             toastService.ShowSuccess(res.Message);
+            await tokenService.StoreTokensAsync(res.Data[0], res.Data[1]);
+
+            var authStateProvider = (CustomAuthStateProvider)AuthenticationStateProvider;
+            await authStateProvider.NotifyUserAuthentication();
             _navigationManager.NavigateTo(Page_Routes.Dashboard);
         }
         else
         {
             toastService.ShowError(res.Message);
-
         }
     }
 

@@ -1,8 +1,10 @@
+using BlazorApp;
 using BlazorApp.Data.Implementations.Auth;
 using BlazorApp.Data.Interfaces.Auth;
 using BlazorBootstrap;
 using Blazored.LocalStorage;
 using Blazored.Toast;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using SMS.DataAccess.Data.Implementations;
 using SMS.DataAccess.Data.Implementations.Student;
@@ -19,6 +21,9 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.Services.AddBlazorBootstrap();
 builder.Services.AddBlazoredToast();
 builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddAuthorizationCore();
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 
 builder.Services.AddSingleton<PreloadService>();
 builder.Services.AddSingleton(new LoaderService());

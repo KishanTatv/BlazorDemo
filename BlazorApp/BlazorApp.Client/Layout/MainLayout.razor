@@ -1,13 +1,18 @@
-﻿@using Blazored.Toast.Configuration
+﻿@using BlazorApp.Data.Interfaces.Auth
+@using Blazored.Toast.Configuration
+@using Microsoft.AspNetCore.Authorization
+@using SMS.DataAccess.Models.Auth.Request
 @using SMS.Shared.JWTToken
 @using SMS.Shared.Loader
 @using SMS.Shared.Static.Routes
 @using Blazored.Toast
 @inherits LayoutComponentBase
 @rendermode InteractiveWebAssembly
+@* @attribute [Authorize] *@
 
 @inject NavigationManager _navigationManager
 @inject ITokenService tokenService
+@inject IAuth _auth;
 
 <Blazored.Toast.BlazoredToasts Position="ToastPosition.TopRight"
 Timeout="2"
@@ -16,45 +21,49 @@ SuccessClass="success-toast-override"
 SuccessIcon="fa fa-check"
 ErrorIcon="fa fa-triangle-exclamation"  />
 
-<div class="page">
-    <Sidebar @ref="sidebar"
-    Href="/"
-    IconName="IconName.BuildingFillGear"
-    Title="SMS"
-    DataProvider="SidebarDataProvider" />
+<Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
+    <Authorized>
+        <div class="page">
+            <Sidebar @ref="sidebar"
+            Href="/"
+            IconName="IconName.BuildingFillGear"
+            Title="SMS"
+            DataProvider="SidebarDataProvider" />
 
-    <main>
-        <div class="d-flex justify-content-between px-4 py-2 border-bottom">
-            <Icon Class="pt-2" Name="IconName.List" role="button" @onclick="ToggleSidebar" />
-            <div class="d-flex">
-                <ThemeSwitcher />
-                <Dropdown Color="DropdownColor.None">
-                    <DropdownToggleButton><span class="mx-3">@tokenData?.UserName</span></DropdownToggleButton>
-                    <DropdownMenu>
-                        <DropdownItem To="#" Type="DropdownItemType.Button">Action</DropdownItem>
-                        <DropdownItem @onclick="LogOutPage" Type="DropdownItemType.Button">LogOut</DropdownItem>
-                    </DropdownMenu>
-                </Dropdown>
-            </div>
+            <main>
+                <div class="d-flex justify-content-between px-4 py-2 border-bottom">
+                    <Icon Class="pt-2" Name="IconName.List" role="button" @onclick="ToggleSidebar" />
+                    <div class="d-flex">
+                        <ThemeSwitcher  Class="mx-3"/>
+                        <Dropdown Color="DropdownColor.None">
+                            <DropdownToggleButton>
+                                <img style="height:30px; border-radius:50%;" src="@UserImage" alt="Profile image" />
+                                <span class="mx-2">@context.User.Identity?.Name</span>
+                            </DropdownToggleButton>
+                            <DropdownMenu>
+                                <DropdownItem To="#" Type="DropdownItemType.Button">Action</DropdownItem>
+                                <DropdownItem @onclick="LogOutPage" Type="DropdownItemType.Button">LogOut</DropdownItem>
+                            </DropdownMenu>
+                        </Dropdown>
+                    </div>
+                </div>
+
+                <article class="content px-4">
+                    @Body
+                </article>
+            </main>
+            <BlazorApp.Client.Shared.Loader />
         </div>
+    </Authorized>
+</Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-    <BlazorApp.Client.Shared.Loader />
-</div>
-
-<div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
-</div>
 
 @code{
     private JwtDTO? tokenData;
-    Sidebar sidebar = default!;
-    IEnumerable<NavItem>? navItems;
+    private Sidebar sidebar = default!;
+    private IEnumerable<NavItem>? navItems;
+    private UserPhoto? userPhoto;
+    private string UserImage = string.Empty;
 
     private async Task<SidebarDataProviderResult> SidebarDataProvider(SidebarDataProviderRequest request)
     {
@@ -73,6 +82,7 @@ ErrorIcon="fa fa-triangle-exclamation"  />
             {
                 await GetTokenData();
             }
+            await GetUserImage();
             StateHasChanged();
         }
     }
@@ -107,9 +117,22 @@ ErrorIcon="fa fa-triangle-exclamation"  />
             new NavItem { Id = "8", IconName = IconName.Newspaper, Text = "Users", IconColor = IconColor.Danger },
             new NavItem { Id = "11", Href = "/student", IconName = IconName.PersonBadge, Text = "Student", ParentId="8" },
             new NavItem { Id = "12", Href = "/staff", IconName = IconName.PersonGear, Text = "Staff", ParentId="8" },
+
+            new NavItem { Id = "13", Href="/study-material",  IconName = IconName.JournalBookmarkFill, Text = "Study Material", IconColor = IconColor.Primary },
         };
 
         return navItems;
+    }
+
+    public async Task GetUserImage()
+    {
+        userPhoto = new UserPhoto()
+            {
+                UserId = tokenData.UserId,
+                RoleId = tokenData.role
+            };
+        var res = await _auth.GetUserPhoto(userPhoto);
+        UserImage = "data:image/jpeg;base64," + res.Data;
     }
 
 
