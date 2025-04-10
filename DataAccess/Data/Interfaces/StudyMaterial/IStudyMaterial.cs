@@ -8,5 +8,6 @@ namespace SMS.DataAccess.Data.Interfaces.StudyMaterial
         Task<HttpResponseDTO<List<StudyMaterialResponceDTO>>> GetStudyMaterialAsync(StudyMaterialFilterDTO filters);
         Task<byte[]> DownloadMaterial(StudyMaterialFileDownloadDTO filterData);
         Task<HttpResponseDTO<bool>> DeleteMaterial(DeleteMaterialReq reqModel);
+        Task<HttpResponseDTO<bool>> AddMaterial(MaterialUpload uploadModal, int studyMaterialId);
     }
 }

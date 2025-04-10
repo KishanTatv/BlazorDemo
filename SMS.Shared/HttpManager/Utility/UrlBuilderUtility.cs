@@ -80,8 +80,17 @@ namespace SMS.Shared.HttpManager.Utility
                     var fileStream = file.OpenReadStream(maxAllowedSize: 1024 * 1024 * 10, cancellationToken: CancellationToken.None);
                     var fileContent = new StreamContent(fileStream);
                     fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
-
                     formData.Add(fileContent, prop.Name, file.Name);
+                }
+                else if (value is List<IBrowserFile> files)
+                {
+                    foreach(var fileItem in files)
+                    {
+                        var fileStream = fileItem.OpenReadStream(maxAllowedSize: 1024 * 1024 * 10, cancellationToken: CancellationToken.None);
+                        var fileContent = new StreamContent(fileStream);
+                        fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(fileItem.ContentType);
+                        formData.Add(fileContent, prop.Name, fileItem.Name);
+                    }
                 }
                 else
                 {

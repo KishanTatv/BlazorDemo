@@ -41,5 +41,20 @@ namespace SMS.DataAccess.Data.Implementations.StudyMaterial
                 UrlBuilderUtility.GenerateQueryStringFromDTO(reqModel));
             return responseVM;
         }
+
+        public async Task<HttpResponseDTO<bool>> AddMaterial(MaterialUpload uploadModal, int studyMaterialId)
+        {
+            string url = UrlBuilderUtility.GetCombineUrl(API_Routes.StudyMaterial.SaveMaterial, _APIConnection);
+            if (studyMaterialId > 0)
+            {
+                url = url + UrlBuilderUtility.GenerateQueryString([
+                    new KeyValuePair<string, string>("studyMaterialId", studyMaterialId.ToString()
+                    )]);
+            }
+            HttpResponseDTO<bool> responseVM = await _httpClientManager.PostAsync<bool>(
+                url, FormDataUtility.ConvertToMultipartFormData(uploadModal)
+                );
+            return responseVM;
+        }
     }
 }

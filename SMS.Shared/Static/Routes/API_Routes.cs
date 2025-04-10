@@ -35,6 +35,7 @@
             public const string MaterialList = "StudyMaterial/GetStudyMaterial";
             public const string DownloadStudyMaterial = "StudyMaterial/DownloadStudyMaterial";
             public const string DeleteMaterial = "StudyMaterial/DeleteStudyMaterial";
+            public const string SaveMaterial = "StudyMaterial/SaveStudyMaterial";
         }
     }
 }

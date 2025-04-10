@@ -56,13 +56,13 @@
 </div>
 
 <Grid @ref="grid"
-TItem="StudyMaterialResponceDTO"
-Class="table table-hover table-bordered"
-Data="result"
-FixedHeader="true"
-Height="700"
-Responsive="true"
-Unit="Unit.Px">
+      TItem="StudyMaterialResponceDTO"
+      Class="table table-hover table-bordered"
+      Data="result"
+      FixedHeader="true"
+      Height="700"
+      Responsive="true"
+      Unit="Unit.Px">
 
     <GridColumns>
         <GridColumn TItem="StudyMaterialResponceDTO" HeaderText="File/Folder Name" PropertyName="fileName">
@@ -96,13 +96,14 @@ Unit="Unit.Px">
             }
         </GridColumn>
         <GridColumn TItem="StudyMaterialResponceDTO"
-        HeaderText="Size" PropertyName="Designation"
-        HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
+                    HeaderText="Size" PropertyName="Designation"
+                    HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
             @{
                 string sizeType = "kb";
                 decimal size;
                 size = (decimal)context.materialSize / 1024;
-                if(size > 1024){
+                if (size > 1024)
+                {
                     size = (decimal)context.materialSize / 1024;
                     sizeType = "mb";
                 }
@@ -120,29 +121,36 @@ Unit="Unit.Px">
             }
         </GridColumn>
         <GridColumn TItem="StudyMaterialResponceDTO"
-        HeaderText="Uploaded Date" PropertyName="uploadedDate"
-        HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
+                    HeaderText="Uploaded Date" PropertyName="uploadedDate"
+                    HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
             @context.uploadedDate.Date.ToString(DateFormat.ddMMMyyyy)
         </GridColumn>
         <GridColumn TItem="StudyMaterialResponceDTO"
-        HeaderText="Uploaded By" PropertyName="uploadedBy"
-        HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
+                    HeaderText="Uploaded By" PropertyName="uploadedBy"
+                    HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
             @context.uploadedBy
         </GridColumn>
         <GridColumn TItem="StudyMaterialResponceDTO"
-        HeaderText="Action" PropertyName="Download"
-        HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
+                    HeaderText="Action" PropertyName="Download"
+                    HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
             <span>
                 @if ((context.studyMaterialId != filters.ParentMaterialId) && (context.parentMaterialId >= 0))
                 {
+                    @if (roleType == Roles.SuperAdmin || roleType == Roles.Admin)
+                    {
+                        <Button Color="ButtonColor.None" TooltipTitle="Edit" Class="py-0 px-1"
+                                @onclick="async () => await EditMaterial(context.studyMaterialId)">
+                            <Icon Name="IconName.PenFill" Color="IconColor.Primary"></Icon>
+                        </Button>
+                    }
                     <Button Color="ButtonColor.None" TooltipTitle="Download" Class="py-0 px-1"
-                    @onclick="async () => await DownloadMaterial(context.studyMaterialId, context.fileName, context.materialType)">
+                            @onclick="async () => await DownloadMaterial(context.studyMaterialId, context.fileName, context.materialType)">
                         <Icon Name="IconName.CloudDownload" Color="IconColor.Primary"></Icon>
                     </Button>
                     @if (roleType == Roles.SuperAdmin || roleType == Roles.Admin)
                     {
-                        <Button Color="ButtonColor.None" TooltipTitle="Delete" Class="py-0 px-1" 
-                        @onclick="async () => await DeleteMaterial(context.studyMaterialId, context.fileName, context.materialType)">
+                        <Button Color="ButtonColor.None" TooltipTitle="Delete" Class="py-0 px-1"
+                                @onclick="async () => await DeleteMaterial(context.studyMaterialId, context.fileName, context.materialType)">
                             <Icon Name="IconName.Trash2Fill" Color="IconColor.Danger"></Icon>
                         </Button>
                     }
@@ -282,6 +290,7 @@ Unit="Unit.Px">
             fileDownload.isFolder = true;
             fileName = fileName + FileType.zip.GetDescription();
         }
+        ToastService.ShowInfo("Downloading in Process...");
         byte[] fileContent = await _studyMaterial.DownloadMaterial(fileDownload);
         if (fileContent == null || fileContent.Length == 0)
         {
@@ -291,6 +300,19 @@ Unit="Unit.Px">
         var fileStream = new MemoryStream(fileContent);
         using var streamRef = new DotNetStreamReference(stream: fileStream);
         await JSRuntime.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+        ToastService.ShowSuccess("Downloading Completed!");
+    }
+
+    private async Task EditMaterial(int studyMaterialId)
+    {
+        var parameters = new Dictionary<string, object>();
+        parameters.Add("id", new List<int>() { filters.ClassId, filters.SubjectId });
+        parameters.Add("studyMaterialId", studyMaterialId);
+        parameters.Add("parentMaterialId", filters.ParentMaterialId);
+        parameters.Add("userId", tokenData?.UserId);
+        parameters.Add("OnCloseClick", EventCallback.Factory.Create<MouseEventArgs>(this, ModelClosed));
+        parameters.Add("DataUpdate", EventCallback.Factory.Create<MouseEventArgs>(this, DataUpdateCall));
+        await modal.ShowAsync<_NewMaterial>(title: "Update File/Folder", parameters: parameters);
     }
 
     private async Task DeleteMaterial(int studyMaterialId, string fileName, string materialType)
@@ -316,13 +338,22 @@ Unit="Unit.Px">
         }
     }
 
-    public async Task AddMaterialClick(){
+    public async Task AddMaterialClick()
+    {
         var parameters = new Dictionary<string, object>();
+        parameters.Add("id", new List<int>() { filters.ClassId, filters.SubjectId });
+        parameters.Add("parentMaterialId", filters.ParentMaterialId);
+        parameters.Add("userId", tokenData?.UserId);
         parameters.Add("OnCloseClick", EventCallback.Factory.Create<MouseEventArgs>(this, ModelClosed));
-        parameters.Add("DataUpdate", EventCallback.Factory.Create<MouseEventArgs>(this, GetMaterialData));
+        parameters.Add("DataUpdate", EventCallback.Factory.Create<MouseEventArgs>(this, DataUpdateCall));
         await modal.ShowAsync<_NewMaterial>(title: "Add File/Folder", parameters: parameters);
     }
 
+    private async Task DataUpdateCall()
+    {
+        await modal.HideAsync();
+        await GetMaterialData();
+    }
 
     private async Task ModelClosed(MouseEventArgs e)
     {

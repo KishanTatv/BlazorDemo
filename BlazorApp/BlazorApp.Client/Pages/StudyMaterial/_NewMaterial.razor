@@ -1,35 +1,40 @@
-﻿@rendermode InteractiveWebAssembly
+﻿@using SMS.DataAccess.Data.Interfaces.StudyMaterial
+@using SMS.DataAccess.Models.StudyMaterial
+@rendermode InteractiveWebAssembly
 
+@inject IToastService ToastService
+@inject IStudyMaterial _studyMaterial
 
 <div>
     <div class="mb-3">
         <label>Upload Type</label>
-        <InputSelect class="form-select" aria-label="Default select example" @bind-Value="isFolder">
+        <InputSelect class="form-select" aria-label="Default select example" @bind-Value="materialUpload.IsFolder">
             @foreach (UploadType type in Enum.GetValues(typeof(UploadType)))
             {
                 <option value="@(type == UploadType.Folder ? "true" : "false")">@type</option>
             }
         </InputSelect>
     </div>
-    @if(isFolder){
+    @if (materialUpload.IsFolder)
+    {
         <div class="mb-3">
             <label>Folder Name</label>
-            <TextInput @bind-Value="@folderName" class="form-control"/>
+            <TextInput @bind-Value="@materialUpload.Name" class="form-control" />
         </div>
     }
     <div class="mb-3">
-        @if (isFolder)
+        @if (materialUpload.IsFolder)
         {
-            <input type="file" @ref="fileInput" multiple webkitdirectory />
+            <InputFile OnChange="HandleFileSelected" multiple webkitdirectory />
         }
         else
         {
-            <InputFile OnChange="HandleFileSelected" multiple/>
+            <InputFile OnChange="HandleFileSelected" multiple />
         }
     </div>
     <div>
         <label>Comment</label>
-        <TextAreaInput @bind-Value="@comment" class="form-control" />
+        <TextAreaInput @bind-Value="@materialUpload.Description" class="form-control" />
     </div>
 </div>
 <hr />
@@ -39,16 +44,31 @@
 </div>
 
 @code {
-    private ElementReference fileInput;
     private List<IBrowserFile>? browserFile;
-    private bool isFolder = false;
-    private string folderName = string.Empty;
-    private string comment = string.Empty;
+    private MaterialUpload? materialUpload;
+    [Parameter] public List<int> id { get; set; }
+    [Parameter] public int parentMaterialId { get; set; } = 0;
+    [Parameter] public int studyMaterialId { get; set; } = 0;
+    [Parameter] public int userId { get; set; }
     [Parameter] public EventCallback<MouseEventArgs> OnCloseClick { get; set; }
     [Parameter] public EventCallback<MouseEventArgs> DataUpdate { get; set; }
 
+    protected override void OnInitialized()
+    {
+        materialUpload = new MaterialUpload()
+            {
+                ClassId = id[0],
+                SubjectId = id[1],
+                ParentMaterialId = parentMaterialId,
+                IsFolder = false,
+                ShowToStudents = true,
+                UserId = userId,
+            };
+    }
+
     private void HandleFileSelected(InputFileChangeEventArgs e)
     {
+        browserFile = new List<IBrowserFile>();
         foreach (var file in e.GetMultipleFiles())
         {
             browserFile?.Add(file);
@@ -57,7 +77,18 @@
 
     private async Task SaveClick()
     {
-
+        if(materialUpload != null)
+        {
+            materialUpload.Files = browserFile;
+            var res = await _studyMaterial.AddMaterial(materialUpload, studyMaterialId);
+            if(res.Result){
+                ToastService.ShowSuccess(res.Message);
+                await DataUpdate.InvokeAsync();
+            }
+            else{
+                ToastService.ShowError(res.Message);
+            }
+        }
     }
 
 }
