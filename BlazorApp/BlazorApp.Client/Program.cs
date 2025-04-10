@@ -8,8 +8,10 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using SMS.DataAccess.Data.Implementations;
 using SMS.DataAccess.Data.Implementations.Student;
+using SMS.DataAccess.Data.Implementations.StudyMaterial;
 using SMS.DataAccess.Data.Interfaces;
 using SMS.DataAccess.Data.Interfaces.Student;
+using SMS.DataAccess.Data.Interfaces.StudyMaterial;
 using SMS.Shared.HttpManager.Delegator;
 using SMS.Shared.HttpManager.Implementation;
 using SMS.Shared.HttpManager.Interface;
@@ -48,5 +50,6 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<ICommon, Common>();
 builder.Services.AddScoped<IAuth, Auth>();
 builder.Services.AddScoped<IStudent, Student>();
+builder.Services.AddScoped<IStudyMaterial, StudyMaterial>();
 
 await builder.Build().RunAsync();

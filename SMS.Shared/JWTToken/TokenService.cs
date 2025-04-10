@@ -59,15 +59,23 @@ namespace SMS.Shared.JWTToken
                 JwtDTO jwtData = new JwtDTO()
                 {
                     UserName = claim?.FirstOrDefault(c => c.Type == "unique_name").Value,
-                    role = int.Parse(claim?.FirstOrDefault(c => c.Type == "role").Value),
+                    Role = int.Parse(claim?.FirstOrDefault(c => c.Type == "role").Value),
                     CurrentYearId = int.Parse(claim?.FirstOrDefault(c => c.Type == "CurrentYearId").Value),
                     UserId = int.Parse(claim?.FirstOrDefault(c => c.Type == "UserId").Value),
                     Email = claim?.FirstOrDefault(c => c.Type == "email").Value
                 };
-                if(jwtData.role == (int)Roles.Teacher)
+                switch ((Roles)jwtData.Role)
                 {
-                    jwtData.TeacherId = int.Parse(claim?.FirstOrDefault(c => c.Type == "TeacherId").Value);
-                    jwtData.StaffId = int.Parse(claim?.FirstOrDefault(c => c.Type == "StaffId").Value);
+                    case Roles.Teacher:
+                        jwtData.TeacherId = int.Parse(claim?.FirstOrDefault(c => c.Type == "TeacherId").Value);
+                        jwtData.StaffId = int.Parse(claim?.FirstOrDefault(c => c.Type == "StaffId").Value);
+                        break;
+                    case Roles.Student:
+                        jwtData.StudentId = int.Parse(claim?.FirstOrDefault(c => c.Type == "StudentId").Value);
+                        break;
+                    case Roles.Parent:
+                        jwtData.ParentId = int.Parse(claim?.FirstOrDefault(c => c.Type == "ParentId").Value);
+                        break;
                 }
                 _tokenData = jwtData;
             }

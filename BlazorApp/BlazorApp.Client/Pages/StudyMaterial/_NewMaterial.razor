@@ -1,0 +1,63 @@
+﻿@rendermode InteractiveWebAssembly
+
+
+<div>
+    <div class="mb-3">
+        <label>Upload Type</label>
+        <InputSelect class="form-select" aria-label="Default select example" @bind-Value="isFolder">
+            @foreach (UploadType type in Enum.GetValues(typeof(UploadType)))
+            {
+                <option value="@(type == UploadType.Folder ? "true" : "false")">@type</option>
+            }
+        </InputSelect>
+    </div>
+    @if(isFolder){
+        <div class="mb-3">
+            <label>Folder Name</label>
+            <TextInput @bind-Value="@folderName" class="form-control"/>
+        </div>
+    }
+    <div class="mb-3">
+        @if (isFolder)
+        {
+            <input type="file" @ref="fileInput" multiple webkitdirectory />
+        }
+        else
+        {
+            <InputFile OnChange="HandleFileSelected" multiple/>
+        }
+    </div>
+    <div>
+        <label>Comment</label>
+        <TextAreaInput @bind-Value="@comment" class="form-control" />
+    </div>
+</div>
+<hr />
+<div class="d-flex justify-content-end">
+    <Button Class="mr-2" Color="ButtonColor.Secondary" @onclick="OnCloseClick">Close</Button> &nbsp;
+    <Button Color="ButtonColor.Primary" @onclick="SaveClick"> Save changes </Button>
+</div>
+
+@code {
+    private ElementReference fileInput;
+    private List<IBrowserFile>? browserFile;
+    private bool isFolder = false;
+    private string folderName = string.Empty;
+    private string comment = string.Empty;
+    [Parameter] public EventCallback<MouseEventArgs> OnCloseClick { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> DataUpdate { get; set; }
+
+    private void HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        foreach (var file in e.GetMultipleFiles())
+        {
+            browserFile?.Add(file);
+        }
+    }
+
+    private async Task SaveClick()
+    {
+
+    }
+
+}

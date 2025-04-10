@@ -1,28 +1,37 @@
 ﻿@page "/study-material"
+@using SMS.DataAccess.Data.Interfaces.StudyMaterial
 @using SMS.DataAccess.Models.StudyMaterial
 @rendermode InteractiveWebAssembly
 
 @inject ITokenService tokenService
+@inject IToastService ToastService
 @inject ICommon _common
+@inject IStudyMaterial _studyMaterial
+@inject IJSRuntime JSRuntime
+@inject ModalService ModalService
 
 <div class="d-flex justify-content-between border-bottom border-4 border-secondary pb-1 mb-3">
     <h2 class="m-0">Study Material</h2>
+    <Button class="p-3 py-0" Color="ButtonColor.Secondary" Size="ButtonSize.Large" @onclick="AddMaterialClick"> <Icon Name="IconName.Plus" /> New Material </Button>
 </div>
 
 <div class="row align-items-end">
-    <div class="col-sm-2 mb-3">
-        <label>Class</label>
-        <InputSelect class="form-select" aria-label="Default select example" @bind-Value="filters.ClassId" @bind-Value:after="GetSubjectData">
-            <option selected disabled>select class</option>
-            @if (classList.Data != null)
-            {
-                foreach (var classOption in classList.Data)
+    @if (roleType == Roles.SuperAdmin || roleType == Roles.Admin || roleType == Roles.Teacher)
+    {
+        <div class="col-sm-2 mb-3">
+            <label>Class</label>
+            <InputSelect class="form-select" aria-label="Default select example" @bind-Value="filters.ClassId" @bind-Value:after="GetSubjectData">
+                <option selected disabled>select class</option>
+                @if (classList.Data != null)
                 {
-                    <option value="@classOption.Id">@classOption.Value</option>
+                    foreach (var classOption in classList.Data)
+                    {
+                        <option value="@classOption.Id">@classOption.Value</option>
+                    }
                 }
-            }
-        </InputSelect>
-    </div>
+            </InputSelect>
+        </div>
+    }
     <div class="col-sm-2 mb-3">
         <label>Subject</label>
         <InputSelect class="form-select" aria-label="Default select example" @bind-Value="filters.SubjectId">
@@ -41,83 +50,123 @@
         <TextInput @bind-Value="@filters.Name" Placeholder="Search file.." />
     </div>
     <div class="col-sm mb-3">
-        <Button class="p-3 py-0" Color="ButtonColor.Secondary" Size="ButtonSize.Large" Outline="true"> Search </Button>
-        <Button class="p-3 py-0" Color="ButtonColor.Secondary" Size="ButtonSize.Large" Outline="true"> Clear </Button>
+        <Button class="p-3 py-0" Color="ButtonColor.Secondary" Size="ButtonSize.Large" Outline="true" @onclick="GetMaterialDataOnSearch"> Search </Button>
+        <Button class="p-3 py-0" Color="ButtonColor.Secondary" Size="ButtonSize.Large" Outline="true" @onclick="GetMaterialDataOnClear"> Clear </Button>
     </div>
 </div>
 
-<br />
-<div>
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>File/Folder Name</th>
-                <th>Description</th>
-                <th>Size</th>
-                <th>Uploaded Date</th>
-                <th>Uploaded By</th>
-                <th>Download</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in result)
-            {
-                <tr>
-                    <td @onclick="async () => await OpenFolder(item.studyMaterialId, item.parentMaterialId, item.materialType)">
-                        @if (string.IsNullOrEmpty(item.materialType))
-                        {
-                            <span class="bi bi-folder-fill px-1"></span>
-                        }
-                        else
-                        {
-                            <span class="bi bi-file-earmark-fill px-1"></span>
-                        }
-                        @if (item.fileName?.Length > 16)
-                        {
-                            @string.Concat(item.fileName.Substring(0, 16), "..")
-                        }
-                        else
-                        {
-                            @item.fileName?.ToString()
-                        }
-                    </td>
-                    <td class="text-center">@item.uploadedDate.Date.ToString(DateFormat.ddMMMyyyy)</td>
-                    <td class="text-center">
-                        <span>
-                            @if ((item.studyMaterialId == filters.ParentMaterialId) && item.parentMaterialId >= 0)
-                            {
-                                <span></span>
-                            }
-                            else
-                            {
-                                <span class="bi bi-cloud-arrow-down-fill" @onclick="async () => await DownloadMaterial(item.studyMaterialId, item.fileName, item.materialType)"></span>
-                            }
-                        </span>
-                    </td>
-                </tr>
-            }
-            @if (result.Count <= 0)
-            {
-                <tr>
-                    <td class="text-center py-5" colspan="6">
-                        <span>
-                            No Material Found
-                        </span>
-                    </td>
-                </tr>
-            }
+<Grid @ref="grid"
+TItem="StudyMaterialResponceDTO"
+Class="table table-hover table-bordered"
+Data="result"
+FixedHeader="true"
+Height="700"
+Responsive="true"
+Unit="Unit.Px">
 
-        </tbody>
-    </table>
-</div>
+    <GridColumns>
+        <GridColumn TItem="StudyMaterialResponceDTO" HeaderText="File/Folder Name" PropertyName="fileName">
+            <span class="d-block w-100" style="cursor: pointer;" @onclick="async () => await OpenFolder(context.studyMaterialId, context.parentMaterialId, context.materialType)">
+                @if (string.IsNullOrEmpty(context.materialType))
+                {
+                    <span class="bi bi-folder-fill px-1"></span>
+                }
+                else
+                {
+                    <span class="bi bi-file-earmark-fill px-1"></span>
+                }
+                @if (context.fileName?.Length > 25)
+                {
+                    @string.Concat(context.fileName.Substring(0, 25), "..")
+                }
+                else
+                {
+                    @context.fileName?.ToString()
+                }
+            </span>
+        </GridColumn>
+        <GridColumn TItem="StudyMaterialResponceDTO" HeaderText="Description" PropertyName="description">
+            @if (context.description?.Length > 20)
+            {
+                @string.Concat(context.description.Substring(0, 20), "..")
+            }
+            else
+            {
+                @context.description
+            }
+        </GridColumn>
+        <GridColumn TItem="StudyMaterialResponceDTO"
+        HeaderText="Size" PropertyName="Designation"
+        HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
+            @{
+                string sizeType = "kb";
+                decimal size;
+                size = (decimal)context.materialSize / 1024;
+                if(size > 1024){
+                    size = (decimal)context.materialSize / 1024;
+                    sizeType = "mb";
+                }
+                if (size > 1024)
+                {
+                    size = (decimal)context.materialSize / 1024;
+                    sizeType = "gb";
+                }
+            }
+            @if (size != 0)
+            {
+                <span>
+                    @Math.Round(size, 2) @sizeType
+                </span>
+            }
+        </GridColumn>
+        <GridColumn TItem="StudyMaterialResponceDTO"
+        HeaderText="Uploaded Date" PropertyName="uploadedDate"
+        HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
+            @context.uploadedDate.Date.ToString(DateFormat.ddMMMyyyy)
+        </GridColumn>
+        <GridColumn TItem="StudyMaterialResponceDTO"
+        HeaderText="Uploaded By" PropertyName="uploadedBy"
+        HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
+            @context.uploadedBy
+        </GridColumn>
+        <GridColumn TItem="StudyMaterialResponceDTO"
+        HeaderText="Action" PropertyName="Download"
+        HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
+            <span>
+                @if ((context.studyMaterialId != filters.ParentMaterialId) && (context.parentMaterialId >= 0))
+                {
+                    <Button Color="ButtonColor.None" TooltipTitle="Download" Class="py-0 px-1"
+                    @onclick="async () => await DownloadMaterial(context.studyMaterialId, context.fileName, context.materialType)">
+                        <Icon Name="IconName.CloudDownload" Color="IconColor.Primary"></Icon>
+                    </Button>
+                    @if (roleType == Roles.SuperAdmin || roleType == Roles.Admin)
+                    {
+                        <Button Color="ButtonColor.None" TooltipTitle="Delete" Class="py-0 px-1" 
+                        @onclick="async () => await DeleteMaterial(context.studyMaterialId, context.fileName, context.materialType)">
+                            <Icon Name="IconName.Trash2Fill" Color="IconColor.Danger"></Icon>
+                        </Button>
+                    }
+                }
+            </span>
+        </GridColumn>
+    </GridColumns>
+</Grid>
+
+<Modal @ref="modal" IsVerticallyCentered="true" />
 
 
 @code {
     private JwtDTO? tokenData;
+    Grid<StudyMaterialResponceDTO> grid = default!;
+    private Modal modal = default!;
+    private Roles roleType;
     private StudyMaterialFilterDTO filters = new StudyMaterialFilterDTO();
     private List<StudyMaterialResponceDTO> result = new List<StudyMaterialResponceDTO>();
     private HttpResponseDTO<List<SelectOptionDTO>> classList = new HttpResponseDTO<List<SelectOptionDTO>>();
     private HttpResponseDTO<List<SelectOptionDTO>> subjectList = new HttpResponseDTO<List<SelectOptionDTO>>();
+    private StudyMaterialFileDownloadDTO fileDownload = new StudyMaterialFileDownloadDTO();
+    private DeleteMaterialReq deleteMaterial = new DeleteMaterialReq();
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -126,34 +175,157 @@
         {
             tokenData = await tokenService.GetClaimFromToken();
         }
+        filters.YearId = tokenData.CurrentYearId;
+        filters.RoleId = tokenData.Role;
+        roleType = (Roles)filters.RoleId;
         await GetAllClasses();
-        filters.ClassId = classList.Data[0].Id;
         await GetSubjectData();
-        filters.SubjectId = subjectList.Data[0].Id;
         await GetMaterialData();
     }
 
-    private async Task GetAllClasses(){
-        classList = await _common.GetAllClassesAsync();
+    private async Task GetAllClasses()
+    {
+        switch (roleType)
+        {
+            case Roles.SuperAdmin:
+            case Roles.Admin:
+                classList = await _common.GetAllClassesAsync();
+                break;
+            case Roles.Teacher:
+                classList = await _common.GetClassesByTeacherIdAsync(tokenData.StaffId, tokenData.CurrentYearId);
+                break;
+            case Roles.Student:
+                return;
+        }
+        filters.ClassId = classList.Data[0].Id;
     }
 
 
-    private async Task GetSubjectData(){
-        subjectList = await _common.GetSubjectByClassAsync(filters.ClassId, tokenData.CurrentYearId);
+    private async Task GetSubjectData()
+    {
+        switch (roleType)
+        {
+            case Roles.SuperAdmin:
+            case Roles.Admin:
+                subjectList = await _common.GetSubjectByClassAsync(filters.ClassId, filters.YearId);
+                break;
+            case Roles.Teacher:
+                subjectList = await _common.GetSubjectsByTeacherClassDivisionAsync(filters.ClassId, tokenData.StaffId, tokenData.CurrentYearId);
+                break;
+            case Roles.Student:
+                subjectList = await _common.GetSubjectsByStudentAsync(tokenData.StudentId, tokenData.CurrentYearId);
+                break;
+        }
+        filters.SubjectId = subjectList.Data[0].Id;
     }
 
     private async Task GetMaterialData()
     {
-        subjectList = await _common.GetSubjectByClassAsync(filters.ClassId, tokenData.CurrentYearId);
+        var response = await _studyMaterial.GetStudyMaterialAsync(filters);
+        if (response.Result)
+        {
+            result = response.Data;
+        }
+    }
+
+    public async Task GetMaterialDataOnSearch()
+    {
+        filters.ParentMaterialId = null;
+        await GetMaterialData();
+    }
+
+    public async Task GetMaterialDataOnClear()
+    {
+        if (classList.Data.Any())
+        {
+            filters.ClassId = classList.Data[0].Id;
+            await GetSubjectData();
+            filters.SubjectId = subjectList.Data[0].Id;
+            filters.Name = string.Empty;
+            filters.ParentMaterialId = null;
+            await GetMaterialData();
+        }
     }
 
     private async Task OpenFolder(int materialId, int parentMaterialId, string? materialType)
     {
+        if (string.IsNullOrEmpty(materialType))
+        {
+            if (materialId == filters.ParentMaterialId && parentMaterialId == 0)
+            {
+                filters.ParentMaterialId = null;
+            }
+            else if (materialId == filters.ParentMaterialId && parentMaterialId > 0)
+            {
+                filters.ParentMaterialId = parentMaterialId;
+            }
+            else
+            {
+                filters.ParentMaterialId = materialId;
+            }
+            await GetMaterialData();
+        }
 
     }
 
     private async Task DownloadMaterial(int studyMaterialId, string fileName, string materialType)
     {
+        fileDownload = new StudyMaterialFileDownloadDTO
+            {
+                StudyMaterialId = studyMaterialId,
+                roleId = tokenData.Role,
+                subjectId = filters.SubjectId,
+                isFolder = false,
+            };
+        if (string.IsNullOrEmpty(materialType))
+        {
+            fileDownload.isFolder = true;
+            fileName = fileName + FileType.zip.GetDescription();
+        }
+        byte[] fileContent = await _studyMaterial.DownloadMaterial(fileDownload);
+        if (fileContent == null || fileContent.Length == 0)
+        {
+            ToastService.ShowError(SystemMessage.msgFileEmpty);
+            return;
+        }
+        var fileStream = new MemoryStream(fileContent);
+        using var streamRef = new DotNetStreamReference(stream: fileStream);
+        await JSRuntime.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+    }
 
+    private async Task DeleteMaterial(int studyMaterialId, string fileName, string materialType)
+    {
+        deleteMaterial = new DeleteMaterialReq()
+            {
+                StudyMaterialId = studyMaterialId,
+                UserId = tokenData.UserId,
+                Name = fileName,
+                ClassId = filters.ClassId,
+                SubjectId = filters.SubjectId,
+                IsFolder = string.IsNullOrEmpty(materialType) ? true : false
+            };
+        var res = await _studyMaterial.DeleteMaterial(deleteMaterial);
+        if (res.Result && res.Data)
+        {
+            ToastService.ShowSuccess(res.Message);
+            await GetMaterialData();
+        }
+        else
+        {
+            ToastService.ShowError(res.Message);
+        }
+    }
+
+    public async Task AddMaterialClick(){
+        var parameters = new Dictionary<string, object>();
+        parameters.Add("OnCloseClick", EventCallback.Factory.Create<MouseEventArgs>(this, ModelClosed));
+        parameters.Add("DataUpdate", EventCallback.Factory.Create<MouseEventArgs>(this, GetMaterialData));
+        await modal.ShowAsync<_NewMaterial>(title: "Add File/Folder", parameters: parameters);
+    }
+
+
+    private async Task ModelClosed(MouseEventArgs e)
+    {
+        await modal.HideAsync();
     }
 }

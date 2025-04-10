@@ -5,8 +5,12 @@
         public class Common
         {
             public const string GetAllClasses = "common/GetClassList";
+            public const string GetClassesByTeacherId = "common/GetClassListByTeacherId";
             public const string GetDivisionsByClass = "common/GetDivisionListByClass";
             public const string GetSubjectListByClass = "common/GetSubjectListByClassId";
+            public const string GetSubjectsByTeacherClassDivision = "common/GetSubjectListByTeacherAndClassAndDivision";
+            public const string GetSubjectListByStudentId = "common/GetSubjectListByStudentId";
+            public const string GetStudentListByParentId = "common/GetStudentListByParentId";
         }
 
         public class Auth
@@ -29,6 +33,8 @@
         public class StudyMaterial
         {
             public const string MaterialList = "StudyMaterial/GetStudyMaterial";
+            public const string DownloadStudyMaterial = "StudyMaterial/DownloadStudyMaterial";
+            public const string DeleteMaterial = "StudyMaterial/DeleteStudyMaterial";
         }
     }
 }

@@ -11,7 +11,7 @@
 </div>
 
 @{
-    if (tokenData?.role == (int)Roles.SuperAdmin || tokenData?.role == (int)Roles.Admin)
+    if (tokenData?.Role == (int)Roles.SuperAdmin || tokenData?.Role == (int)Roles.Admin)
     {
         <div class="card">
             <div class="card-body">
@@ -45,7 +45,7 @@
         </div>
 
     }
-    else if (tokenData?.role == (int)Roles.Teacher)
+    else if (tokenData?.Role == (int)Roles.Teacher)
     {
         <p>Teacher Dash..</p>
     }

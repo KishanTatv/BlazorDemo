@@ -69,7 +69,7 @@
                     SortString="State" SortKeySelector="item => item.State">
             @context.City , @context.State
         </GridColumn>
-        @if (tokenData?.role == 2)
+        @if (tokenData?.Role == 2)
         {
             <GridColumn TItem="StudentListDTO" HeaderText="Action" PropertyName="Action">
                 <Button Class="py-1"

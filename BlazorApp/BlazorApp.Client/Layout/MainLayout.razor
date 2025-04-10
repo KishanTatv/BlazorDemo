@@ -129,7 +129,7 @@ ErrorIcon="fa fa-triangle-exclamation"  />
         userPhoto = new UserPhoto()
             {
                 UserId = tokenData.UserId,
-                RoleId = tokenData.role
+                RoleId = tokenData.Role
             };
         var res = await _auth.GetUserPhoto(userPhoto);
         UserImage = "data:image/jpeg;base64," + res.Data;

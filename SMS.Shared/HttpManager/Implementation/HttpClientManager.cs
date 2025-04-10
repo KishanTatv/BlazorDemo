@@ -2,6 +2,8 @@
 using SMS.Shared.HttpManager.Interface;
 using System.Net.Http.Json;
 using SMS.Shared.HttpManager.Utility.HttpResponce;
+using SMS.Shared.Static.Constants;
+using static SMS.Shared.Static.Enum.HttpStatusCodes;
 
 namespace SMS.Shared.HttpManager.Implementation
 {
@@ -74,6 +76,28 @@ namespace SMS.Shared.HttpManager.Implementation
                 return HttpResponseUtility.HttpConnectionErrorResponse<T>();
             }
         }
+
+        public async Task<byte[]> GetBlobAsync(string url)
+        {
+            try
+            {
+                HttpResponseMessage response = await _httpClient.GetAsync(url);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadAsByteArrayAsync();
+                }
+                else
+                {
+                    throw new Exception($"{HttpResponseMessages.msgHttpRequestFailed}. StatusCode: {(int)HttpStatus.InternalServerError}");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"{HttpResponseMessages.msgHttpConnectionFailed}. StatusCode: {(int)HttpStatus.InternalServerError}");
+            }
+        }
+
 
     }
 }

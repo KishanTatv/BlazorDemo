@@ -3,7 +3,7 @@
     public class JwtDTO
     {
         public string UserName { get; set; } = "";
-        public int role {  get; set; }
+        public int Role {  get; set; }
         public string Email { get; set; }
         public int CurrentYearId { get; set; }
         public int TeacherId { get; set; } = 0;

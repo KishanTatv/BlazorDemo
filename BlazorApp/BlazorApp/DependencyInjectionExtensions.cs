@@ -5,8 +5,10 @@ using Blazored.Toast;
 using Blazored.Toast.Services;
 using SMS.DataAccess.Data.Implementations;
 using SMS.DataAccess.Data.Implementations.Student;
+using SMS.DataAccess.Data.Implementations.StudyMaterial;
 using SMS.DataAccess.Data.Interfaces;
 using SMS.DataAccess.Data.Interfaces.Student;
+using SMS.DataAccess.Data.Interfaces.StudyMaterial;
 using SMS.Shared.HttpManager.Delegator;
 using SMS.Shared.HttpManager.Implementation;
 using SMS.Shared.HttpManager.Interface;
@@ -34,6 +36,7 @@ namespace BlazorApp
             services.AddScoped<ICommon, Common>();
             services.AddScoped<IAuth, Auth>();
             services.AddScoped<IStudent, Student>();
+            services.AddScoped<IStudyMaterial, StudyMaterial>();
 
             // Blazor Bootstrap & Local Storage
             services.AddBlazorBootstrap();

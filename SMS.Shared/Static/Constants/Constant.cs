@@ -11,6 +11,7 @@
     {
         public static string msgSomethingWrong = "Something Wrong !";
         public static string msgTryAgain = "Plaese try again !";
+        public static string msgFileEmpty = "File is Empty !";
     }
 
     public static class DateFormat

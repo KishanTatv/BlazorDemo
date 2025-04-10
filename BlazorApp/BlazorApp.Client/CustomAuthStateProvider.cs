@@ -22,7 +22,7 @@ namespace BlazorApp
                 identity = new ClaimsIdentity(
                     new[] {
                         new Claim(ClaimTypes.Name, tokenResult.UserName),
-                        new Claim(ClaimTypes.Role, ((Roles)tokenResult.role).ToString()),
+                        new Claim(ClaimTypes.Role, ((Roles)tokenResult.Role).ToString()),
                         new Claim(ClaimTypes.Email, tokenResult.Email),
                         new Claim("UserId", tokenResult.UserId.ToString()),
                     }, "Custom Authentication"
@@ -40,7 +40,7 @@ namespace BlazorApp
                 identity = new ClaimsIdentity(
                     new[] {
                         new Claim(ClaimTypes.Name, tokenResult.UserName),
-                        new Claim(ClaimTypes.Role, ((Roles)tokenResult.role).ToString()),
+                        new Claim(ClaimTypes.Role, ((Roles)tokenResult.Role).ToString()),
                         new Claim(ClaimTypes.Email, tokenResult.Email),
                         new Claim("UserId", tokenResult.UserId.ToString()),
                     }, "Custom Authentication"
