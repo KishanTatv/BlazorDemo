@@ -27,6 +27,16 @@ namespace SMS.DataAccess.Data.Implementations.StudyMaterial
             return responceVM;
         }
 
+        public async Task<HttpResponseDTO<StudyMaterialModel>> GetSpecificMaterial(int studyMaterialId)
+        {
+            HttpResponseDTO<StudyMaterialModel> responseVM = await _httpClientManager.GetAsync<StudyMaterialModel>(
+                UrlBuilderUtility.GetCombineUrl(API_Routes.StudyMaterial.GetStudyMaterialById, _APIConnection) +
+                UrlBuilderUtility.GenerateQueryString(
+                   [new KeyValuePair<string,string>("studyMaterialId", studyMaterialId.ToString())]
+               ));
+            return responseVM;
+        }
+
         public async Task<byte[]> DownloadMaterial(StudyMaterialFileDownloadDTO filterData)
         {
             string url = UrlBuilderUtility.GetCombineUrl(API_Routes.StudyMaterial.DownloadStudyMaterial, _APIConnection) +

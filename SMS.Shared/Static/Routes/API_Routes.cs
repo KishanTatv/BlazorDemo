@@ -32,6 +32,7 @@
 
         public class StudyMaterial
         {
+            public const string GetStudyMaterialById = "StudyMaterial/GetStudyMaterialById";
             public const string MaterialList = "StudyMaterial/GetStudyMaterial";
             public const string DownloadStudyMaterial = "StudyMaterial/DownloadStudyMaterial";
             public const string DeleteMaterial = "StudyMaterial/DeleteStudyMaterial";

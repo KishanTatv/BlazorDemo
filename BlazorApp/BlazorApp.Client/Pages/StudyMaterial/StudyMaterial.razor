@@ -12,7 +12,10 @@
 
 <div class="d-flex justify-content-between border-bottom border-4 border-secondary pb-1 mb-3">
     <h2 class="m-0">Study Material</h2>
-    <Button class="p-3 py-0" Color="ButtonColor.Secondary" Size="ButtonSize.Large" @onclick="AddMaterialClick"> <Icon Name="IconName.Plus" /> New Material </Button>
+    @if (roleType == Roles.SuperAdmin || roleType == Roles.Admin || roleType == Roles.Teacher)
+    {
+        <Button class="p-3 py-0" Color="ButtonColor.Secondary" Size="ButtonSize.Large" @onclick="AddMaterialClick"> <Icon Name="IconName.Plus" /> New Material </Button>
+    }
 </div>
 
 <div class="row align-items-end">
@@ -56,13 +59,13 @@
 </div>
 
 <Grid @ref="grid"
-      TItem="StudyMaterialResponceDTO"
-      Class="table table-hover table-bordered"
-      Data="result"
-      FixedHeader="true"
-      Height="700"
-      Responsive="true"
-      Unit="Unit.Px">
+TItem="StudyMaterialResponceDTO"
+Class="table table-hover table-bordered"
+Data="result"
+FixedHeader="true"
+Height="700"
+Responsive="true"
+Unit="Unit.Px">
 
     <GridColumns>
         <GridColumn TItem="StudyMaterialResponceDTO" HeaderText="File/Folder Name" PropertyName="fileName">
@@ -96,8 +99,8 @@
             }
         </GridColumn>
         <GridColumn TItem="StudyMaterialResponceDTO"
-                    HeaderText="Size" PropertyName="Designation"
-                    HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
+        HeaderText="Size" PropertyName="Designation"
+        HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
             @{
                 string sizeType = "kb";
                 decimal size;
@@ -121,36 +124,36 @@
             }
         </GridColumn>
         <GridColumn TItem="StudyMaterialResponceDTO"
-                    HeaderText="Uploaded Date" PropertyName="uploadedDate"
-                    HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
+        HeaderText="Uploaded Date" PropertyName="uploadedDate"
+        HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
             @context.uploadedDate.Date.ToString(DateFormat.ddMMMyyyy)
         </GridColumn>
         <GridColumn TItem="StudyMaterialResponceDTO"
-                    HeaderText="Uploaded By" PropertyName="uploadedBy"
-                    HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
+        HeaderText="Uploaded By" PropertyName="uploadedBy"
+        HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
             @context.uploadedBy
         </GridColumn>
         <GridColumn TItem="StudyMaterialResponceDTO"
-                    HeaderText="Action" PropertyName="Download"
-                    HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
+        HeaderText="Action" PropertyName="Download"
+        HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
             <span>
                 @if ((context.studyMaterialId != filters.ParentMaterialId) && (context.parentMaterialId >= 0))
                 {
-                    @if (roleType == Roles.SuperAdmin || roleType == Roles.Admin)
+                    @if (roleType == Roles.SuperAdmin || roleType == Roles.Admin || roleType == Roles.Teacher)
                     {
                         <Button Color="ButtonColor.None" TooltipTitle="Edit" Class="py-0 px-1"
-                                @onclick="async () => await EditMaterial(context.studyMaterialId)">
+                        @onclick="async () => await EditMaterial(context.studyMaterialId)">
                             <Icon Name="IconName.PenFill" Color="IconColor.Primary"></Icon>
                         </Button>
                     }
                     <Button Color="ButtonColor.None" TooltipTitle="Download" Class="py-0 px-1"
-                            @onclick="async () => await DownloadMaterial(context.studyMaterialId, context.fileName, context.materialType)">
+                    @onclick="async () => await DownloadMaterial(context.studyMaterialId, context.fileName, context.materialType)">
                         <Icon Name="IconName.CloudDownload" Color="IconColor.Primary"></Icon>
                     </Button>
-                    @if (roleType == Roles.SuperAdmin || roleType == Roles.Admin)
+                    @if (roleType == Roles.SuperAdmin || roleType == Roles.Admin || roleType == Roles.Teacher)
                     {
                         <Button Color="ButtonColor.None" TooltipTitle="Delete" Class="py-0 px-1"
-                                @onclick="async () => await DeleteMaterial(context.studyMaterialId, context.fileName, context.materialType)">
+                        @onclick="async () => await DeleteMaterial(context.studyMaterialId, context.fileName, context.materialType)">
                             <Icon Name="IconName.Trash2Fill" Color="IconColor.Danger"></Icon>
                         </Button>
                     }
@@ -359,4 +362,5 @@
     {
         await modal.HideAsync();
     }
+
 }

@@ -13,4 +13,18 @@
         public DateTime uploadedDate { get; set; }
     }
 
+    public class StudyMaterialModel
+    {
+        public int StudyMaterialId { get; set; }
+        public string FileName { get; set; }
+        public string? FilePath { get; set; }
+        public string MaterialType { get; set; }
+        public int MaterialSize { get; set; }
+        public string Description { get; set; }
+        public bool IsShow { get; set; }
+        public int ParentMaterialId { get; set; }
+        public string UploadedBy { get; set; }
+        public DateTime UploadedDate { get; set; }
+
+    }
 }

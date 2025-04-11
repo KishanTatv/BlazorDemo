@@ -53,7 +53,7 @@
     [Parameter] public EventCallback<MouseEventArgs> OnCloseClick { get; set; }
     [Parameter] public EventCallback<MouseEventArgs> DataUpdate { get; set; }
 
-    protected override void OnInitialized()
+    protected override async void OnInitialized()
     {
         materialUpload = new MaterialUpload()
             {
@@ -64,6 +64,17 @@
                 ShowToStudents = true,
                 UserId = userId,
             };
+        if (studyMaterialId > 0)
+        {
+            var res = await _studyMaterial.GetSpecificMaterial(studyMaterialId);
+            if(res.Result && res.Data != null){
+                var data = res.Data;
+                materialUpload.IsFolder = string.IsNullOrEmpty(data.FilePath) ? true : false;
+                materialUpload.Name = data.FileName;
+                materialUpload.Description = data.Description;
+                StateHasChanged();
+            }
+        }
     }
 
     private void HandleFileSelected(InputFileChangeEventArgs e)
@@ -77,15 +88,17 @@
 
     private async Task SaveClick()
     {
-        if(materialUpload != null)
+        if (materialUpload != null)
         {
             materialUpload.Files = browserFile;
             var res = await _studyMaterial.AddMaterial(materialUpload, studyMaterialId);
-            if(res.Result){
+            if (res.Result)
+            {
                 ToastService.ShowSuccess(res.Message);
                 await DataUpdate.InvokeAsync();
             }
-            else{
+            else
+            {
                 ToastService.ShowError(res.Message);
             }
         }
