@@ -6,6 +6,7 @@ using Blazored.LocalStorage;
 using Blazored.Toast;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.JSInterop;
 using SMS.DataAccess.Data.Implementations;
 using SMS.DataAccess.Data.Implementations.Student;
 using SMS.DataAccess.Data.Implementations.StudyMaterial;
@@ -17,14 +18,17 @@ using SMS.Shared.HttpManager.Implementation;
 using SMS.Shared.HttpManager.Interface;
 using SMS.Shared.JWTToken;
 using SMS.Shared.Loader;
+using SMS.Shared.Static.Constants;
+using SMS.Shared.Static.Enum;
+using System.Globalization;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
-
 builder.Services.AddBlazorBootstrap();
 builder.Services.AddBlazoredToast();
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddLocalization();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 
 builder.Services.AddSingleton<PreloadService>();
@@ -52,4 +56,23 @@ builder.Services.AddScoped<IAuth, Auth>();
 builder.Services.AddScoped<IStudent, Student>();
 builder.Services.AddScoped<IStudyMaterial, StudyMaterial>();
 
-await builder.Build().RunAsync();
+
+//culture setup
+var host = builder.Build();
+
+string defaultCulture = LanguageEnum.Languages.English.GetDescription();
+
+var js = host.Services.GetRequiredService<IJSRuntime>();
+var result = await js.InvokeAsync<string>(JsStaticFun.blazorCultureGet);
+var culture = CultureInfo.GetCultureInfo(result ?? defaultCulture);
+
+if (result == null)
+{
+    await js.InvokeVoidAsync(JsStaticFun.blazorCultureSet, defaultCulture);
+}
+
+CultureInfo.DefaultThreadCurrentCulture = culture;
+CultureInfo.DefaultThreadCurrentUICulture = culture;
+
+await host.RunAsync();
+//await builder.Build().RunAsync();

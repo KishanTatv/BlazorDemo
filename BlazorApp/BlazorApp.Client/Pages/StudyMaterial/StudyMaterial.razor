@@ -24,7 +24,7 @@
     @if (roleType == Roles.SuperAdmin || roleType == Roles.Admin || roleType == Roles.Teacher)
     {
         <div class="col-sm-2 mb-3">
-            <label>Class</label>
+            <label>@ResourcesManager.GetString(LanguageEnum.MultiLanguals.Class)</label>
             <InputSelect class="form-select" aria-label="Default select example" @bind-Value="filters.ClassId" @bind-Value:after="GetSubjectData">
                 <option selected disabled>select class</option>
                 @if (classList.Data != null)
@@ -38,7 +38,7 @@
         </div>
     }
     <div class="col-sm-2 mb-3">
-        <label>Subject</label>
+        <label>@ResourcesManager.GetString(LanguageEnum.MultiLanguals.Subject)</label>
         <InputSelect class="form-select" aria-label="Default select example" @bind-Value="filters.SubjectId">
             <option selected disabled>select division</option>
             @if (subjectList.Data != null)
@@ -51,12 +51,16 @@
         </InputSelect>
     </div>
     <div class="col-sm-2 mb-3">
-        <label>File Name</label>
+        <label>@ResourcesManager.GetString(LanguageEnum.MultiLanguals.FileName)</label>
         <TextInput @bind-Value="@filters.Name" Placeholder="Search file.." />
     </div>
     <div class="col-sm mb-3">
-        <Button class="p-3 py-0" Color="ButtonColor.Secondary" Size="ButtonSize.Large" Outline="true" @onclick="GetMaterialDataOnSearch"> Search </Button>
-        <Button class="p-3 py-0" Color="ButtonColor.Secondary" Size="ButtonSize.Large" Outline="true" @onclick="GetMaterialDataOnClear"> Clear </Button>
+        <Button class="p-3 py-0" Color="ButtonColor.Secondary" Size="ButtonSize.Large" Outline="true" @onclick="GetMaterialDataOnSearch">
+            @ResourcesManager.GetString(LanguageEnum.MultiLanguals.Search)
+        </Button>
+        <Button class="p-3 py-0" Color="ButtonColor.Secondary" Size="ButtonSize.Large" Outline="true" @onclick="GetMaterialDataOnClear">
+            @ResourcesManager.GetString(LanguageEnum.MultiLanguals.Clear)
+        </Button>
     </div>
 </div>
 
@@ -70,7 +74,7 @@
       Unit="Unit.Px">
 
     <GridColumns>
-        <GridColumn TItem="StudyMaterialResponceDTO" HeaderText="File/Folder Name" PropertyName="fileName">
+        <GridColumn TItem="StudyMaterialResponceDTO" HeaderText="@ResourcesManager.GetString(LanguageEnum.MultiLanguals.FileFolderName)" PropertyName="fileName">
             <span class="d-block w-100" style="cursor: pointer;" @onclick="async () => await OpenFolder(context.studyMaterialId, context.parentMaterialId, context.materialType)">
                 @if (string.IsNullOrEmpty(context.materialType))
                 {
@@ -90,7 +94,7 @@
                 }
             </span>
         </GridColumn>
-        <GridColumn TItem="StudyMaterialResponceDTO" HeaderText="Description" PropertyName="description">
+        <GridColumn TItem="StudyMaterialResponceDTO" HeaderText="@ResourcesManager.GetString(LanguageEnum.MultiLanguals.Description)" PropertyName="description">
             @if (context.description?.Length > 20)
             {
                 @string.Concat(context.description.Substring(0, 20), "..")
@@ -101,7 +105,7 @@
             }
         </GridColumn>
         <GridColumn TItem="StudyMaterialResponceDTO"
-                    HeaderText="Size" PropertyName="Designation"
+                    HeaderText="@ResourcesManager.GetString(LanguageEnum.MultiLanguals.Size)" PropertyName="Designation"
                     HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
             @{
                 string sizeType = FileSize.kb.GetDescription();
@@ -126,17 +130,17 @@
             }
         </GridColumn>
         <GridColumn TItem="StudyMaterialResponceDTO"
-                    HeaderText="Uploaded Date" PropertyName="uploadedDate"
+                    HeaderText="@ResourcesManager.GetString(LanguageEnum.MultiLanguals.UploadedDate)" PropertyName="uploadedDate"
                     HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
             @context.uploadedDate.Date.ToString(DateFormat.ddMMMyyyy)
         </GridColumn>
         <GridColumn TItem="StudyMaterialResponceDTO"
-                    HeaderText="Uploaded By" PropertyName="uploadedBy"
+                    HeaderText="@ResourcesManager.GetString(LanguageEnum.MultiLanguals.UploadedBy)" PropertyName="uploadedBy"
                     HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
             @context.uploadedBy
         </GridColumn>
         <GridColumn TItem="StudyMaterialResponceDTO"
-                    HeaderText="Action" PropertyName="Download"
+                    HeaderText="@ResourcesManager.GetString(LanguageEnum.MultiLanguals.Action)" PropertyName="Download"
                     HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
             <span>
                 @if ((context.studyMaterialId != filters.ParentMaterialId) && (context.parentMaterialId >= 0))
@@ -169,7 +173,7 @@
 
 
 @code {
-    private JwtDTO? tokenData;
+    private JwtDTO tokenData = default!;
     private Grid<StudyMaterialResponceDTO> grid = default!;
     private Modal modal = default!;
     private Roles roleType;
@@ -188,12 +192,14 @@
         {
             tokenData = await tokenService.GetClaimFromToken();
         }
-        filters.YearId = tokenData.CurrentYearId;
-        filters.RoleId = tokenData.Role;
-        roleType = (Roles)filters.RoleId;
-        await GetAllClasses();
-        await GetSubjectData();
-        await GetMaterialData();
+        if(tokenData != null){
+            filters.YearId = tokenData.CurrentYearId;
+            filters.RoleId = tokenData.Role;
+            roleType = (Roles)filters.RoleId;
+            await GetAllClasses();
+            await GetSubjectData();
+            await GetMaterialData();
+        }
     }
 
     private async Task GetAllClasses()
@@ -295,7 +301,7 @@
             fileDownload.isFolder = true;
             fileName = fileName + FileType.zip.GetDescription();
         }
-        ToastService.ShowInfo("Downloading in Process...");
+        ToastService.ShowInfo(SystemMessage.msgFileDownloadProcess);
         byte[] fileContent = await _studyMaterial.DownloadMaterial(fileDownload);
         if (fileContent == null || fileContent.Length == 0)
         {
@@ -304,8 +310,8 @@
         }
         var fileStream = new MemoryStream(fileContent);
         using var streamRef = new DotNetStreamReference(stream: fileStream);
-        await JSRuntime.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
-        ToastService.ShowSuccess("Downloading Completed!");
+        await JSRuntime.InvokeVoidAsync(JsStaticFun.downloadFileStream, fileName, streamRef);
+        ToastService.ShowSuccess(SystemMessage.msgFileDownloadComplete);
     }
 
     private async Task EditMaterial(int studyMaterialId)
@@ -314,7 +320,7 @@
         parameters.Add("id", new List<int>() { filters.ClassId, filters.SubjectId });
         parameters.Add("studyMaterialId", studyMaterialId);
         parameters.Add("parentMaterialId", filters.ParentMaterialId);
-        parameters.Add("userId", tokenData?.UserId);
+        parameters.Add("userId", tokenData.UserId);
         parameters.Add("OnCloseClick", EventCallback.Factory.Create<MouseEventArgs>(this, ModelClosed));
         parameters.Add("DataUpdate", EventCallback.Factory.Create<MouseEventArgs>(this, DataUpdateCall));
         await modal.ShowAsync<_NewMaterial>(title: "Update File/Folder", parameters: parameters);
@@ -348,7 +354,7 @@
         var parameters = new Dictionary<string, object>();
         parameters.Add("id", new List<int>() { filters.ClassId, filters.SubjectId });
         parameters.Add("parentMaterialId", filters.ParentMaterialId);
-        parameters.Add("userId", tokenData?.UserId);
+        parameters.Add("userId", tokenData.UserId);
         parameters.Add("OnCloseClick", EventCallback.Factory.Create<MouseEventArgs>(this, ModelClosed));
         parameters.Add("DataUpdate", EventCallback.Factory.Create<MouseEventArgs>(this, DataUpdateCall));
         await modal.ShowAsync<_NewMaterial>(title: "Add File/Folder", parameters: parameters);

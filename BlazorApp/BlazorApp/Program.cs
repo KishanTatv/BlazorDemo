@@ -1,5 +1,6 @@
 using BlazorApp;
 using BlazorApp.Components;
+using SMS.Shared.Static.Enum;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,8 +25,8 @@ else
 }
 
 app.UseHttpsRedirection();
-
 app.UseStaticFiles();
+app.UseRequestLocalization(LanguageEnum.Languages.English.GetDescription());
 app.UseAntiforgery();
 app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()

@@ -1,6 +1,8 @@
 ﻿@page "/"
 @rendermode InteractiveWebAssembly
 @using Blazored.Toast.Configuration
+@using System.Globalization
+@using Microsoft.Extensions.Localization
 
 @inject ITokenService tokenService
 @inject NavigationManager _navigationManager
@@ -9,6 +11,10 @@
 <div class="d-flex border-bottom border-4 border-secondary pb-1 mb-3">
     <h2 class="m-0">Dashboard</h2>
 </div>
+
+<p>
+    @ResourcesManager.GetString(LanguageEnum.MultiLanguals.WelcomeMessage)
+</p>
 
 @{
     if (tokenData?.Role == (int)Roles.SuperAdmin || tokenData?.Role == (int)Roles.Admin)
@@ -84,20 +90,10 @@
         }
     }
 
-    public bool isSubset(int[] a, int[] b)
-    {
-        var x = true;
-        for(int i=0; i<b.Length; i++){
-            if(!a.Any(x => x == b[i])){
-                x = false;
-            }
-        }
-        // Your code here
-        return x;
-    }
 
     private void showToastMsg()
     {
         ToastService.ShowToast(ToastLevel.Success, "This is a success message!");
     }
+
 }

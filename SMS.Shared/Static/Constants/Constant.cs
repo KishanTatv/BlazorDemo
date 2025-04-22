@@ -12,6 +12,15 @@
         public static string msgSomethingWrong = "Something Wrong !";
         public static string msgTryAgain = "Plaese try again !";
         public static string msgFileEmpty = "File is Empty !";
+        public static string msgFileDownloadProcess = "Downloading in Process...";
+        public static string msgFileDownloadComplete = "Downloading Completed!";
+    }
+
+    public static class JsStaticFun
+    {
+        public static string blazorCultureGet = "blazorCulture.get";
+        public static string blazorCultureSet = "blazorCulture.set";
+        public static string downloadFileStream = "downloadFileFromStream";
     }
 
     public static class DateFormat
@@ -19,6 +28,7 @@
         public static string ddMMMyyyy = "dd MMM, yyyy";
         public static string MMMMyyyy = "MMMM yyyy";
     }
+
 
 
 

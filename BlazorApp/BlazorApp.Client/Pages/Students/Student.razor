@@ -31,7 +31,6 @@
       DataProvider="StudentDataProvider"
       PageSizeSelectorVisible="true"
       PageSizeSelectorItems="@(new int[] { 5,10,20 })"
-      OnRowClick="OnRowClick"
       Responsive="true">
     <GridColumns>
         <GridColumn TItem="StudentListDTO"
@@ -159,11 +158,6 @@
     private async Task GetStudentData()
     {
         studentData = await _student.GetStudentList(studentReq);
-    }
-
-    private async Task OnRowClick(GridRowEventArgs<StudentListDTO> args)
-    {
-        await ModalService.ShowAsync(new ModalOption { Type = ModalType.Primary, Title = "Event: Row Click", Message = $"First Name: {args.Item.FirstName}, Last Name: {args.Item.LastName}" });
     }
 
     private async Task GetStudentDataOnSearch()

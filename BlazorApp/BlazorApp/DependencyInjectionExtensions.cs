@@ -43,6 +43,7 @@ namespace BlazorApp
             services.AddBlazoredLocalStorage();
             services.AddServerSideBlazor();
             services.AddBlazoredToast();
+            services.AddLocalization();
 
             return services;
         }
