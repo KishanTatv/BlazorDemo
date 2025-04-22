@@ -1,71 +1,140 @@
 ﻿@page "/staff"
-@using SMS.DataAccess.Models.Student.Response
 @rendermode InteractiveWebAssembly
+@using SMS.DataAccess.Models.Student.Response
 
 <div class="d-flex justify-content-between border-bottom border-4 border-secondary pb-1 mb-3">
-    <h2 class="m-0">Staff</h2>
+    <h2 class="m-0 htColor">Staff Task</h2>
 </div>
 
-<Grid TItem="Employee1"
-      AllowRowClick="true"
-      AllowSorting="true"
-      Class="table table-hover"
-      DataProvider="EmployeesDataProvider"
-      HeaderRowCssClass="bg-primary text-white border-bottom-0"
-      OnRowClick="OnRowClick"
-      Responsive="true">
+<div class="row">
+    <div class="col">
+        <div>
+            <div>
+                <h5 class="px-2">Todo</h5>
+            </div>
+            <SortableList TItem="TaskItem"
+                          Group="SharedListExample3"
+                          Name="empList1"
+                          Data="employeeList1"
+                          Context="item"
+                          OnUpdate="OnEmployeeList1Update"
+                          OnRemove="OnEmployeeListRemove">
+                <ItemTemplate>
+                    @item.Name
+                </ItemTemplate>
+            </SortableList>
+        </div>
+    </div>
+    <div class="col">
+        <div>
+            <div>
+                <h5 class="px-2">In-Progress</h5>
+            </div>
+            <SortableList TItem="TaskItem"
+                          Group="SharedListExample3"
+                          Name="empList2"
+                          Data="employeeList2"
+                          Context="item"
+                          OnUpdate="OnEmployeeList2Update"
+                          OnRemove="OnEmployeeListRemove">
+                <ItemTemplate>
+                    @item.Name
+                </ItemTemplate>
+            </SortableList>
+        </div>
+    </div>
+    <div class="col">
+        <div>
+            <div>
+                <h5 class="px-2">Complete</h5>
+            </div>
+            <SortableList TItem="TaskItem"
+                          Group="SharedListExample3"
+                          Name="empList3"
+                          Data="employeeList3"
+                          Context="item"
+                          OnUpdate="OnEmployeeList3Update"
+                          OnRemove="OnEmployeeListRemove">
+                <ItemTemplate>
+                    @item.Name
+                </ItemTemplate>
+            </SortableList>
+        </div>
+    </div>
+</div>
 
-    <GridColumns>
-        <GridColumn TItem="Employee1" HeaderText="Id" SortKeySelector="item => item.Id">
-            @context.Id
-        </GridColumn>
-
-        <GridColumn TItem="Employee1" HeaderText="Employee Name" SortKeySelector="item => item.Name">
-            @context.Name
-        </GridColumn>
-
-        <GridColumn TItem="Employee1" HeaderText="Designation" SortKeySelector="item => item.Designation">
-            @context.Designation
-        </GridColumn>
-
-        <GridColumn TItem="Employee1" HeaderText="DOJ" SortKeySelector="item => item.DOJ">
-            @context.DOJ
-        </GridColumn>
-
-        <GridColumn TItem="Employee1" HeaderText="Active" SortKeySelector="item => item.IsActive">
-            @context.IsActive
-        </GridColumn>
-    </GridColumns>
-
-</Grid>
 
 @code {
-    [Inject] ModalService ModalService { get; set; } = default!;
+    public List<TaskItem> employeeList1 = Enumerable.Range(10, 5).Select(i => new TaskItem(i, $"Task Item {i}")).ToList();
 
-    private IEnumerable<Employee1> employees = default!;
+    public List<TaskItem> employeeList2 = Enumerable.Range(20, 7).Select(i => new TaskItem(i, $"Task Item {i}")).ToList();
 
-    private async Task<GridDataProviderResult<Employee1>> EmployeesDataProvider(GridDataProviderRequest<Employee1> request)
+    public List<TaskItem> employeeList3 = Enumerable.Range(30, 3).Select(i => new TaskItem(i, $"Task Item {i}")).ToList();
+
+    private void OnEmployeeList1Update(SortableListEventArgs args)
     {
-        if (employees is null) // pull employees only one time for client-side filtering, sorting, and paging
-            employees = GetEmployees(); // call a service or an API to pull the employees
+        var itemToMove = employeeList1[args.OldIndex];
 
-        return await Task.FromResult(request.ApplyTo(employees));
+        employeeList1.RemoveAt(args.OldIndex);
+
+        if (args.NewIndex < employeeList1.Count)
+            employeeList1.Insert(args.NewIndex, itemToMove);
+        else
+            employeeList1.Add(itemToMove);
     }
 
-    private IEnumerable<Employee1> GetEmployees()
+    private void OnEmployeeList2Update(SortableListEventArgs args)
     {
-        return new List<Employee1>
-        {
-            new Employee1 { Id = 103, Name = "Bob", Designation = "Senior DevOps Engineer", DOJ = new DateOnly(1985, 1, 5), IsActive = true },
-            new Employee1 { Id = 106, Name = "John", Designation = "Data Engineer", DOJ = new DateOnly(1995, 4, 17), IsActive = true },
-            new Employee1 { Id = 104, Name = "Pop", Designation = "Associate Architect", DOJ = new DateOnly(1985, 6, 8), IsActive = false },
-            new Employee1 { Id = 105, Name = "Ronald", Designation = "Senior Data Engineer", DOJ = new DateOnly(1991, 8, 23), IsActive = true },
-            new Employee1 { Id = 102, Name = "Line", Designation = "Architect", DOJ = new DateOnly(1977, 1, 12), IsActive = true },
-        };
+        var itemToMove = employeeList2[args.OldIndex];
+
+        employeeList2.RemoveAt(args.OldIndex);
+
+        if (args.NewIndex < employeeList2.Count)
+            employeeList2.Insert(args.NewIndex, itemToMove);
+        else
+            employeeList2.Add(itemToMove);
     }
 
-    private async Task OnRowClick(GridRowEventArgs<Employee1> args)
+    private void OnEmployeeList3Update(SortableListEventArgs args)
     {
-        await ModalService.ShowAsync(new ModalOption { Type = ModalType.Primary, Title = "Event: Row Click", Message = $"Id: {args.Item.Id}, Name: {args.Item.Name}" });
+        var itemToMove = employeeList3[args.OldIndex];
+
+        employeeList3.RemoveAt(args.OldIndex);
+
+        if (args.NewIndex < employeeList3.Count)
+            employeeList3.Insert(args.NewIndex, itemToMove);
+        else
+            employeeList3.Add(itemToMove);
     }
+
+    private void OnEmployeeListRemove(SortableListEventArgs args)
+    {
+        TaskItem? item = default!;
+
+        // get the item at the old index
+        if (args.FromListName == "empList1")
+            item = employeeList1[args.OldIndex];
+        else if (args.FromListName == "empList2")
+            item = employeeList2[args.OldIndex];
+        else
+            item = employeeList3[args.OldIndex];
+
+        // add it to the new index
+        if (args.ToListName == "empList1")
+            employeeList1.Insert(args.NewIndex, item);
+        else if (args.ToListName == "empList2")
+            employeeList2.Insert(args.NewIndex, item);
+        else
+            employeeList3.Insert(args.NewIndex, item);
+
+        // remove the item from the old index
+        if (args.FromListName == "empList1")
+            employeeList1.Remove(employeeList1[args.OldIndex]);
+        else if (args.FromListName == "empList2")
+            employeeList2.Remove(employeeList2[args.OldIndex]);
+        else
+            employeeList3.Remove(employeeList3[args.OldIndex]);
+    }
+
+    public record TaskItem(int Id, string? Name);
 }

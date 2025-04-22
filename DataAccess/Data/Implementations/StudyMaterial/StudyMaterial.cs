@@ -32,7 +32,7 @@ namespace SMS.DataAccess.Data.Implementations.StudyMaterial
             HttpResponseDTO<StudyMaterialModel> responseVM = await _httpClientManager.GetAsync<StudyMaterialModel>(
                 UrlBuilderUtility.GetCombineUrl(API_Routes.StudyMaterial.GetStudyMaterialById, _APIConnection) +
                 UrlBuilderUtility.GenerateQueryString(
-                   [new KeyValuePair<string,string>("studyMaterialId", studyMaterialId.ToString())]
+                   [new KeyValuePair<string, string>("studyMaterialId", studyMaterialId.ToString())]
                ));
             return responseVM;
         }
@@ -57,9 +57,7 @@ namespace SMS.DataAccess.Data.Implementations.StudyMaterial
             string url = UrlBuilderUtility.GetCombineUrl(API_Routes.StudyMaterial.SaveMaterial, _APIConnection);
             if (studyMaterialId > 0)
             {
-                url = url + UrlBuilderUtility.GenerateQueryString([
-                    new KeyValuePair<string, string>("studyMaterialId", studyMaterialId.ToString()
-                    )]);
+                url = url + UrlBuilderUtility.GenerateQueryString([new KeyValuePair<string, string>("studyMaterialId", studyMaterialId.ToString())]);
             }
             HttpResponseDTO<bool> responseVM = await _httpClientManager.PostAsync<bool>(
                 url, FormDataUtility.ConvertToMultipartFormData(uploadModal)

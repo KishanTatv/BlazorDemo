@@ -1,7 +1,6 @@
 ﻿using Blazored.LocalStorage;
 using SMS.Shared.Static.Enum;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 
 namespace SMS.Shared.JWTToken
 {
@@ -46,40 +45,37 @@ namespace SMS.Shared.JWTToken
             if (_tokenData == null)
             {
                 var token = await GetUserToken();
-                if (string.IsNullOrWhiteSpace(token) || string.IsNullOrEmpty(token))
+                var jwtHandler = new JwtSecurityTokenHandler();
+                if (!string.IsNullOrWhiteSpace(token) && !string.IsNullOrEmpty(token) && jwtHandler.CanReadToken(token))
                 {
-                    return null;
+                    var claim = jwtHandler.ReadJwtToken(token).Claims;
+                    JwtDTO jwtData = new JwtDTO()
+                    {
+                        UserName = claim?.FirstOrDefault(c => c.Type == "unique_name").Value,
+                        Role = int.Parse(claim?.FirstOrDefault(c => c.Type == "role").Value),
+                        CurrentYearId = int.Parse(claim?.FirstOrDefault(c => c.Type == "CurrentYearId").Value),
+                        UserId = int.Parse(claim?.FirstOrDefault(c => c.Type == "UserId").Value),
+                        Email = claim?.FirstOrDefault(c => c.Type == "email").Value
+                    };
+                    switch ((Roles)jwtData.Role)
+                    {
+                        case Roles.Teacher:
+                            jwtData.TeacherId = int.Parse(claim?.FirstOrDefault(c => c.Type == "TeacherId").Value);
+                            jwtData.StaffId = int.Parse(claim?.FirstOrDefault(c => c.Type == "StaffId").Value);
+                            break;
+                        case Roles.Student:
+                            jwtData.StudentId = int.Parse(claim?.FirstOrDefault(c => c.Type == "StudentId").Value);
+                            break;
+                        case Roles.Parent:
+                            jwtData.ParentId = int.Parse(claim?.FirstOrDefault(c => c.Type == "ParentId").Value);
+                            break;
+                    }
+                    _tokenData = jwtData;
+                    return _tokenData;
                 }
-                JwtSecurityTokenHandler jwtHandler = new JwtSecurityTokenHandler();
-                if (!jwtHandler.CanReadToken(token))
-                {
-                    return null;
-                }
-                IEnumerable<Claim> claim = jwtHandler.ReadJwtToken(token).Claims;
-                JwtDTO jwtData = new JwtDTO()
-                {
-                    UserName = claim?.FirstOrDefault(c => c.Type == "unique_name").Value,
-                    Role = int.Parse(claim?.FirstOrDefault(c => c.Type == "role").Value),
-                    CurrentYearId = int.Parse(claim?.FirstOrDefault(c => c.Type == "CurrentYearId").Value),
-                    UserId = int.Parse(claim?.FirstOrDefault(c => c.Type == "UserId").Value),
-                    Email = claim?.FirstOrDefault(c => c.Type == "email").Value
-                };
-                switch ((Roles)jwtData.Role)
-                {
-                    case Roles.Teacher:
-                        jwtData.TeacherId = int.Parse(claim?.FirstOrDefault(c => c.Type == "TeacherId").Value);
-                        jwtData.StaffId = int.Parse(claim?.FirstOrDefault(c => c.Type == "StaffId").Value);
-                        break;
-                    case Roles.Student:
-                        jwtData.StudentId = int.Parse(claim?.FirstOrDefault(c => c.Type == "StudentId").Value);
-                        break;
-                    case Roles.Parent:
-                        jwtData.ParentId = int.Parse(claim?.FirstOrDefault(c => c.Type == "ParentId").Value);
-                        break;
-                }
-                _tokenData = jwtData;
+                return null;
             }
-            return _tokenData;
+            return null;
         }
 
         public void SetTokenData(JwtDTO token)
@@ -90,7 +86,7 @@ namespace SMS.Shared.JWTToken
         public async Task<bool> IsTokenValid()
         {
             var token = await GetUserToken();
-            if(!string.IsNullOrEmpty(token))
+            if (!string.IsNullOrEmpty(token))
             {
                 if (new JwtSecurityTokenHandler().ReadJwtToken(token).ValidTo <= DateTime.UtcNow)
                 {

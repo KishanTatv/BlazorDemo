@@ -1,6 +1,7 @@
 ﻿@using BlazorApp.Data.Interfaces.Auth
 @using Blazored.Toast.Configuration
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
 @using SMS.DataAccess.Models.Auth.Request
 @using SMS.Shared.JWTToken
 @using SMS.Shared.Loader
@@ -10,6 +11,7 @@
 @rendermode InteractiveWebAssembly
 @* @attribute [Authorize] *@
 
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager _navigationManager
 @inject ITokenService tokenService
 @inject IAuth _auth;
@@ -103,6 +105,7 @@ ErrorIcon="fa fa-triangle-exclamation"  />
     private async Task LogOutPage(){
         await tokenService.RemoveTokensAsync();
         _navigationManager.NavigateTo(Page_Routes.Login);
+        await ((CustomAuthStateProvider)AuthenticationStateProvider).NotifyUserAuthentication();
     }
 
 
