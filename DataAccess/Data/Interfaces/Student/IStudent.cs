@@ -16,5 +16,6 @@ namespace SMS.DataAccess.Data.Interfaces.Student
         Task<HttpResponseDTO<string>> StudentPhoto(StudentImage model);
         Task<HttpResponseDTO<int>> StudentLeaving(StudentSchoolLeavingDetails model);
         Task<HttpResponseDTO<StudentListResponceVM<AlumiStudentModel>>> AlumniStudent(AlumniStudentsRequestModel model);
+        Task<byte[]> DownloadLC(int StudentId);
     }
 }

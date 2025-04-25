@@ -96,5 +96,13 @@ namespace SMS.DataAccess.Data.Implementations.Student
                 );
             return responseVM;
         }
+
+        public async Task<byte[]> DownloadLC(int StudentId)
+        {
+            byte[] responseVM = await _httpClientManager.GetBlobAsync(
+                UrlBuilderUtility.GetCombineUrl(API_Routes.Student.DownloadLC, _APIConnection) +"/"+ StudentId
+                );
+            return responseVM;
+        }
     }
 }

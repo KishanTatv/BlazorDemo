@@ -26,14 +26,14 @@
 </div>
 
 <Grid @ref="studentGrid" TItem="StudentListDTO"
-      AllowPaging="true" AllowSorting="true" PageSize="10"
+      AllowPaging="true" AllowSorting="true" PageSize="GridTable.PageSize"
       AllowRowClick="true"
       FixedHeader="true"
-      Height="466"
+      Height="GridTable.FixHeight"
       Class="table table-hover table-bordered"
       DataProvider="StudentDataProvider"
       PageSizeSelectorVisible="true"
-      PageSizeSelectorItems="@(new int[] { 5,10,20 })"
+      PageSizeSelectorItems="GridTable.PageSizeOption"
       Responsive="true">
     <GridColumns>
         <GridColumn TItem="StudentListDTO"
@@ -122,7 +122,7 @@
         {
             YearId = 1,
             SortCol = "studentId",
-            SortDir = "desc"
+            SortDir = GridTable.SortDesc,
         };
 
     private HttpResponseDTO<StudentListResponceVM<StudentListDTO>> studentData = new HttpResponseDTO<StudentListResponceVM<StudentListDTO>>();
@@ -146,7 +146,7 @@
         if (request.Sorting is not null && request.Sorting.Any())
         {
             studentReq.SortCol = request.Sorting.FirstOrDefault()!.SortString;
-            studentReq.SortDir = request.Sorting.FirstOrDefault()!.SortDirection == SortDirection.Ascending ? "asc" : "desc";
+            studentReq.SortDir = request.Sorting.FirstOrDefault()!.SortDirection == SortDirection.Ascending ? GridTable.SortAsc : GridTable.SortDesc;
         }
         studentReq.DisplayLength = request.PageSize;
         studentReq.DisplayStart = request.PageNumber - 1;

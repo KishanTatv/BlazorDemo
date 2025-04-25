@@ -146,14 +146,14 @@
             {
                 @if (roleType == Roles.SuperAdmin || roleType == Roles.Admin || roleType == Roles.Teacher)
                 {
-                    <Button Color="ButtonColor.None" TooltipTitle="Edit" Class="py-1"
+                    @* <Button Color="ButtonColor.None" TooltipTitle="Edit" Class="py-1"
                             @onclick="async () => await EditMaterial(context.studyMaterialId)">
                         <Icon Name="IconName.PenFill" Color="IconColor.Primary"></Icon>
-                    </Button>
+                    </Button> *@
                 }
                 <Button Color="ButtonColor.None" TooltipTitle="Download" Class="py-1"
                         @onclick="async () => await DownloadMaterial(context.studyMaterialId, context.fileName, context.materialType)">
-                    <Icon Name="IconName.CloudDownload" Color="IconColor.Warning"></Icon>
+                    <Icon Name="IconName.CloudArrowDownFill" Color="IconColor.Warning"></Icon>
                 </Button>
                 @if (roleType == Roles.SuperAdmin || roleType == Roles.Admin || roleType == Roles.Teacher)
                 {
@@ -302,11 +302,6 @@
             fileName = fileName + FileType.zip.GetDescription();
         }
         byte[] fileContent = await _studyMaterial.DownloadMaterial(fileDownload);
-        if (fileContent == null || fileContent.Length == 0)
-        {
-            ToastService.ShowError(SystemMessage.msgFileEmpty);
-            return;
-        }
         var fileStream = new MemoryStream(fileContent);
         using var streamRef = new DotNetStreamReference(stream: fileStream);
         await JSRuntime.InvokeVoidAsync(JsStaticFun.downloadFileStream, fileName, streamRef);

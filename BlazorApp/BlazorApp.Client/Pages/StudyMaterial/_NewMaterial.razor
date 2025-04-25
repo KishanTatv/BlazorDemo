@@ -11,7 +11,7 @@
         <InputSelect class="form-select" aria-label="Default select example" @bind-Value="materialUpload.IsFolder">
             @foreach (UploadType type in Enum.GetValues(typeof(UploadType)))
             {
-                <option value="@(type == UploadType.Folder ? "true" : "false")">@type</option>
+                <option value="@(type == UploadType.Folder ? "true" : "false")" disabled="@(studyMaterialId > 0 && materialUpload.IsFolder != (type == UploadType.Folder))">@type</option>
             }
         </InputSelect>
     </div>
@@ -61,7 +61,7 @@
                 SubjectId = id[1],
                 ParentMaterialId = parentMaterialId,
                 IsFolder = false,
-                ShowToStudents = true,
+                ShowToStudents = true, 
                 UserId = userId,
             };
         if (studyMaterialId > 0)
@@ -72,6 +72,7 @@
                 materialUpload.IsFolder = string.IsNullOrEmpty(data.FilePath) ? true : false;
                 materialUpload.Name = data.FileName;
                 materialUpload.Description = data.Description;
+                materialUpload.ParentMaterialId = data.ParentMaterialId;
                 StateHasChanged();
             }
         }

@@ -5,8 +5,11 @@
 @using SMS.DataAccess.Models.Student.Response
 
 @inject IStudent _student
+@inject ICommon _common
 @inject ITokenService tokenService
+@inject IJSRuntime JSRuntime
 @inject NavigationManager navigationManager
+@inject IToastService ToastService
 
 <div class="d-flex justify-content-between border-bottom border-4 border-secondary pb-1 mb-3">
     <h2 class="m-0">Alumni Student</h2>
@@ -22,62 +25,68 @@
     </div>
 </div>
 
-<div>
-    <Grid @ref="studentGrid" TItem="AlumiStudentModel"
-          AllowPaging="true" AllowSorting="true" PageSize="10"
-          AllowRowClick="true"
-          FixedHeader="true"
-          Height="466"
-          Class="table table-hover table-bordered"
-          DataProvider="StudentDataProvider"
-          PageSizeSelectorVisible="true"
-          PageSizeSelectorItems="@(new int[] { 5,10,20 })"
-          Responsive="true">
-        <GridColumns>
-            <GridColumn TItem="AlumiStudentModel"
-                        HeaderText="Student Name" PropertyName="FirstName"
-                        SortString="FirstName" SortKeySelector="item => item.FirstName"
-                        HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
-                @context.FirstName @context.LastName
-            </GridColumn>
-                <GridColumn TItem="AlumiStudentModel"
-                        HeaderText="Class" PropertyName="Class"
-                        SortString="ClassName" SortKeySelector="item => item.ClassName"
-                        HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
-                @context.ClassName
-            </GridColumn>
-            <GridColumn TItem="AlumiStudentModel"
-                        HeaderText="Admission Date" PropertyName="AdmissionDate"
-                        SortString="AdmissionDate" SortKeySelector="item => item.AdmissionDate"
-                        HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
-                @context.AdmissionDate.ToString(DateFormat.ddMMMyyyy)
-            </GridColumn>
-            <GridColumn TItem="AlumiStudentModel"
-                        HeaderText="Leaving Date" PropertyName="DateOfLeavingSchool"
-                        SortString="DateOfLeavingSchool" SortKeySelector="item => item.DateOfLeavingSchool"
-                        HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
-                @context.DateOfLeavingSchool?.ToString(DateFormat.ddMMMyyyy)
-            </GridColumn>
-            <GridColumn TItem="AlumiStudentModel"
-                        HeaderText="Progress" PropertyName="Progress"
-                        SortString="Progress" SortKeySelector="item => item.Progress"
-                        HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
-                @context.Progress
-            </GridColumn>
-            <GridColumn TItem="AlumiStudentModel"
-                        HeaderText="Conduct" PropertyName="Conduct"
-                        SortString="Conduct" SortKeySelector="item => item.Conduct"
-                        HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
-                @context.Conduct
-            </GridColumn>
-            <GridColumn TItem="AlumiStudentModel"
-                        HeaderText="Reason For LeavingSchool" PropertyName="ReasonForLeavingSchool"
-                        SortString="ReasonForLeavingSchool" SortKeySelector="item => item.ReasonForLeavingSchool">
-                @context.ReasonForLeavingSchool
-            </GridColumn>
-        </GridColumns>
-    </Grid>
-</div>
+<Grid @ref="studentGrid" TItem="AlumiStudentModel"
+      AllowPaging="true" AllowSorting="true" PageSize="GridTable.PageSize"
+      AllowRowClick="true"
+      FixedHeader="true"
+      Height="GridTable.FixHeight"
+      Class="table table-hover table-bordered"
+      DataProvider="StudentDataProvider"
+      PageSizeSelectorVisible="true"
+      PageSizeSelectorItems="GridTable.PageSizeOption"
+      Responsive="true">
+    <GridColumns>
+        <GridColumn TItem="AlumiStudentModel"
+                    HeaderText="Student Name" PropertyName="FirstName"
+                    SortString="FirstName" SortKeySelector="item => item.FirstName"
+                    HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
+            @context.FirstName @context.LastName
+        </GridColumn>
+        <GridColumn TItem="AlumiStudentModel"
+                    HeaderText="Class" PropertyName="Class"
+                    SortString="ClassName" SortKeySelector="item => item.ClassName"
+                    HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
+            @context.ClassName
+        </GridColumn>
+        <GridColumn TItem="AlumiStudentModel"
+                    HeaderText="Admission Date" PropertyName="AdmissionDate"
+                    SortString="AdmissionDate" SortKeySelector="item => item.AdmissionDate"
+                    HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
+            @context.AdmissionDate.ToString(DateFormat.ddMMMyyyy)
+        </GridColumn>
+        <GridColumn TItem="AlumiStudentModel"
+                    HeaderText="Leaving Date" PropertyName="DateOfLeavingSchool"
+                    SortString="DateOfLeavingSchool" SortKeySelector="item => item.DateOfLeavingSchool"
+                    HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
+            @context.DateOfLeavingSchool?.ToString(DateFormat.ddMMMyyyy)
+        </GridColumn>
+        <GridColumn TItem="AlumiStudentModel"
+                    HeaderText="Progress" PropertyName="Progress"
+                    SortString="Progress" SortKeySelector="item => item.Progress"
+                    HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
+            @context.Progress
+        </GridColumn>
+        <GridColumn TItem="AlumiStudentModel"
+                    HeaderText="Conduct" PropertyName="Conduct"
+                    SortString="Conduct" SortKeySelector="item => item.Conduct"
+                    HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
+            @context.Conduct
+        </GridColumn>
+        <GridColumn TItem="AlumiStudentModel"
+                    HeaderText="Reason For LeavingSchool" PropertyName="ReasonForLeavingSchool"
+                    SortString="ReasonForLeavingSchool" SortKeySelector="item => item.ReasonForLeavingSchool">
+            @context.ReasonForLeavingSchool
+        </GridColumn>
+        <GridColumn TItem="AlumiStudentModel" class="p-0 pb-2"
+                    HeaderText="Download" PropertyName="Download"
+                    HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
+            <Button Color="ButtonColor.None" TooltipTitle="Download" Class="py-1"
+                    @onclick="async () => await DownloadAction(context.StudentId)">
+                <Icon Name="IconName.CloudArrowDownFill" Color="IconColor.Primary"></Icon>
+            </Button>
+        </GridColumn>
+    </GridColumns>
+</Grid>
 
 @code {
     private JwtDTO? tokenData;
@@ -85,7 +94,7 @@
     private AlumniStudentsRequestModel studentReq = new AlumniStudentsRequestModel()
         {
             SortCol = "studentId",
-            SortDir = "desc"
+            SortDir = GridTable.SortDesc
         };
     private StudentListResponceVM<AlumiStudentModel> studentData = new StudentListResponceVM<AlumiStudentModel>();
 
@@ -103,7 +112,7 @@
         if (request.Sorting is not null && request.Sorting.Any())
         {
             studentReq.SortCol = request.Sorting.FirstOrDefault()!.SortString;
-            studentReq.SortDir = request.Sorting.FirstOrDefault()!.SortDirection == SortDirection.Ascending ? "asc" : "desc";
+            studentReq.SortDir = request.Sorting.FirstOrDefault()!.SortDirection == SortDirection.Ascending ? GridTable.SortAsc : GridTable.SortDesc;
         }
         studentReq.DisplayLength = request.PageSize;
         studentReq.DisplayStart = request.PageNumber - 1;
@@ -142,5 +151,19 @@
     private void BackClick()
     {
         navigationManager.NavigateTo(Page_Routes.Student);
+    }
+
+    private async Task DownloadAction(int studentId)
+    {
+        var fileContent = await _student.DownloadLC(studentId);
+        if (fileContent == null || fileContent.Length == 0)
+        {
+            ToastService.ShowError(SystemMessage.msgFileEmpty);
+            return;
+        }
+        var fileStream = new MemoryStream(fileContent);
+        using var streamRef = new DotNetStreamReference(stream: fileStream);
+        await JSRuntime.InvokeVoidAsync(JsStaticFun.downloadFileStream, FixFileName.LCReport + FileType.pdf.GetDescription(), streamRef);
+        ToastService.ShowSuccess(SystemMessage.msgFileDownloadComplete);
     }
 }

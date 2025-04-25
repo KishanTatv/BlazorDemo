@@ -31,6 +31,7 @@
             public const string StudentPhoto = "Student/StudentPhoto";
             public const string LeavingDetail = "Student/EditStudentSchoolLeavingDetails";
             public const string AlumniStudent = "Student/GetAllAlumniStudents";
+            public const string DownloadLC = "Student/GetLeavingCertificate";
         }
 
         public class StudyMaterial

@@ -1,4 +1,5 @@
-﻿using SMS.DataAccess.Models;
+﻿using Microsoft.JSInterop;
+using SMS.DataAccess.Models;
 using SMS.Shared.HttpManager.DTO;
 
 namespace SMS.DataAccess.Data.Interfaces
@@ -11,5 +12,13 @@ namespace SMS.DataAccess.Data.Interfaces
         Task<HttpResponseDTO<List<SelectOptionDTO>>> GetSubjectByClassAsync(int classId, int yearId);
         Task<HttpResponseDTO<List<SelectOptionDTO>>> GetSubjectsByTeacherClassDivisionAsync(int classId, int teacherId, int yearId);
         Task<HttpResponseDTO<List<SelectOptionDTO>>> GetSubjectsByStudentAsync(int studentId, int yearId);
+
+
+        public DotNetStreamReference GetStreamContent(byte[] fileContent)
+        {
+            var fileStream = new MemoryStream(fileContent);
+            using var streamRef = new DotNetStreamReference(stream: fileStream);
+            return streamRef;
+        }
     }
 }

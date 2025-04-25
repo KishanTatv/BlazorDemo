@@ -23,6 +23,20 @@
         public static string downloadFileStream = "downloadFileFromStream";
     }
 
+    public static class FixFileName
+    {
+        public static string LCReport = "LC-Certificate";
+    }
+
+    public static class GridTable
+    {
+        public static int PageSize = 10;
+        public static int FixHeight = 466;
+        public static int[] PageSizeOption = { 5, 10, 20 };
+        public static string SortAsc = "asc";
+        public static string SortDesc = "desc";
+    }
+
     public static class DateFormat
     {
         public static string ddMMMyyyy = "dd MMM, yyyy";
