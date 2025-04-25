@@ -8,5 +8,6 @@
 
         public const string Student = "/student";
         public const string AddStudent = "/student/add";
+        public const string AlumniStudent = "/student/alumniStudent";
     }
 }

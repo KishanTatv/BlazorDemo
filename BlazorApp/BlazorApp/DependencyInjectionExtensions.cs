@@ -14,6 +14,7 @@ using SMS.Shared.HttpManager.Implementation;
 using SMS.Shared.HttpManager.Interface;
 using SMS.Shared.JWTToken;
 using SMS.Shared.Loader;
+using SMS.Shared.Static.Enum;
 
 namespace BlazorApp
 {
@@ -44,6 +45,13 @@ namespace BlazorApp
             services.AddServerSideBlazor();
             services.AddBlazoredToast();
             services.AddLocalization();
+
+            //services.Configure<RequestLocalizationOptions>(options =>
+            //{
+            //    options.SetDefaultCulture(LanguageEnum.Languages.English.GetDescription());
+            //    options.AddSupportedCultures(new[] { LanguageEnum.Languages.English.GetDescription(), LanguageEnum.Languages.Hindi.GetDescription() });
+            //    options.AddSupportedUICultures(new[] { LanguageEnum.Languages.English.GetDescription(), LanguageEnum.Languages.Hindi.GetDescription() });
+            //});
 
             return services;
         }

@@ -27,6 +27,7 @@
     {
         public static string ddMMMyyyy = "dd MMM, yyyy";
         public static string MMMMyyyy = "MMMM yyyy";
+        public static string yyyy_MM_ddT = "yyyy-MM-ddT00:00:00";
     }
 
 

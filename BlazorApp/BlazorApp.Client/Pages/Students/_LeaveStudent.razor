@@ -1,0 +1,91 @@
+﻿@using SMS.DataAccess.Data.Interfaces.Student
+@using SMS.DataAccess.Models.Student.Request
+@using SMS.DataAccess.Models.Student.Response
+
+@inject IStudent _student
+@inject ITokenService tokenService
+@inject IToastService ToastService
+
+<div>
+    <EditForm Model=@leaveModel OnValidSubmit="SaveClick" FormName="loginForm">
+        <DataAnnotationsValidator />
+        <div class="py-2 px-2">
+            <div class="row">
+                <div class="col-5 col-md-4 fw-bold">Student Name :</div>
+                <div class="col-7 col-md-8">@Name?[0] @Name?[1]</div>
+            </div>
+            <div class="row">
+                <div class="col-5 col-md-4 fw-bold">Class/Division :</div>
+                <div class="col-7 col-md-8">@Standard?[0] / @Standard?[1]</div>
+            </div>
+            <div class="row">
+                <div class="mb-3 mt-3">
+                    <label>Admission Date</label>
+                    <DateInput @bind-Value="leaveModel.DateOfLeavingSchool" Placeholder="Leaving Date" EnableMinMax="true" Max="DateTime.Now"/>
+                    <ValidationMessage For="() => leaveModel.DateOfLeavingSchool" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="mb-3">
+                    <label>Progress</label>
+                    <TextInput @bind-Value=leaveModel.Progress class="form-control" id="progress" />
+                    <ValidationMessage For="() => leaveModel.Progress" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="mb-3">
+                    <label>Conduct</label>
+                    <TextInput @bind-Value=leaveModel.Conduct class="form-control" id="conduct" />
+                    <ValidationMessage For="() => leaveModel.Conduct" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="mb-3">
+                    <label>Reason for a leaving school</label>
+                    <TextAreaInput @bind-Value=leaveModel.ReasonForLeavingSchool class="form-control" id="leaveReason" />
+                    <ValidationMessage For="() => leaveModel.ReasonForLeavingSchool" />
+                </div>
+            </div>
+        </div>
+        <hr />
+        <div class="d-flex justify-content-end">
+            <Button Type="ButtonType.Button" Class="mr-2" Color="ButtonColor.Secondary" @onclick="async () => await OnCloseClick.InvokeAsync()"> Close </Button> &nbsp;
+            <Button Type="ButtonType.Submit" Color="ButtonColor.Primary"> Save </Button>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    private StudentSchoolLeavingDetails leaveModel = default!;
+    [Parameter] public int StudentId { get; set; }
+    [Parameter] public List<string> Name { get; set; }
+    [Parameter] public List<string> Standard { get; set; }
+    [Parameter] public int userId { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> OnCloseClick { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> DataUpdate { get; set; }
+
+    protected override void OnInitialized()
+    {
+        leaveModel = new StudentSchoolLeavingDetails()
+            {
+                StudentId = StudentId,
+                StudentName = Name?[0] + Name?[1],
+                DateOfLeavingSchool = DateTime.Now.Date,
+                ModifiedBy = userId,
+                ModifiedDate = DateTime.Now.Date
+            };
+    }
+
+    protected async Task SaveClick()
+    {
+        var res = await _student.StudentLeaving(leaveModel);
+        if(res.Result && res.Data > 0){
+            ToastService.ShowSuccess(res.Message);
+            await OnCloseClick.InvokeAsync();
+            await DataUpdate.InvokeAsync();
+        }
+        else{
+            ToastService.ShowError(res.Message);
+        }
+    }
+}

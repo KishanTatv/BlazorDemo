@@ -10,7 +10,7 @@
 
 <div class="d-flex justify-content-between border-bottom border-4 border-secondary pb-1 mb-3">
     <h2 class="m-0">Student</h2>
-    <Button class="p-3 py-0" Color="ButtonColor.Secondary" Size="ButtonSize.Large" @onclick="AddStudentClick"> <Icon Name="IconName.Plus" /> Add </Button>
+    <Button class="p-3 py-0" Color="ButtonColor.Light" Size="ButtonSize.Large" @onclick="RouteToAlumni"> Alumni Student </Button>
 </div>
 
 <div class="row mb-3 align-items-center">
@@ -19,6 +19,9 @@
     </div>
     <div class="col-md-2">
         <Button class="p-3 py-0" Color="ButtonColor.Secondary" Size="ButtonSize.Large" Outline="true" @onclick="GetStudentDataOnSearch"> Search </Button>
+    </div>
+    <div class="col-md d-flex justify-content-end">
+        <Button class="p-3 py-0" Color="ButtonColor.Secondary" Size="ButtonSize.Large" @onclick="AddStudentClick"> <Icon Name="IconName.Plus" /> Add </Button>
     </div>
 </div>
 
@@ -35,56 +38,69 @@
     <GridColumns>
         <GridColumn TItem="StudentListDTO"
                     HeaderText="Student Name" PropertyName="FirstName"
-                    SortString="FirstName" SortKeySelector="item => item.FirstName">
+                    SortString="FirstName" SortKeySelector="item => item.FirstName"
+                    HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
             @context.FirstName @context.LastName
         </GridColumn>
         <GridColumn TItem="StudentListDTO"
                     HeaderText="Date Of Birth" PropertyName="DateOfBirth"
-                    SortString="DateOfBirth" SortKeySelector="item => item.DateOfBirth">
+                    SortString="DateOfBirth" SortKeySelector="item => item.DateOfBirth"
+                    HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
             @context.DateOfBirth.ToString(DateFormat.ddMMMyyyy)
         </GridColumn>
         <GridColumn TItem="StudentListDTO"
                     HeaderText="Email" PropertyName="Email"
-                    SortString="Email" SortKeySelector="item => item.Email">
+                    SortString="Email" SortKeySelector="item => item.Email"
+                    HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
             @context.Email
         </GridColumn>
         <GridColumn TItem="StudentListDTO"
                     HeaderText="Mobile" PropertyName="Mobile"
-                    SortString="Mobile" SortKeySelector="item => item.Mobile">
+                    SortString="Mobile" SortKeySelector="item => item.Mobile"
+                    HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
             @context.Mobile
         </GridColumn>
         <GridColumn TItem="StudentListDTO"
                     HeaderText="Class / Division" PropertyName="ClassName"
-                    SortString="ClassName" SortKeySelector="item => item.ClassName">
+                    SortString="ClassName" SortKeySelector="item => item.ClassName"
+                    HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
             @context.ClassName / @context.DivisionName
         </GridColumn>
         <GridColumn TItem="StudentListDTO"
                     HeaderText="Admission Date" PropertyName="AdmissionDate"
-                    SortString="AdmissionDate" SortKeySelector="item => item.AdmissionDate">
+                    SortString="AdmissionDate" SortKeySelector="item => item.AdmissionDate"
+                    HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
             @context.AdmissionDate.ToString(DateFormat.ddMMMyyyy)
         </GridColumn>
         <GridColumn TItem="StudentListDTO"
                     HeaderText="Address" PropertyName="Address"
-                    SortString="State" SortKeySelector="item => item.State">
+                    SortString="State" SortKeySelector="item => item.State"
+                    HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
             @context.City , @context.State
         </GridColumn>
         @if (tokenData?.Role == 2)
         {
-            <GridColumn TItem="StudentListDTO" HeaderText="Action" PropertyName="Action">
+            <GridColumn TItem="StudentListDTO" HeaderText="Action" PropertyName="Action" HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
                 <Button Class="py-1"
-                        Type="ButtonType.Button" Color="ButtonColor.Secondary"
+                        Type="ButtonType.Button" Color="ButtonColor.None"
                         TooltipTitle="Edit"
                         @onclick="() => EditAction(context.StudentId)">
                     <Icon Name="IconName.PenFill"></Icon>
                 </Button>
                 <Button Class="py-1"
-                        Type="ButtonType.Button" Color="ButtonColor.Secondary"
+                        Type="ButtonType.Button" Color="ButtonColor.None"
+                        TooltipTitle="Leaving"
+                        @onclick="() => LeaveAction(context.StudentId)">
+                    <Icon Name="IconName.PersonFillDash"></Icon>
+                </Button>
+                <Button Class="py-1"
+                        Type="ButtonType.Button" Color="ButtonColor.None"
                         TooltipTitle="Transfer"
                         @onclick="() => TransferAction(context.StudentId)">
                     <Icon Name="IconName.ListNested"></Icon>
                 </Button>
                 <Button Class="py-1"
-                        Type="ButtonType.Button" Color="ButtonColor.Secondary"
+                        Type="ButtonType.Button" Color="ButtonColor.None"
                         TooltipTitle="Delete"
                         @onclick="async () => await DeleteAction(context.StudentId)">
                     <Icon Name="IconName.TrashFill"></Icon>
@@ -109,7 +125,7 @@
             SortDir = "desc"
         };
 
-    private HttpResponseDTO<StudentListResponceVM> studentData = new HttpResponseDTO<StudentListResponceVM>();
+    private HttpResponseDTO<StudentListResponceVM<StudentListDTO>> studentData = new HttpResponseDTO<StudentListResponceVM<StudentListDTO>>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -172,9 +188,27 @@
         navigationManager.NavigateTo(Page_Routes.AddStudent);
     }
 
+    private void RouteToAlumni()
+    {
+        navigationManager.NavigateTo(Page_Routes.AlumniStudent);
+    }
+
     private void EditAction(int studentId)
     {
         navigationManager.NavigateTo(Page_Routes.AddStudent + "/" + studentId);
+    }
+
+    private async Task LeaveAction(int studentId)
+    {
+        var student = studentData.Data.Students.First(x => x.StudentId == studentId);
+        var parameters = new Dictionary<string, object>();
+        parameters.Add("StudentId", studentId);
+        parameters.Add("userId", tokenData.UserId);
+        parameters.Add("Name", new List<string>() { student.FirstName, student.LastName });
+        parameters.Add("Standard", new List<string>() { student.ClassName, student.DivisionName });
+        parameters.Add("OnCloseClick", EventCallback.Factory.Create<MouseEventArgs>(this, ModelClosed));
+        parameters.Add("DataUpdate", EventCallback.Factory.Create<MouseEventArgs>(this, DataUpdateCall));
+        await modal.ShowAsync<_LeaveStudent>(title: "School Leaving Process", parameters: parameters);
     }
 
     private async Task DeleteAction(int studentId)

@@ -1,0 +1,146 @@
+﻿@page "/student/alumniStudent"
+@rendermode InteractiveWebAssembly
+@using SMS.DataAccess.Data.Interfaces.Student
+@using SMS.DataAccess.Models.Student.Request
+@using SMS.DataAccess.Models.Student.Response
+
+@inject IStudent _student
+@inject ITokenService tokenService
+@inject NavigationManager navigationManager
+
+<div class="d-flex justify-content-between border-bottom border-4 border-secondary pb-1 mb-3">
+    <h2 class="m-0">Alumni Student</h2>
+    <Button class="p-3 py-0" Color="ButtonColor.Secondary" Size="ButtonSize.Large" @onclick="BackClick"> <Icon Name="IconName.Arrow90DegLeft" /> Back </Button>
+</div>
+
+<div class="row mb-3 align-items-center">
+    <div class="col-md-3">
+        <TextInput @bind-Value="@studentReq.StudentName" Placeholder="Search here.." />
+    </div>
+    <div class="col-md-2">
+        <Button class="p-3 py-0" Color="ButtonColor.Secondary" Size="ButtonSize.Large" Outline="true" @onclick="GetStudentDataOnSearch"> Search </Button>
+    </div>
+</div>
+
+<div>
+    <Grid @ref="studentGrid" TItem="AlumiStudentModel"
+          AllowPaging="true" AllowSorting="true" PageSize="10"
+          AllowRowClick="true"
+          FixedHeader="true"
+          Height="466"
+          Class="table table-hover table-bordered"
+          DataProvider="StudentDataProvider"
+          PageSizeSelectorVisible="true"
+          PageSizeSelectorItems="@(new int[] { 5,10,20 })"
+          Responsive="true">
+        <GridColumns>
+            <GridColumn TItem="AlumiStudentModel"
+                        HeaderText="Student Name" PropertyName="FirstName"
+                        SortString="FirstName" SortKeySelector="item => item.FirstName"
+                        HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
+                @context.FirstName @context.LastName
+            </GridColumn>
+                <GridColumn TItem="AlumiStudentModel"
+                        HeaderText="Class" PropertyName="Class"
+                        SortString="ClassName" SortKeySelector="item => item.ClassName"
+                        HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
+                @context.ClassName
+            </GridColumn>
+            <GridColumn TItem="AlumiStudentModel"
+                        HeaderText="Admission Date" PropertyName="AdmissionDate"
+                        SortString="AdmissionDate" SortKeySelector="item => item.AdmissionDate"
+                        HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
+                @context.AdmissionDate.ToString(DateFormat.ddMMMyyyy)
+            </GridColumn>
+            <GridColumn TItem="AlumiStudentModel"
+                        HeaderText="Leaving Date" PropertyName="DateOfLeavingSchool"
+                        SortString="DateOfLeavingSchool" SortKeySelector="item => item.DateOfLeavingSchool"
+                        HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
+                @context.DateOfLeavingSchool?.ToString(DateFormat.ddMMMyyyy)
+            </GridColumn>
+            <GridColumn TItem="AlumiStudentModel"
+                        HeaderText="Progress" PropertyName="Progress"
+                        SortString="Progress" SortKeySelector="item => item.Progress"
+                        HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
+                @context.Progress
+            </GridColumn>
+            <GridColumn TItem="AlumiStudentModel"
+                        HeaderText="Conduct" PropertyName="Conduct"
+                        SortString="Conduct" SortKeySelector="item => item.Conduct"
+                        HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
+                @context.Conduct
+            </GridColumn>
+            <GridColumn TItem="AlumiStudentModel"
+                        HeaderText="Reason For LeavingSchool" PropertyName="ReasonForLeavingSchool"
+                        SortString="ReasonForLeavingSchool" SortKeySelector="item => item.ReasonForLeavingSchool">
+                @context.ReasonForLeavingSchool
+            </GridColumn>
+        </GridColumns>
+    </Grid>
+</div>
+
+@code {
+    private JwtDTO? tokenData;
+    private Grid<AlumiStudentModel> studentGrid = default!;
+    private AlumniStudentsRequestModel studentReq = new AlumniStudentsRequestModel()
+        {
+            SortCol = "studentId",
+            SortDir = "desc"
+        };
+    private StudentListResponceVM<AlumiStudentModel> studentData = new StudentListResponceVM<AlumiStudentModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        tokenData = tokenService.TokenData;
+        if (tokenData == null && OperatingSystem.IsBrowser())
+        {
+            tokenData = await tokenService.GetClaimFromToken();
+        }
+    }
+
+    private async Task<GridDataProviderResult<AlumiStudentModel>> StudentDataProvider(GridDataProviderRequest<AlumiStudentModel> request)
+    {
+        if (request.Sorting is not null && request.Sorting.Any())
+        {
+            studentReq.SortCol = request.Sorting.FirstOrDefault()!.SortString;
+            studentReq.SortDir = request.Sorting.FirstOrDefault()!.SortDirection == SortDirection.Ascending ? "asc" : "desc";
+        }
+        studentReq.DisplayLength = request.PageSize;
+        studentReq.DisplayStart = request.PageNumber - 1;
+
+        await GetAlumniStudentData();
+
+        if (studentData.TotalItemCount > 0)
+        {
+            return await Task.FromResult(new GridDataProviderResult<AlumiStudentModel>
+                {
+                    Data = studentData.Students,
+                    TotalCount = studentData.TotalItemCount
+                });
+        }
+        else
+        {
+            return await Task.FromResult(new GridDataProviderResult<AlumiStudentModel>
+                {
+                    Data = [],
+                    TotalCount = 0
+                });
+        }
+    }
+
+    private async Task GetStudentDataOnSearch()
+    {
+        await studentGrid.ResetPageNumber();
+    }
+
+    private async Task GetAlumniStudentData()
+    {
+        var res = await _student.AlumniStudent(studentReq);
+        studentData = res.Data;
+    }
+
+    private void BackClick()
+    {
+        navigationManager.NavigateTo(Page_Routes.Student);
+    }
+}

@@ -14,8 +14,8 @@
     <h2 class="m-0">Study Material</h2>
     @if (roleType == Roles.SuperAdmin || roleType == Roles.Admin || roleType == Roles.Teacher)
     {
-        <Button class="p-3 py-0" Color="ButtonColor.Secondary" Size="ButtonSize.Large" @onclick="AddMaterialClick"> 
-            <Icon Name="IconName.Plus" /> New Material 
+        <Button class="p-3 py-0" Color="ButtonColor.Secondary" Size="ButtonSize.Large" @onclick="AddMaterialClick">
+            <Icon Name="IconName.Plus" /> New Material
         </Button>
     }
 </div>
@@ -139,32 +139,30 @@
                     HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
             @context.uploadedBy
         </GridColumn>
-        <GridColumn TItem="StudyMaterialResponceDTO"
+        <GridColumn TItem="StudyMaterialResponceDTO" class="p-0 pt-1"
                     HeaderText="@ResourcesManager.GetString(LanguageEnum.MultiLanguals.Action)" PropertyName="Download"
                     HeaderTextAlignment="Alignment.Center" TextAlignment="Alignment.Center">
-            <span>
-                @if ((context.studyMaterialId != filters.ParentMaterialId) && (context.parentMaterialId >= 0))
+            @if ((context.studyMaterialId != filters.ParentMaterialId) && (context.parentMaterialId >= 0))
+            {
+                @if (roleType == Roles.SuperAdmin || roleType == Roles.Admin || roleType == Roles.Teacher)
                 {
-                    @if (roleType == Roles.SuperAdmin || roleType == Roles.Admin || roleType == Roles.Teacher)
-                    {
-                        <Button Color="ButtonColor.None" TooltipTitle="Edit" Class="py-0 px-1"
-                                @onclick="async () => await EditMaterial(context.studyMaterialId)">
-                            <Icon Name="IconName.PenFill" Color="IconColor.Primary"></Icon>
-                        </Button>
-                    }
-                    <Button Color="ButtonColor.None" TooltipTitle="Download" Class="py-0 px-1"
-                            @onclick="async () => await DownloadMaterial(context.studyMaterialId, context.fileName, context.materialType)">
-                        <Icon Name="IconName.CloudDownload" Color="IconColor.Primary"></Icon>
+                    <Button Color="ButtonColor.None" TooltipTitle="Edit" Class="py-1"
+                            @onclick="async () => await EditMaterial(context.studyMaterialId)">
+                        <Icon Name="IconName.PenFill" Color="IconColor.Primary"></Icon>
                     </Button>
-                    @if (roleType == Roles.SuperAdmin || roleType == Roles.Admin || roleType == Roles.Teacher)
-                    {
-                        <Button Color="ButtonColor.None" TooltipTitle="Delete" Class="py-0 px-1"
-                                @onclick="async () => await DeleteMaterial(context.studyMaterialId, context.fileName, context.materialType)">
-                            <Icon Name="IconName.Trash2Fill" Color="IconColor.Danger"></Icon>
-                        </Button>
-                    }
                 }
-            </span>
+                <Button Color="ButtonColor.None" TooltipTitle="Download" Class="py-1"
+                        @onclick="async () => await DownloadMaterial(context.studyMaterialId, context.fileName, context.materialType)">
+                    <Icon Name="IconName.CloudDownload" Color="IconColor.Warning"></Icon>
+                </Button>
+                @if (roleType == Roles.SuperAdmin || roleType == Roles.Admin || roleType == Roles.Teacher)
+                {
+                    <Button Color="ButtonColor.None" TooltipTitle="Delete" Class="py-1"
+                            @onclick="async () => await DeleteMaterial(context.studyMaterialId, context.fileName, context.materialType)">
+                        <Icon Name="IconName.Trash2Fill" Color="IconColor.Danger"></Icon>
+                    </Button>
+                }
+            }
         </GridColumn>
     </GridColumns>
 </Grid>
@@ -192,7 +190,8 @@
         {
             tokenData = await tokenService.GetClaimFromToken();
         }
-        if(tokenData != null){
+        if (tokenData != null)
+        {
             filters.YearId = tokenData.CurrentYearId;
             filters.RoleId = tokenData.Role;
             roleType = (Roles)filters.RoleId;
@@ -289,6 +288,7 @@
 
     private async Task DownloadMaterial(int studyMaterialId, string fileName, string materialType)
     {
+        ToastService.ShowInfo(SystemMessage.msgFileDownloadProcess);
         fileDownload = new StudyMaterialFileDownloadDTO
             {
                 StudyMaterialId = studyMaterialId,
@@ -301,7 +301,6 @@
             fileDownload.isFolder = true;
             fileName = fileName + FileType.zip.GetDescription();
         }
-        ToastService.ShowInfo(SystemMessage.msgFileDownloadProcess);
         byte[] fileContent = await _studyMaterial.DownloadMaterial(fileDownload);
         if (fileContent == null || fileContent.Length == 0)
         {

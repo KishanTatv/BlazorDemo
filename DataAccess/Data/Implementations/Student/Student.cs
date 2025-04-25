@@ -20,9 +20,9 @@ namespace SMS.DataAccess.Data.Implementations.Student
             _APIConnection = AppSettingsConfig.GetConnectionString(config);
         }
 
-        public async Task<HttpResponseDTO<StudentListResponceVM>> GetStudentList(StudentListReqDTO model)
+        public async Task<HttpResponseDTO<StudentListResponceVM<StudentListDTO>>> GetStudentList(StudentListReqDTO model)
         {
-            HttpResponseDTO<StudentListResponceVM> responseVM = await _httpClientManager.GetAsync<StudentListResponceVM>(
+            HttpResponseDTO<StudentListResponceVM<StudentListDTO>> responseVM = await _httpClientManager.GetAsync<StudentListResponceVM<StudentListDTO>>(
                 UrlBuilderUtility.GetCombineUrl(API_Routes.Student.StudentList, _APIConnection) +
                 UrlBuilderUtility.GenerateQueryStringFromDTO(model)
                 );
@@ -76,6 +76,24 @@ namespace SMS.DataAccess.Data.Implementations.Student
                 FormDataUtility.ConvertToMultipartFormData(model)
                 );
 
+            return responseVM;
+        }
+
+        public async Task<HttpResponseDTO<int>> StudentLeaving(StudentSchoolLeavingDetails model)
+        {
+            HttpResponseDTO<int> responseVM = await _httpClientManager.PostAsync<int>(
+                UrlBuilderUtility.GetCombineUrl(API_Routes.Student.LeavingDetail, _APIConnection),
+                TypeConversionUtility.ConvertToStringContent(model)
+                );
+            return responseVM;
+        }
+
+        public async Task<HttpResponseDTO<StudentListResponceVM<AlumiStudentModel>>> AlumniStudent(AlumniStudentsRequestModel model)
+        {
+            HttpResponseDTO<StudentListResponceVM<AlumiStudentModel>> responseVM = await _httpClientManager.GetAsync<StudentListResponceVM<AlumiStudentModel>>(
+                UrlBuilderUtility.GetCombineUrl(API_Routes.Student.AlumniStudent, _APIConnection) +
+                UrlBuilderUtility.GenerateQueryStringFromDTO(model)
+                );
             return responseVM;
         }
     }

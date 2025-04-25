@@ -3,6 +3,7 @@
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 @using SMS.DataAccess.Models.Auth.Request
+@using SMS.DataAccess.Models.Auth.Response
 @using SMS.Shared.JWTToken
 @using SMS.Shared.Loader
 @using SMS.Shared.Static.Routes
@@ -34,7 +35,7 @@ ErrorIcon="fa fa-triangle-exclamation"  />
 
             <main>
                 <div class="d-flex justify-content-between px-4 py-2 border-bottom">
-                    <Icon Class="pt-2" Name="IconName.List" role="button" @onclick="ToggleSidebar" />
+                    <Icon Class="pt-2 d-none d-md-block" Name="IconName.List" role="button" @onclick="ToggleSidebar" />
                     <div class="d-flex">
                         <ThemeSwitcher  Class="mx-3"/>
                         <Dropdown Color="DropdownColor.None">
@@ -57,7 +58,7 @@ ErrorIcon="fa fa-triangle-exclamation"  />
             <BlazorApp.Client.Shared.Loader />
         </div>
     </Authorized>
-</Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
+</Microsoft.AspNetCore.Components.Authorization.AuthorizeView>      
 
 
 @code{
@@ -70,7 +71,7 @@ ErrorIcon="fa fa-triangle-exclamation"  />
     private async Task<SidebarDataProviderResult> SidebarDataProvider(SidebarDataProviderRequest request)
     {
         if (navItems is null)
-            navItems = GetNavItems();
+            navItems = await GetNavItems();
 
         return await Task.FromResult(request.ApplyTo(navItems));
     }
@@ -109,8 +110,25 @@ ErrorIcon="fa fa-triangle-exclamation"  />
     }
 
 
-    private IEnumerable<NavItem> GetNavItems()
+    private async Task<IEnumerable<NavItem>> GetNavItems()
     {
+        // navItems = new List<NavItem>();
+        // if(tokenData != null){
+        //     var res = await _auth.GetMenu(tokenData.Role);
+        //     if(res.Result && res.Data != null){
+        //         var temp = new List<NavItem>();
+        //         foreach(var menuItem in res.Data){
+        //             temp.Add(new NavItem { Id = menuItem.MenuId.ToString(), Text = menuItem.Name, IconName = (IconName)menuItem.MenuId, Href = menuItem.MenuRoute, ParentId = menuItem.ParentMenuId.ToString() });
+        //             if(menuItem.InverseParentMenu.Any()){
+        //                 foreach(var item in menuItem.InverseParentMenu){
+        //                     temp.Add(new NavItem { Id = item.MenuId.ToString(), Text = item.Name, IconName = (IconName)item.MenuId, Href = item.MenuRoute, ParentId = item.ParentMenuId.ToString() });
+        //                 }
+        //             }
+        //         }
+        //         navItems = temp;
+        //     }
+        // }
+
         navItems = new List<NavItem>
         {
             new NavItem { Id = "4", IconName = IconName.LayersHalf, Text = "Section", IconColor = IconColor.Success },
@@ -119,9 +137,10 @@ ErrorIcon="fa fa-triangle-exclamation"  />
 
             new NavItem { Id = "8", IconName = IconName.Newspaper, Text = "Users", IconColor = IconColor.Danger },
             new NavItem { Id = "11", Href = "/student", IconName = IconName.PersonBadge, Text = "Student", ParentId="8" },
-            new NavItem { Id = "12", Href = "/staff", IconName = IconName.PersonGear, Text = "Staff", ParentId="8" },
+            new NavItem { Id = "12", Href = "/student/AlumniStudent", IconName = IconName.PersonExclamation, Text = "Almni Student", ParentId="8" },
+            new NavItem { Id = "13", Href = "/staff", IconName = IconName.PersonGear, Text = "Staff", ParentId="8" },
 
-            new NavItem { Id = "13", Href="/study-material",  IconName = IconName.JournalBookmarkFill, Text = "Study Material", IconColor = IconColor.Primary },
+            new NavItem { Id = "14", Href="/study-material",  IconName = IconName.JournalBookmarkFill, Text = "Study Material", IconColor = IconColor.Primary },
         };
 
         return navItems;

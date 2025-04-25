@@ -18,6 +18,7 @@
             public const string LoginRoute = "Auth/Login";
             public const string ForgetPassword = "Auth/ForgetPassword";
             public const string UserPhoto = "Auth/GetUserPhoto";
+            public const string Menu = "auth/menus";
         }
 
         public class Student
@@ -28,6 +29,8 @@
             public const string TransferDivision = "Student/AllocateStudentRollNumber";
             public const string DeleteStudent = "Student/DeleteStudent";
             public const string StudentPhoto = "Student/StudentPhoto";
+            public const string LeavingDetail = "Student/EditStudentSchoolLeavingDetails";
+            public const string AlumniStudent = "Student/GetAllAlumniStudents";
         }
 
         public class StudyMaterial

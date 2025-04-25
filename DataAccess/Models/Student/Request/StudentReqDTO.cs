@@ -99,4 +99,38 @@ namespace SMS.DataAccess.Models.Student.Request
         public int StudentId { get; set; }
         public IBrowserFile StudentPhoto { get; set; }
     }
+
+    public class StudentSchoolLeavingDetails
+    {
+        public int StudentId { get; set; }
+        public string StudentName { get; set; }
+        //public DateTime AdmissionDate { get; set; }
+        public DateTime DateOfLeavingSchool { get; set; }
+
+        [Display(Name = "progress")]
+        [Required(ErrorMessage = ErrorMessage.RequiredMsg)]
+        [StringLength(20, ErrorMessage = ErrorMessage.InValidMsg, MinimumLength = 2)]
+        [RegularExpression(FormRegEx.OnlyString, ErrorMessage = ErrorMessage.OnlyAlphabetMsg)]
+        public string Progress { get; set; }
+
+        [Display(Name = "conduct")]
+        [Required(ErrorMessage = ErrorMessage.RequiredMsg)]
+        [StringLength(20, ErrorMessage = ErrorMessage.InValidMsg, MinimumLength = 2)]
+        [RegularExpression(FormRegEx.OnlyString, ErrorMessage = ErrorMessage.OnlyAlphabetMsg)]
+        public string Conduct { get; set; }
+
+        [Display(Name = "leave reason")]
+        [Required(ErrorMessage = ErrorMessage.RequiredMsg)]
+        [StringLength(20, ErrorMessage = ErrorMessage.InValidMsg, MinimumLength = 10)]
+        public string ReasonForLeavingSchool { get; set; }
+        public int ModifiedBy { get; set; }
+        public DateTime ModifiedDate { get; set; }
+    }
+
+    public class AlumniStudentsRequestModel : FilterViewModel
+    {
+        public string? StudentName { get; set; }
+        public string? FromDate { get; set; }
+        public string? ToDate { get; set; }
+    }
 }
