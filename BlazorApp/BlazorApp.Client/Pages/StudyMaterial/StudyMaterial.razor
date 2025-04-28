@@ -302,9 +302,7 @@
             fileName = fileName + FileType.zip.GetDescription();
         }
         byte[] fileContent = await _studyMaterial.DownloadMaterial(fileDownload);
-        var fileStream = new MemoryStream(fileContent);
-        using var streamRef = new DotNetStreamReference(stream: fileStream);
-        await JSRuntime.InvokeVoidAsync(JsStaticFun.downloadFileStream, fileName, streamRef);
+        await JSRuntime.InvokeVoidAsync(JsStaticFun.downloadFileStream, fileName, _common.GetStreamContent(fileContent));
         ToastService.ShowSuccess(SystemMessage.msgFileDownloadComplete);
     }
 

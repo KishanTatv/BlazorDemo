@@ -17,7 +17,7 @@ namespace SMS.DataAccess.Data.Interfaces
         public DotNetStreamReference GetStreamContent(byte[] fileContent)
         {
             var fileStream = new MemoryStream(fileContent);
-            using var streamRef = new DotNetStreamReference(stream: fileStream);
+            var streamRef = new DotNetStreamReference(stream: fileStream);
             return streamRef;
         }
     }

@@ -161,9 +161,7 @@
             ToastService.ShowError(SystemMessage.msgFileEmpty);
             return;
         }
-        var fileStream = new MemoryStream(fileContent);
-        using var streamRef = new DotNetStreamReference(stream: fileStream);
-        await JSRuntime.InvokeVoidAsync(JsStaticFun.downloadFileStream, FixFileName.LCReport + FileType.pdf.GetDescription(), streamRef);
+        await JSRuntime.InvokeVoidAsync(JsStaticFun.downloadFileStream, FixFileName.LCReport + FileType.pdf.GetDescription(), _common.GetStreamContent(fileContent));
         ToastService.ShowSuccess(SystemMessage.msgFileDownloadComplete);
     }
 }
