@@ -39,7 +39,7 @@
 </div>
 <hr />
 <div class="d-flex justify-content-end">
-    <Button Class="mr-2" Color="ButtonColor.Secondary" @onclick="OnCloseClick">Close</Button> &nbsp;
+    <Button Class="mr-2" Color="ButtonColor.Secondary" @onclick="async () => await OnCloseClick.InvokeAsync()">Close</Button> &nbsp;
     <Button Color="ButtonColor.Primary" @onclick="SaveClick"> Save changes </Button>
 </div>
 

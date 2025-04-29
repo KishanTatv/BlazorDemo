@@ -161,7 +161,7 @@
             ToastService.ShowError(SystemMessage.msgFileEmpty);
             return;
         }
-        await JSRuntime.InvokeVoidAsync(JsStaticFun.downloadFileStream, FixFileName.LCReport + FileType.pdf.GetDescription(), _common.GetStreamContent(fileContent));
+        await JSRuntime.InvokeVoidAsync(JsStaticFun.downloadFileStream, string.Concat(FixFileName.LCReport, FileType.pdf.GetDescription()), _common.GetStreamContent(fileContent));
         ToastService.ShowSuccess(SystemMessage.msgFileDownloadComplete);
     }
 }

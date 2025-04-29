@@ -299,7 +299,7 @@
         if (string.IsNullOrEmpty(materialType))
         {
             fileDownload.isFolder = true;
-            fileName = fileName + FileType.zip.GetDescription();
+            fileName = string.Concat(fileName, FileType.zip.GetDescription());
         }
         byte[] fileContent = await _studyMaterial.DownloadMaterial(fileDownload);
         await JSRuntime.InvokeVoidAsync(JsStaticFun.downloadFileStream, fileName, _common.GetStreamContent(fileContent));
