@@ -5,7 +5,7 @@ public static class EnumHelper
 {
     public static string GetDescription(this Enum value)
     {
-        FieldInfo fi = value.GetType().GetField(value.ToString());
+        FieldInfo? fi = value.GetType().GetField(value.ToString());
 
         if (fi != null && Attribute.GetCustomAttribute(fi, typeof(DescriptionAttribute)) is DescriptionAttribute description)
         {
