@@ -11,7 +11,7 @@
 @inject ModalService ModalService
 
 <div class="d-flex justify-content-between border-bottom border-4 border-secondary pb-1 mb-3">
-    <h2 class="m-0">Study Material</h2>
+    <h2 class="m-0">@PageHeading.StudyMaterial</h2>
     @if (roleType == Roles.SuperAdmin || roleType == Roles.Admin || roleType == Roles.Teacher)
     {
         <Button class="p-3 py-0" Color="ButtonColor.Secondary" Size="ButtonSize.Large" @onclick="AddMaterialClick">

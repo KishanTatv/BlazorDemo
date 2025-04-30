@@ -25,7 +25,12 @@
 
     public static class PageHeading
     {
-        public const string academicPerformance = "Academic Performance";
+        public const string Dashboard = "Dashboard";
+        public const string StudyMaterial = "Study Material";
+        public const string Student = "Student";
+        public const string AlumniStudent = "Alumni Student";
+        public const string StaffTask = "Staff Task";
+        public const string AcademicPerformance = "Academic Performance";
     }
 
     public static class FixFileName
