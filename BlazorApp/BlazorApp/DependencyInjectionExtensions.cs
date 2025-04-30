@@ -4,9 +4,11 @@ using Blazored.LocalStorage;
 using Blazored.Toast;
 using Blazored.Toast.Services;
 using SMS.DataAccess.Data.Implementations;
+using SMS.DataAccess.Data.Implementations.AcademicPerformance;
 using SMS.DataAccess.Data.Implementations.Student;
 using SMS.DataAccess.Data.Implementations.StudyMaterial;
 using SMS.DataAccess.Data.Interfaces;
+using SMS.DataAccess.Data.Interfaces.AcademicPerformance;
 using SMS.DataAccess.Data.Interfaces.Student;
 using SMS.DataAccess.Data.Interfaces.StudyMaterial;
 using SMS.Shared.HttpManager.Delegator;
@@ -14,7 +16,6 @@ using SMS.Shared.HttpManager.Implementation;
 using SMS.Shared.HttpManager.Interface;
 using SMS.Shared.JWTToken;
 using SMS.Shared.Loader;
-using SMS.Shared.Static.Enum;
 
 namespace BlazorApp
 {
@@ -38,6 +39,7 @@ namespace BlazorApp
             services.AddScoped<IAuth, Auth>();
             services.AddScoped<IStudent, Student>();
             services.AddScoped<IStudyMaterial, StudyMaterial>();
+            services.AddScoped<IAcademicPerformance, AcademicPerformance>();
 
             // Blazor Bootstrap & Local Storage
             services.AddBlazorBootstrap();

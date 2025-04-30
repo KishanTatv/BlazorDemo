@@ -8,9 +8,11 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.JSInterop;
 using SMS.DataAccess.Data.Implementations;
+using SMS.DataAccess.Data.Implementations.AcademicPerformance;
 using SMS.DataAccess.Data.Implementations.Student;
 using SMS.DataAccess.Data.Implementations.StudyMaterial;
 using SMS.DataAccess.Data.Interfaces;
+using SMS.DataAccess.Data.Interfaces.AcademicPerformance;
 using SMS.DataAccess.Data.Interfaces.Student;
 using SMS.DataAccess.Data.Interfaces.StudyMaterial;
 using SMS.Shared.HttpManager.Delegator;
@@ -55,6 +57,7 @@ builder.Services.AddScoped<ICommon, Common>();
 builder.Services.AddScoped<IAuth, Auth>();
 builder.Services.AddScoped<IStudent, Student>();
 builder.Services.AddScoped<IStudyMaterial, StudyMaterial>();
+builder.Services.AddScoped<IAcademicPerformance, AcademicPerformance>();
 
 
 //culture setup

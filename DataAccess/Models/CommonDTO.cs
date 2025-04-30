@@ -14,4 +14,10 @@
         public string? SortCol { get; set; }
         public string? SortDir { get; set; }
     }
+
+    public class KeyPairDTO<T>
+    {
+        public string Name { get; set; }
+        public T Value { get; set; }
+    }
 }

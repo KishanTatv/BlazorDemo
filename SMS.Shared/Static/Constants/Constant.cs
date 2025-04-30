@@ -23,6 +23,11 @@
         public static string downloadFileStream = "downloadFileFromStream";
     }
 
+    public static class PageHeading
+    {
+        public const string academicPerformance = "Academic Performance";
+    }
+
     public static class FixFileName
     {
         public static string LCReport = "LC-Certificate";

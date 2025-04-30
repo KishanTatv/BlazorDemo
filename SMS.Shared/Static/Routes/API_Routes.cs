@@ -42,5 +42,11 @@
             public const string DeleteMaterial = "StudyMaterial/DeleteStudyMaterial";
             public const string SaveMaterial = "StudyMaterial/SaveStudyMaterial";
         }
+
+        public class AcademicPerformance
+        {
+            public static string GetAcademicPerformanceSubjectWise = "AcademicPerformance/GetSubjectWiseAvgPercentageByClassDivision";
+            public static string GetAcademicPerformanceExamWise = "AcademicPerformance/GetAverageOfAllExamTypeByClassDivision";
+        }
     }
 }

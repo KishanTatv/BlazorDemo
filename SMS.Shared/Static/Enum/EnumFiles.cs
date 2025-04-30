@@ -30,4 +30,16 @@ namespace SMS.Shared.Static.Enum
         tb = 4,
     }
 
+    public enum ExamType
+    {
+        [Description("Mid Term Exam")]
+        MidTermExam = 1,
+        [Description("Final Exam")]
+        FinalExam = 2,
+        [Description("Surprise Test")]
+        SurpriseTest = 3,
+        [Description("Unit Test")]
+        UnitTest = 4,
+    }
+
 }
