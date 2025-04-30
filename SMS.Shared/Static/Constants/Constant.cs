@@ -47,6 +47,14 @@
         public static string SortDesc = "desc";
     }
 
+    public static class ChartFile
+    {
+        public static string fontFamily = "Arial";
+        public static int fontHeadingSize = 20;
+        public static int fontScaleSize = 15;
+        public static string fontHeadColor = "#c5c5c5";
+    }
+
     public static class DateFormat
     {
         public static string ddMMMyyyy = "dd MMM, yyyy";

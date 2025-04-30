@@ -91,25 +91,25 @@
                 Interaction = new Interaction { Mode = InteractionMode.Index },
             };
 
-        barChartOptions.Scales.X!.Title = new ChartAxesTitle { Text = "Percentage", Display = true, Font = new ChartFont { Size = 15, Family = "Arial" } };
-        barChartOptions.Scales.Y!.Title = new ChartAxesTitle { Text = "Exam Type", Display = true, Font = new ChartFont { Size = 15, Family = "Arial" } };
+        barChartOptions.Scales.X!.Title = new ChartAxesTitle { Text = "Percentage", Display = true, Font = new ChartFont { Size = ChartFile.fontScaleSize, Family = ChartFile.fontFamily } };
+        barChartOptions.Scales.Y!.Title = new ChartAxesTitle { Text = "Exam Type", Display = true, Font = new ChartFont { Size = ChartFile.fontScaleSize, Family = ChartFile.fontFamily } };
         barChartOptions.Plugins.Title = new ChartPluginsTitle
             {
                 Text = "Exam Wise Performance",
                 Display = true,
-                Color = "#c5c5c5",
-                Font = new ChartFont { Size = 20, Family = "Arial" }
+                Color = ChartFile.fontHeadColor,
+                Font = new ChartFont { Size = ChartFile.fontHeadingSize, Family = ChartFile.fontFamily }
             };
         barChartOptions.Plugins.Legend.Display = false;
 
-        barChartOptions1.Scales.X!.Title = new ChartAxesTitle { Text = "Subject", Display = true, Font = new ChartFont { Size = 15, Family = "Arial" } };
-        barChartOptions1.Scales.Y!.Title = new ChartAxesTitle { Text = "Avg Percentage", Display = true, Font = new ChartFont { Size = 15, Family = "Arial" } };
+        barChartOptions1.Scales.X!.Title = new ChartAxesTitle { Text = "Subject", Display = true, Font = new ChartFont { Size = ChartFile.fontScaleSize, Family = ChartFile.fontFamily } };
+        barChartOptions1.Scales.Y!.Title = new ChartAxesTitle { Text = "Avg Percentage", Display = true, Font = new ChartFont { Size = ChartFile.fontScaleSize, Family = ChartFile.fontFamily } };
         barChartOptions1.Plugins.Title = new ChartPluginsTitle
             {
                 Text = "Subject Wise Performance",
                 Display = true,
-                Color = "#c5c5c5",
-                Font = new ChartFont { Size = 20, Family = "Arial" }
+                Color = ChartFile.fontHeadColor,
+                Font = new ChartFont { Size = ChartFile.fontHeadingSize, Family = ChartFile.fontFamily }
             };
         barChartOptions1.Plugins.Legend.Display = false;
 
