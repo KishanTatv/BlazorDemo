@@ -151,6 +151,7 @@
     private void BackClick()
     {
         navigationManager.NavigateTo(Page_Routes.Student);
+        // await JSRuntime.InvokeVoidAsync(JsStaticFun.localStorageSet, "userName", "kishanB");
     }
 
     private async Task DownloadAction(int studentId)

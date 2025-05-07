@@ -184,7 +184,7 @@
                     BorderColor = new List<string> { "#3b3b3b" },
                     BorderWidth = new List<double> { 0 },
                 };
-
+                  
             subjectLabel.AddRange(subjectPerformanceRes.Data.Select(x => x.Name));
             datasetTemp.Data.AddRange(subjectPerformanceRes.Data.Select(x => x.Value));
             datasetTemp.BackgroundColor.AddRange(subjectPerformanceRes.Data.Select((x, i) => colors[i % colors.Count()]));

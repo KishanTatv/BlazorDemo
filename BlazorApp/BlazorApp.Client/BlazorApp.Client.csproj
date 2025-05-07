@@ -21,7 +21,7 @@
   <PropertyGroup>
       <BlazorWebAssemblyLoadAllGlobalizationData>true</BlazorWebAssemblyLoadAllGlobalizationData>
   </PropertyGroup>
-
+	
   <ItemGroup>
     <ProjectReference Include="..\..\DataAccess\SMS.DataAccess.csproj" />
     <ProjectReference Include="..\..\SMS.Shared\SMS.Shared.csproj" />

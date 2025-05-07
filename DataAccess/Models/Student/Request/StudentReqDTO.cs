@@ -4,13 +4,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SMS.DataAccess.Models.Student.Request
 {
-    public class StudentListReqDTO
+    public class StudentListReqDTO : FilterViewModel
     {
         public int YearId { get; set; }
-        public int DisplayStart { get; set; }
-        public int DisplayLength { get; set; }
-        public string SortCol {  get; set; }
-        public string SortDir { get; set; }
         public string? SearchByName { get; set; }
         public int? StaffId { get; set; }
     }

@@ -20,8 +20,8 @@
             </div>
             <div class="row">
                 <div class="mb-3 mt-3">
-                    <label>Admission Date</label>
-                    <DateInput @bind-Value="leaveModel.DateOfLeavingSchool" Placeholder="Leaving Date" EnableMinMax="true" Max="DateTime.Now"/>
+                    <label>Date of School Leaving</label>
+                    <DateInput @bind-Value="leaveModel.DateOfLeavingSchool" Placeholder="Leaving Date" EnableMinMax="true" Min="DateTime.Now.AddMonths(-2).Date" Max="DateTime.Now"/>
                     <ValidationMessage For="() => leaveModel.DateOfLeavingSchool" />
                 </div>
             </div>

@@ -21,6 +21,8 @@
         public static string blazorCultureGet = "blazorCulture.get";
         public static string blazorCultureSet = "blazorCulture.set";
         public static string downloadFileStream = "downloadFileFromStream";
+        public static string localStorageGet = "localStorageFunctions.getItem";
+        public static string localStorageSet = "localStorageFunctions.setItem";
     }
 
     public static class PageHeading
