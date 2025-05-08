@@ -1,8 +1,33 @@
 ﻿@using Microsoft.AspNetCore.Components.Authorization
+@using System.Reflection
+@using Microsoft.AspNetCore.Components.WebAssembly.Services
 
-<Router AppAssembly="typeof(Program).Assembly" AdditionalAssemblies="new[] { typeof(Client._Imports).Assembly }">
+@inject LazyAssemblyLoader AssemblyLoader
+
+<Router AppAssembly="typeof(Program).Assembly" AdditionalAssemblies="@_lazyAssemblies" OnNavigateAsync="OnNavigateAsync">
     <Found Context="routeData">
         <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
         <FocusOnNavigate RouteData="routeData" Selector="h1" />
     </Found>
+    <NotFound>
+        <LayoutView Layout="@typeof(Layout.EmptyLayout)">
+            <p>Sorry, there's nothing at this address.</p>
+        </LayoutView>
+    </NotFound>
 </Router>
+
+
+@code{
+    private List<Assembly> _lazyAssemblies = new List<Assembly>();
+    private bool lazyModuleAssembyLoaded;
+
+    private async Task OnNavigateAsync(NavigationContext args)
+    {
+        if (args.Path.StartsWith("lazy") && !lazyModuleAssembyLoaded)
+        {
+            var assemblies = await AssemblyLoader.LoadAssembliesAsync(new[] { "BlazorApp.LazyModules.wasm" });
+            _lazyAssemblies.AddRange(assemblies);
+            lazyModuleAssembyLoaded = true;
+        }
+    }
+}

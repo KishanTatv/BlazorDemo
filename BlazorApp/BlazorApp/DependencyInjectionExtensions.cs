@@ -3,6 +3,7 @@ using BlazorApp.Data.Interfaces.Auth;
 using Blazored.LocalStorage;
 using Blazored.Toast;
 using Blazored.Toast.Services;
+using Microsoft.AspNetCore.Components.WebAssembly.Services;
 using SMS.DataAccess.Data.Implementations;
 using SMS.DataAccess.Data.Implementations.AcademicPerformance;
 using SMS.DataAccess.Data.Implementations.Student;
@@ -25,6 +26,7 @@ namespace BlazorApp
         {
             services.AddSingleton<LoaderService>();
             services.AddTransient<HttpDelegator>();
+            services.AddTransient<LazyAssemblyLoader>();
 
             // HttpClient with HttpDelegator
             services.AddHttpClient<IHttpClientManager, HttpClientManager>()

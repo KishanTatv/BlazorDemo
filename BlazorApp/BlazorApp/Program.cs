@@ -30,6 +30,7 @@ app.UseRequestLocalization(LanguageEnum.Languages.English.GetDescription());
 app.UseAntiforgery();
 app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(BlazorApp.Client._Imports).Assembly);
+    .AddAdditionalAssemblies(typeof(BlazorApp.Client._Imports).Assembly)
+    .AddAdditionalAssemblies(typeof(BlazorApp.LazyModules.ExampleJsInterop).Assembly);
 
 app.Run();

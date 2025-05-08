@@ -21,6 +21,14 @@
   <PropertyGroup>
       <BlazorWebAssemblyLoadAllGlobalizationData>true</BlazorWebAssemblyLoadAllGlobalizationData>
   </PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\BlazorApp.LazyModules\BlazorApp.LazyModules.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<BlazorWebAssemblyLazyLoad Include="BlazorApp.LazyModules.wasm" />
+	</ItemGroup>
 	
   <ItemGroup>
     <ProjectReference Include="..\..\DataAccess\SMS.DataAccess.csproj" />
