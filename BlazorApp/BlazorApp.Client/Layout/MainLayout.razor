@@ -1,4 +1,5 @@
-﻿@using BlazorApp.Data.Interfaces.Auth
+﻿@using BlazorApp.Client.Services
+@using BlazorApp.Data.Interfaces.Auth
 @using Blazored.Toast.Configuration
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
@@ -16,6 +17,7 @@
 @inject NavigationManager _navigationManager
 @inject ITokenService tokenService
 @inject IAuth _auth;
+@inject SignalRService signalRService
 
 <Blazored.Toast.BlazoredToasts Position="ToastPosition.TopRight"
 Timeout="2"
@@ -87,6 +89,9 @@ ErrorIcon="fa fa-triangle-exclamation"  />
             }
             await GetUserImage();
             StateHasChanged();
+
+            //connect to signalR
+            await signalRService.InitilizeSignalR();
         }
     }
 
@@ -142,6 +147,8 @@ ErrorIcon="fa fa-triangle-exclamation"  />
 
             new NavItem { Id = "14", Href="/study-material",  IconName = IconName.JournalBookmarkFill, Text = "Study Material", IconColor = IconColor.Primary },
             new NavItem { Id = "15", Href="/academic-performance",  IconName = IconName.TicketPerforated, Text = "Academic Performance", IconColor = IconColor.Warning },
+
+            new NavItem { Id = "16", Href="/chat",  IconName = IconName.Messenger, Text = "Message", IconColor = IconColor.Success },
         };
 
         return navItems;

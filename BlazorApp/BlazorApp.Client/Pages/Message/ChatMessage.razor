@@ -1,0 +1,160 @@
+﻿@using BlazorApp.Client.Services
+@using SMS.DataAccess.Data.Interfaces.Message
+@using SMS.DataAccess.Models.Chat.Request
+@using SMS.DataAccess.Models.Chat.Response
+
+@inject ITokenService tokenService
+@inject SignalRService signalRService
+@inject IMessage _message
+@inject IJSRuntime JSRuntime
+
+<div class="card my-3">
+    <div id="chatMessagesContainer" class="card-body" style="height: 660px; overflow-y: auto;">
+        @if (chatHistoryList != null && chatHistoryList.Any())
+        {
+            @foreach (var message in chatHistoryList)
+            {
+                var isOwnMessage = message.SenderId == UserId;
+                var bgColor = isOwnMessage ? "bg-primary text-white" : "bg-light text-dark";
+
+                <div class="mb-2 d-flex @(isOwnMessage ? "justify-content-end" : "justify-content-start")">
+                    <div class="p-2 rounded @bgColor" style="max-width: 75%;">
+                        @if (message.IsEventChat)
+                        {
+                            <small class="d-block text-muted"><b>~@message.Sender</b></small>
+                        }
+
+                        <p class="mb-1">@message.Message</p>
+
+                        <small class="@(isOwnMessage ? "text-muted" : "text-secondary")">
+                            <i>
+                                @message.SendDate.ToString(DateFormat.MMM_dd_YYYYHHMM)
+
+                                @if (!message.IsEventChat && message.SenderId == UserId)
+                                {
+                                    @if (message.IsSeen)
+                                    {
+                                        <i class="bi bi-check2-all" style="transform: scale(0.9); margin-left: 5px;"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-check" style="transform: scale(0.9); margin-left: 5px;"></i>
+                                    }
+                                }
+                            </i>
+                        </small>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <p class="text-muted text-center">No messages yet.</p>
+        }
+    </div>
+</div>
+<div class="d-flex">
+    <TextInput @bind-Value="@chatMessage" class="form-control" />
+    <Button @onclick="async () => await SendMessage()"><Icon Name="IconName.SendFill" /></Button>
+</div>
+
+@code {
+    [Parameter] public int ActiveMessageId { get; set; }
+    [Parameter] public int UserId { get; set; }
+    [Parameter] public string UserName { get; set; }
+    private int _lastMessageId = -1;
+    private string chatMessage = string.Empty;
+    List<MessageModel> chatHistoryList = new List<MessageModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (ActiveMessageId > 0)
+        {
+            await GetChatHistory();
+        }
+        signalRService.MessageReceived += OnMessageReceived;
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_lastMessageId != ActiveMessageId)
+        {
+            _lastMessageId = ActiveMessageId;
+            if (_lastMessageId > 0)
+            {
+                await GetChatHistory();
+            }
+        }
+    }
+
+    private async Task SendMessage()
+    {
+        if (!string.IsNullOrEmpty(chatMessage.Trim()))
+        {
+            NewMessageDTO newMessageDTO = new()
+                {
+                    ParentMessageId = ActiveMessageId,
+                    SenderId = UserId,
+                    Message = chatMessage
+                };
+            var firstData = chatHistoryList.First();
+            var item = new MessageModel()
+                {
+                    MessageId = ActiveMessageId,
+                    Message = chatMessage,
+                    IsSeen = false,
+                    SenderId = UserId,
+                    ReceiverId = firstData.ReceiverId,
+                    SendDate = DateTime.Now,
+                    ParentMessageId = firstData.ParentMessageId,
+                    IsEventChat = firstData.IsEventChat,
+                    Sender = firstData.IsEventChat ? UserName : string.Empty
+                };
+            chatHistoryList.Add(item);
+            chatMessage = string.Empty;
+            // await signalRService.SendMessage(newMessageDTO);
+            await ScrollToBottomAsync();
+        }
+    }
+
+    private async Task GetChatHistory()
+    {
+        var req = new ChatListReq()
+            {
+                UserId = UserId,
+                ParentMessageId = ActiveMessageId,
+            };
+        var res = await _message.GetChatMessageAsync(req);
+        if (res.Result)
+        {
+            chatHistoryList = res.Data;
+            await ScrollToBottomAsync();
+        }
+    }
+
+    private void OnMessageReceived(MessageResponseDTO message)
+    {
+        var newMessage = new MessageModel
+            {
+                SenderId = message.SenderId,
+                ReceiverId = message.ReceiverId,
+                Sender = message.Sender,
+                Receiver = message.Receiver,
+                Message = message.Message,
+                SendDate = message.SendDate,
+                IsSeen = message.IsSeen,
+                IsEventChat = message.IsEventChat
+            };
+        chatHistoryList.Add(newMessage);
+        InvokeAsync(async () =>
+        {
+            StateHasChanged();
+            await ScrollToBottomAsync();
+        });
+    }
+
+    private async Task ScrollToBottomAsync()
+    {
+        await JSRuntime.InvokeVoidAsync(JsStaticFun.scrollToBottom, "chatMessagesContainer");
+    }
+}

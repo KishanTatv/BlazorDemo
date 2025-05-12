@@ -1,4 +1,5 @@
 using BlazorApp;
+using BlazorApp.Client.Services;
 using BlazorApp.Data.Implementations.Auth;
 using BlazorApp.Data.Interfaces.Auth;
 using BlazorBootstrap;
@@ -9,10 +10,12 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.JSInterop;
 using SMS.DataAccess.Data.Implementations;
 using SMS.DataAccess.Data.Implementations.AcademicPerformance;
+using SMS.DataAccess.Data.Implementations.Message;
 using SMS.DataAccess.Data.Implementations.Student;
 using SMS.DataAccess.Data.Implementations.StudyMaterial;
 using SMS.DataAccess.Data.Interfaces;
 using SMS.DataAccess.Data.Interfaces.AcademicPerformance;
+using SMS.DataAccess.Data.Interfaces.Message;
 using SMS.DataAccess.Data.Interfaces.Student;
 using SMS.DataAccess.Data.Interfaces.StudyMaterial;
 using SMS.Shared.HttpManager.Delegator;
@@ -35,7 +38,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>
 
 builder.Services.AddSingleton<PreloadService>();
 builder.Services.AddSingleton(new LoaderService());
-
+builder.Services.AddScoped<SignalRService>();
 
 //HttpDelegator
 builder.Services.AddTransient<HttpDelegator>();
@@ -58,6 +61,7 @@ builder.Services.AddScoped<IAuth, Auth>();
 builder.Services.AddScoped<IStudent, Student>();
 builder.Services.AddScoped<IStudyMaterial, StudyMaterial>();
 builder.Services.AddScoped<IAcademicPerformance, AcademicPerformance>();
+builder.Services.AddScoped<IMessage, Message>();
 
 
 //culture setup

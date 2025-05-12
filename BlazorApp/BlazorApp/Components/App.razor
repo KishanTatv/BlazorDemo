@@ -41,7 +41,7 @@
       anchorElement.remove();
       URL.revokeObjectURL(url);
     }
-    
+
     window.blazorCulture = {
         get: () => window.localStorage['BlazorCulture'],
         set: (value) => window.localStorage['BlazorCulture'] = value
@@ -54,5 +54,17 @@
         getItem: function (key) {
             return localStorage.getItem(key);
         }
+    };
+
+    window.scrollToBottom = function (elementId) {
+        setTimeout(() => {
+            var el = document.getElementById(elementId);
+            if (el) {
+                 el.scrollTo({
+                    top: el.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }
+        }, 50);
     };
 </script>

@@ -1,4 +1,5 @@
-﻿using BlazorApp.Data.Implementations.Auth;
+﻿using BlazorApp.Client.Services;
+using BlazorApp.Data.Implementations.Auth;
 using BlazorApp.Data.Interfaces.Auth;
 using Blazored.LocalStorage;
 using Blazored.Toast;
@@ -6,10 +7,12 @@ using Blazored.Toast.Services;
 using Microsoft.AspNetCore.Components.WebAssembly.Services;
 using SMS.DataAccess.Data.Implementations;
 using SMS.DataAccess.Data.Implementations.AcademicPerformance;
+using SMS.DataAccess.Data.Implementations.Message;
 using SMS.DataAccess.Data.Implementations.Student;
 using SMS.DataAccess.Data.Implementations.StudyMaterial;
 using SMS.DataAccess.Data.Interfaces;
 using SMS.DataAccess.Data.Interfaces.AcademicPerformance;
+using SMS.DataAccess.Data.Interfaces.Message;
 using SMS.DataAccess.Data.Interfaces.Student;
 using SMS.DataAccess.Data.Interfaces.StudyMaterial;
 using SMS.Shared.HttpManager.Delegator;
@@ -32,7 +35,7 @@ namespace BlazorApp
             services.AddHttpClient<IHttpClientManager, HttpClientManager>()
                     .AddHttpMessageHandler<HttpDelegator>();
 
-            // Toast Service as Singleton
+            // Service as Singleton
             services.AddSingleton<IToastService, ToastService>();
 
             // Application Services
@@ -42,6 +45,8 @@ namespace BlazorApp
             services.AddScoped<IStudent, Student>();
             services.AddScoped<IStudyMaterial, StudyMaterial>();
             services.AddScoped<IAcademicPerformance, AcademicPerformance>();
+            services.AddScoped<IMessage, Message>();
+            services.AddScoped<SignalRService>();
 
             // Blazor Bootstrap & Local Storage
             services.AddBlazorBootstrap();

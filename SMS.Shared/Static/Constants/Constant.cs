@@ -23,6 +23,7 @@
         public static string downloadFileStream = "downloadFileFromStream";
         public static string localStorageGet = "localStorageFunctions.getItem";
         public static string localStorageSet = "localStorageFunctions.setItem";
+        public static string scrollToBottom = "scrollToBottom";
     }
 
     public static class PageHeading
@@ -33,6 +34,7 @@
         public const string AlumniStudent = "Alumni Student";
         public const string StaffTask = "Staff Task";
         public const string AcademicPerformance = "Academic Performance";
+        public const string Message = "Message";
     }
 
     public static class FixFileName
@@ -62,6 +64,7 @@
         public static string ddMMMyyyy = "dd MMM, yyyy";
         public static string MMMMyyyy = "MMMM yyyy";
         public static string yyyy_MM_ddT = "yyyy-MM-ddT00:00:00";
+        public static string MMM_dd_YYYYHHMM = "MMM dd, yyyy HH:mm";
     }
 
 

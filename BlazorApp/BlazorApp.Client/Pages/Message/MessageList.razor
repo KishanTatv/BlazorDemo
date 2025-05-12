@@ -1,0 +1,76 @@
+﻿@using SMS.DataAccess.Data.Interfaces.Message
+@using SMS.DataAccess.Models.Chat.Request
+@using SMS.DataAccess.Models.Chat.Response
+
+@inject IMessage _message
+
+<div>
+    @foreach (var item in parentMessageModels)
+    {
+        <Card Class="my-2">
+            <CardBody Class="@(ActiveMessageId == item.MessageId ? "bg-secondary rounded" : "")" @onclick="async () => await NewChatOpen(item)">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-2">
+                        @if(string.IsNullOrEmpty(item.UserPhoto))
+                        {
+                            <img src="../wwwroot/Images/defalut-profile.jpg" />
+                        }
+                        else
+                        {
+                            <img style="height:25px; width:25px; border-radius:50%;" src="data:image/jpeg;base64, @item.UserPhoto" alt="img" />
+                        }
+                        <div>
+                            <div>
+                                <b>@item.UserName</b>
+                            </div>
+                            <i>
+                                @if (item.Topic.Length > 10)
+                                {
+                                    @string.Concat(item.Topic.Substring(0, 10), "..")
+                                }
+                                else
+                                {
+                                    @item.Topic
+                                }
+                            </i>
+                        </div>
+                    </div>
+                    <div>
+                        <h6 class="m-0">
+                            @(item.UserRole == Roles.SuperAdmin.GetDescription() ? "Sup Admin" : item.UserRole)
+                        </h6>
+                    </div>
+                </div>
+            </CardBody>
+        </Card>
+    }
+</div>
+
+@code {
+    private string Message = default!;
+    [Parameter] public int UserId { get; set; }
+    [Parameter] public int ActiveMessageId { get; set; }
+    [Parameter] public EventCallback<ParentMessageModel> ParentMessageId { get; set; }
+    private IEnumerable<ParentMessageModel> parentMessageModels = Enumerable.Empty<ParentMessageModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var reqData = new ChatListReq()
+            {
+                UserId = UserId,
+            };
+        var res = await _message.GetParentMessageListAsync(reqData);
+        if (res.Result)
+        {
+            parentMessageModels = res.Data;
+            await NewChatOpen(parentMessageModels.First());
+        }
+    }
+
+    private async Task NewChatOpen(ParentMessageModel message)
+    {
+        ActiveMessageId = message.MessageId;
+        await ParentMessageId.InvokeAsync(message);
+    }
+
+}

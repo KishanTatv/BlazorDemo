@@ -48,5 +48,11 @@
             public static string GetAcademicPerformanceSubjectWise = "AcademicPerformance/GetSubjectWiseAvgPercentageByClassDivision";
             public static string GetAcademicPerformanceExamWise = "AcademicPerformance/GetAverageOfAllExamTypeByClassDivision";
         }
+
+        public class Message
+        {
+            public static string ParentMessageList = "message/GetParentMessageList";
+            public static string ChatData = "message/GetMessageList";
+        }
     }
 }
