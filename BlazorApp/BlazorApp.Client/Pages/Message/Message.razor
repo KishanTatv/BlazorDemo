@@ -24,10 +24,17 @@
     <div class="w-100">
         <Card style="max-height: 800px;">
             <CardBody>
-                <div class="d-flex">
-                    <Icon Name="IconName.ListNested" @onclick="ToggleContentAsync" />
-                    <div class="d-flex mx-2">
-                        <img style="height:25px; border-radius:50%;" src="data:image/jpeg;base64, @parentMessagaeData?.UserPhoto" alt="img" />
+                <div class="d-flex justify-content-between">
+                    <div class="d-flex">
+                        <Icon Class="mx-2" Name="IconName.JustifyLeft" @onclick="ToggleContentAsync" />
+                        @if (!string.IsNullOrEmpty(parentMessagaeData?.UserPhoto))
+                        {
+                            <img style="height:25px; border-radius:50%;" src="data:image/jpeg;base64, @parentMessagaeData?.UserPhoto" alt="img" />
+                        }
+                        else
+                        {
+                            <img style="height:25px; border-radius:50%;" src="Images/default-profile.jpg" alt="img" />
+                        }
                         <h5 class="mx-2">@parentMessagaeData?.UserName</h5>
                     </div>
                 </div>
@@ -42,6 +49,7 @@
     private ParentMessageModel? parentMessagaeData;
     private int activeMessageId;
     Collapse collapse1 = default!;
+    private bool firstChat = true;
 
     protected override async Task OnInitializedAsync()
     {
@@ -54,10 +62,14 @@
 
     private async Task ToggleContentAsync() => await collapse1.ToggleAsync();
 
-    private Task NewMessageOpen(ParentMessageModel messageData)
+    private async Task NewMessageOpen(ParentMessageModel messageData)
     {
+        if (firstChat)
+        {
+            await collapse1.ShowAsync();
+        }
         parentMessagaeData = messageData;
         activeMessageId = parentMessagaeData.MessageId;
-        return Task.CompletedTask;
+        firstChat = false;
     }
 }

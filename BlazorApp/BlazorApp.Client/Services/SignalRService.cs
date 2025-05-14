@@ -12,6 +12,7 @@ namespace BlazorApp.Client.Services
         private bool _isSubscribed = false;
 
         public event Action<MessageResponseDTO>? MessageReceived;
+        public event Action<int>? MessageReadMark;
 
         public SignalRService(ITokenService tokenService)
         {
@@ -58,11 +59,22 @@ namespace BlazorApp.Client.Services
             await _hubConnection.InvokeAsync("SendMessageToUser", newMessageDTO);
         }
 
+        public async Task ReadAllMessage(ReadMessageDTO readMessageReq)
+        {
+            await StartConnectionAsync();
+            await _hubConnection.InvokeAsync("readAllMessages", readMessageReq);
+        }
+
+
         public void ListenHandler()
         {
             _hubConnection.On<MessageResponseDTO>("ReceiveMessage", (msg) =>
             {
                 MessageReceived?.Invoke(msg);
+            });
+            _hubConnection.On<int>("MessageSeen", (parentMessageId) =>
+            {
+                MessageReadMark?.Invoke(parentMessageId);
             });
         }
 

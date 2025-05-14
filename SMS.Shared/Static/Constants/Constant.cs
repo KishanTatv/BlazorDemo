@@ -24,6 +24,7 @@
         public static string localStorageGet = "localStorageFunctions.getItem";
         public static string localStorageSet = "localStorageFunctions.setItem";
         public static string scrollToBottom = "scrollToBottom";
+        public static string notifySend = "notifyUpdates";
     }
 
     public static class PageHeading

@@ -1,19 +1,30 @@
-﻿@using SMS.DataAccess.Data.Interfaces.Message
+﻿@using BlazorApp.Client.Services
+@using SMS.DataAccess.Data.Interfaces.Message
 @using SMS.DataAccess.Models.Chat.Request
 @using SMS.DataAccess.Models.Chat.Response
 
 @inject IMessage _message
+@inject SignalRService signalRService
+@inject IJSRuntime JSRuntime
+@implements IDisposable
 
 <div>
     @foreach (var item in parentMessageModels)
     {
         <Card Class="my-2">
             <CardBody Class="@(ActiveMessageId == item.MessageId ? "bg-secondary rounded" : "")" @onclick="async () => await NewChatOpen(item)">
+                @if(item.UnreadCount > 0){
+                    <Badge Color="BadgeColor.Danger"
+                    Position="Position.Absolute"
+                    Placement="BadgePlacement.TopRight"
+                    IndicatorType="BadgeIndicatorType.RoundedPill"
+                    VisuallyHiddenText="unread messages">@item.UnreadCount</Badge>
+                }
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center gap-2">
                         @if(string.IsNullOrEmpty(item.UserPhoto))
                         {
-                            <img src="../wwwroot/Images/defalut-profile.jpg" />
+                            <img style="height:25px; width:25px; border-radius:50%;" src="Images/default-profile.jpg" alt="img" />
                         }
                         else
                         {
@@ -52,25 +63,52 @@
     [Parameter] public int ActiveMessageId { get; set; }
     [Parameter] public EventCallback<ParentMessageModel> ParentMessageId { get; set; }
     private IEnumerable<ParentMessageModel> parentMessageModels = Enumerable.Empty<ParentMessageModel>();
+    private bool isComponentVisible;
 
     protected override async Task OnInitializedAsync()
     {
-        var reqData = new ChatListReq()
-            {
-                UserId = UserId,
-            };
+        var reqData = new ChatListReq(){UserId = UserId};
         var res = await _message.GetParentMessageListAsync(reqData);
         if (res.Result)
         {
             parentMessageModels = res.Data;
             await NewChatOpen(parentMessageModels.First());
         }
+        isComponentVisible = true;
+        signalRService.MessageReceived += OnMessageReceived;
     }
 
     private async Task NewChatOpen(ParentMessageModel message)
     {
         ActiveMessageId = message.MessageId;
+        var openChat = parentMessageModels.FirstOrDefault(x => x.MessageId == message.MessageId);
+        if(openChat != null){
+            openChat.UnreadCount = 0;
+        }
         await ParentMessageId.InvokeAsync(message);
+    }
+
+    public async void OnMessageReceived(MessageResponseDTO message)
+    {
+        if(!isComponentVisible){
+            await JSRuntime.InvokeVoidAsync(JsStaticFun.notifySend, string.Concat("chat message : ", message.Sender));
+        }
+        else{
+            if(message.ParentMessageId != ActiveMessageId && parentMessageModels.Any()){
+                var targetUser = parentMessageModels.FirstOrDefault(x => x.MessageId == message.ParentMessageId);
+                if (targetUser != null)
+                {
+                    targetUser.UnreadCount++;
+                    targetUser.Topic = message.Message;
+                    StateHasChanged();
+                }
+            }
+        }
+    }
+
+    void IDisposable.Dispose()
+    {
+        isComponentVisible = false;
     }
 
 }

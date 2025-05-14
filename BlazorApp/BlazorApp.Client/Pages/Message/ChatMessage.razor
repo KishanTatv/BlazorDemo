@@ -7,6 +7,7 @@
 @inject SignalRService signalRService
 @inject IMessage _message
 @inject IJSRuntime JSRuntime
+@implements IDisposable
 
 <div class="card my-3">
     <div id="chatMessagesContainer" class="card-body" style="height: 660px; overflow-y: auto;">
@@ -73,6 +74,7 @@
             await GetChatHistory();
         }
         signalRService.MessageReceived += OnMessageReceived;
+        signalRService.MessageReadMark += OnMessageSeen;
     }
 
     protected override async Task OnParametersSetAsync()
@@ -83,6 +85,14 @@
             if (_lastMessageId > 0)
             {
                 await GetChatHistory();
+                if (chatHistoryList.Any())
+                {
+                    var reciverData = chatHistoryList.Where(x => x.SenderId != UserId);
+                    if (reciverData.Any() && !reciverData.Last().IsSeen)
+                    {
+                        await signalRService.ReadAllMessage(new ReadMessageDTO { SenderId = reciverData.Last().SenderId, ReceiverId = reciverData.Last().ReceiverId, ParentMessageId = ActiveMessageId });
+                    }
+                }
             }
         }
     }
@@ -112,7 +122,7 @@
                 };
             chatHistoryList.Add(item);
             chatMessage = string.Empty;
-            // await signalRService.SendMessage(newMessageDTO);
+            await signalRService.SendMessage(newMessageDTO);
             await ScrollToBottomAsync();
         }
     }
@@ -132,29 +142,43 @@
         }
     }
 
-    private void OnMessageReceived(MessageResponseDTO message)
+    private async void OnMessageReceived(MessageResponseDTO message)
     {
-        var newMessage = new MessageModel
-            {
-                SenderId = message.SenderId,
-                ReceiverId = message.ReceiverId,
-                Sender = message.Sender,
-                Receiver = message.Receiver,
-                Message = message.Message,
-                SendDate = message.SendDate,
-                IsSeen = message.IsSeen,
-                IsEventChat = message.IsEventChat
-            };
-        chatHistoryList.Add(newMessage);
-        InvokeAsync(async () =>
+        if (message.ParentMessageId == ActiveMessageId)
         {
-            StateHasChanged();
+            var newMessage = new MessageModel
+                {
+                    SenderId = message.SenderId,
+                    ReceiverId = message.ReceiverId,
+                    Sender = message.Sender,
+                    Receiver = message.Receiver,
+                    Message = message.Message,
+                    SendDate = message.SendDate,
+                    IsSeen = message.IsSeen,
+                    IsEventChat = message.IsEventChat
+                };
+            chatHistoryList.Add(newMessage);
             await ScrollToBottomAsync();
-        });
+            await signalRService.ReadAllMessage(new ReadMessageDTO { SenderId = message.SenderId, ReceiverId = message.ReceiverId, ParentMessageId = ActiveMessageId });
+            StateHasChanged();
+        }
+    }
+
+    private void OnMessageSeen(int parentMessageId)
+    {
+        chatHistoryList.Where(x => x.SenderId == UserId).ToList().ForEach(x => x.IsSeen = true);
+        StateHasChanged();
     }
 
     private async Task ScrollToBottomAsync()
     {
         await JSRuntime.InvokeVoidAsync(JsStaticFun.scrollToBottom, "chatMessagesContainer");
     }
+
+    void IDisposable.Dispose()
+    {
+        signalRService.MessageReceived -= OnMessageReceived;
+        signalRService.MessageReadMark -= OnMessageSeen;
+    }
+
 }
