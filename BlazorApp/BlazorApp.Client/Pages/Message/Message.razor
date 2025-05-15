@@ -5,6 +5,8 @@
 
 @inject ITokenService tokenService
 @inject SignalRService signalRService
+@inject StateService stateService
+@implements IDisposable
 
 <div class="d-flex justify-content-between border-bottom border-4 border-secondary pb-1 mb-3">
     <h2 class="m-0">@PageHeading.Message</h2>
@@ -70,6 +72,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        stateService.IsChatPageActive = true;
         tokenData = tokenService.TokenData;
         if (tokenData == null && OperatingSystem.IsBrowser())
         {
@@ -110,5 +113,11 @@
 
     private void HandleChatRefresh(MessageModel messageInfo){
         messageRefreshChat = new KeyValuePair<bool, MessageModel>(true, messageInfo);
+    }
+
+
+    void IDisposable.Dispose()
+    {
+        stateService.IsChatPageActive = false;
     }
 }

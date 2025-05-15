@@ -70,7 +70,6 @@
     [Parameter] public KeyValuePair<bool, MessageModel> MessageRefreshChat { get; set; }
     [Parameter] public EventCallback OnRefreshCompleted { get; set; }
     private IEnumerable<ParentMessageModel> parentMessageModels = Enumerable.Empty<ParentMessageModel>();
-    private bool isComponentVisible = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -81,7 +80,6 @@
             parentMessageModels = res.Data;
             await NewChatOpen(parentMessageModels.First());
         }
-        isComponentVisible = true;
         signalRService.MessageReceived += OnMessageReceived;
         signalRService.MessageChatEnd += OnChatComplete;
     }
@@ -128,25 +126,18 @@
         await ParentMessageId.InvokeAsync(message);
     }
 
-    public async void OnMessageReceived(MessageResponseDTO message)
+    public void OnMessageReceived(MessageResponseDTO message)
     {
-        if (!isComponentVisible)
+        if (message.ParentMessageId != ActiveMessageId && parentMessageModels.Any())
         {
-            // await JSRuntime.InvokeVoidAsync(JsStaticFun.notifySend, string.Concat("chat message : ", message.Sender, " - ", message.Message));
-        }
-        else
-        {
-            if (message.ParentMessageId != ActiveMessageId && parentMessageModels.Any())
+            var targetUser = parentMessageModels.FirstOrDefault(x => x.MessageId == message.ParentMessageId);
+            if (targetUser != null)
             {
-                var targetUser = parentMessageModels.FirstOrDefault(x => x.MessageId == message.ParentMessageId);
-                if (targetUser != null)
-                {
-                    targetUser.UnreadCount++;
-                    targetUser.Topic = message.Message;
-                }
-                parentMessageModels = parentMessageModels.OrderByDescending(x => x.UnreadCount);
-                StateHasChanged();
+                targetUser.UnreadCount++;
+                targetUser.Topic = message.Message;
             }
+            parentMessageModels = parentMessageModels.OrderByDescending(x => x.UnreadCount);
+            StateHasChanged();
         }
     }
 
@@ -168,8 +159,7 @@
 
     void IDisposable.Dispose()
     {
-        isComponentVisible = false;
-        // signalRService.MessageReceived -= OnMessageReceived;
+        signalRService.MessageReceived -= OnMessageReceived;
         signalRService.MessageChatEnd -= OnChatComplete;
     }
 

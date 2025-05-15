@@ -5,6 +5,7 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using SMS.DataAccess.Models.Auth.Request
 @using SMS.DataAccess.Models.Auth.Response
+@using SMS.DataAccess.Models.Chat.Response
 @using SMS.Shared.JWTToken
 @using SMS.Shared.Loader
 @using SMS.Shared.Static.Routes
@@ -18,6 +19,9 @@
 @inject ITokenService tokenService
 @inject IAuth _auth;
 @inject SignalRService signalRService
+@inject StateService stateService
+@inject IJSRuntime JSRuntime
+@implements IDisposable
 
 <Blazored.Toast.BlazoredToasts Position="ToastPosition.TopRight"
 Timeout="2"
@@ -92,6 +96,7 @@ ErrorIcon="fa fa-triangle-exclamation"  />
 
             //connect to signalR
             await signalRService.InitilizeSignalR();
+            signalRService.MessageReceived += OnMessageReceived;
         }
     }
 
@@ -154,6 +159,13 @@ ErrorIcon="fa fa-triangle-exclamation"  />
         return navItems;
     }
 
+    public async void OnMessageReceived(MessageResponseDTO message)
+    {
+        if(!stateService.IsChatPageActive){
+            await JSRuntime.InvokeVoidAsync(JsStaticFun.notifySend, string.Concat("chat message : ", message.Sender, " - ", message.Message));
+        }
+    }
+
     public async Task GetUserImage()
     {
         userPhoto = new UserPhoto()
@@ -167,6 +179,12 @@ ErrorIcon="fa fa-triangle-exclamation"  />
 
 
     private void ToggleSidebar() => sidebar.ToggleSidebar();
+
+
+    void IDisposable.Dispose()
+    {
+        signalRService.MessageReceived -= OnMessageReceived;
+    }
 
 }
 

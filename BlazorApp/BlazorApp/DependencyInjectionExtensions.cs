@@ -15,6 +15,7 @@ using SMS.DataAccess.Data.Interfaces.AcademicPerformance;
 using SMS.DataAccess.Data.Interfaces.Message;
 using SMS.DataAccess.Data.Interfaces.Student;
 using SMS.DataAccess.Data.Interfaces.StudyMaterial;
+using SMS.Shared;
 using SMS.Shared.HttpManager.Delegator;
 using SMS.Shared.HttpManager.Implementation;
 using SMS.Shared.HttpManager.Interface;
@@ -37,6 +38,7 @@ namespace BlazorApp
 
             // Service as Singleton
             services.AddSingleton<IToastService, ToastService>();
+            services.AddSingleton<StateService>();
 
             // Application Services
             services.AddScoped<ITokenService, TokenService>();

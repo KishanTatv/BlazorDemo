@@ -18,6 +18,7 @@ using SMS.DataAccess.Data.Interfaces.AcademicPerformance;
 using SMS.DataAccess.Data.Interfaces.Message;
 using SMS.DataAccess.Data.Interfaces.Student;
 using SMS.DataAccess.Data.Interfaces.StudyMaterial;
+using SMS.Shared;
 using SMS.Shared.HttpManager.Delegator;
 using SMS.Shared.HttpManager.Implementation;
 using SMS.Shared.HttpManager.Interface;
@@ -38,6 +39,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>
 
 builder.Services.AddSingleton<PreloadService>();
 builder.Services.AddSingleton(new LoaderService());
+builder.Services.AddSingleton<StateService>();
 builder.Services.AddScoped<SignalRService>();
 
 //HttpDelegator
