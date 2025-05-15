@@ -1,7 +1,10 @@
 ﻿@page "/chat"
+@using BlazorApp.Client.Services
+@using SMS.DataAccess.Models.Chat.Request
 @using SMS.DataAccess.Models.Chat.Response
 
 @inject ITokenService tokenService
+@inject SignalRService signalRService
 
 <div class="d-flex justify-content-between border-bottom border-4 border-secondary pb-1 mb-3">
     <h2 class="m-0">@PageHeading.Message</h2>
@@ -14,10 +17,9 @@
                 <div class="p-3 border-bottom">
                     <h3 class="mb-0">Chat</h3>
                 </div>
-                <div class="flex-grow-1 overflow-auto px-3 py-2">
-                    <MessageList UserId="tokenData.UserId" ParentMessageId="NewMessageOpen" />
+                <div id="card-chatList" class="flex-grow-1 overflow-auto px-3 py-2">
+                    <MessageList UserId="tokenData.UserId" ParentMessageId="NewMessageOpen" MessageListRefresh="messageListUpdate" MessageRefreshChat="messageRefreshChat" OnRefreshCompleted="HandleRefreshCompleted" />
                 </div>
-
             </CardBody>
         </Card>
     </Collapse>
@@ -25,7 +27,7 @@
         <Card style="max-height: 800px;">
             <CardBody>
                 <div class="d-flex justify-content-between">
-                    <div class="d-flex">
+                    <div class="d-flex align-items-center">
                         <Icon Class="mx-2" Name="IconName.JustifyLeft" @onclick="ToggleContentAsync" />
                         @if (!string.IsNullOrEmpty(parentMessagaeData?.UserPhoto))
                         {
@@ -35,10 +37,22 @@
                         {
                             <img style="height:25px; border-radius:50%;" src="Images/default-profile.jpg" alt="img" />
                         }
-                        <h5 class="mx-2">@parentMessagaeData?.UserName</h5>
+                        <h5 class="m-0 mx-2">@parentMessagaeData?.UserName</h5>
                     </div>
+                    <Dropdown Color="DropdownColor.None">
+                        <DropdownToggleButton>
+                            <Icon Name="IconName.Sliders2" />
+                        </DropdownToggleButton>
+                        <DropdownMenu>
+                            <DropdownItem Type="DropdownItemType.Button">
+                                <div @onclick="EndConversation">
+                                    <Icon Class="mx-2" Name="IconName.ChatRightDotsFill" Color="IconColor.Danger"/> End Chat
+                                </div>
+                            </DropdownItem>
+                        </DropdownMenu>
+                    </Dropdown>
                 </div>
-                <ChatMessage UserId="tokenData.UserId" UserName="@tokenData.UserName" ActiveMessageId="activeMessageId" />
+                <ChatMessage UserId="tokenData.UserId" UserName="@tokenData.UserName" ActiveMessageId="activeMessageId" MessageChatData="setOpenChatData" RefreshMessageList="HandleChatRefresh" />
             </CardBody>
         </Card>
     </div>
@@ -50,6 +64,9 @@
     private int activeMessageId;
     Collapse collapse1 = default!;
     private bool firstChat = true;
+    private bool messageListUpdate = false;
+    private KeyValuePair<bool, MessageModel> messageRefreshChat = default!;
+    private int reciverId;
 
     protected override async Task OnInitializedAsync()
     {
@@ -71,5 +88,27 @@
         parentMessagaeData = messageData;
         activeMessageId = parentMessagaeData.MessageId;
         firstChat = false;
+    }
+
+    private void setOpenChatData(MessageModel messageInfo)
+    {
+        reciverId = messageInfo.SenderId == tokenData.UserId ? messageInfo.ReceiverId : messageInfo.SenderId;
+    }
+
+    private async Task EndConversation()
+    {
+        var reqModel = new ReadMessageDTO() { SenderId = tokenData.UserId, ReceiverId = reciverId, ParentMessageId = activeMessageId };
+        await signalRService.EndChat(reqModel);
+        messageListUpdate = true;
+    }
+
+    private void HandleRefreshCompleted()
+    {
+        messageListUpdate = false;
+        messageRefreshChat = new KeyValuePair<bool, MessageModel>(false, new MessageModel());
+    }
+
+    private void HandleChatRefresh(MessageModel messageInfo){
+        messageRefreshChat = new KeyValuePair<bool, MessageModel>(true, messageInfo);
     }
 }

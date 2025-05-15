@@ -68,6 +68,18 @@
         }, 50);
     };
 
+    window.scrollToTop = function (elementId) {
+        setTimeout(() => {
+            var el = document.getElementById(elementId);
+            if (el) {
+                 el.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            }
+        }, 50);
+    };
+
     window.notifyUpdates = function(bodyMsg) {
         if (Notification.permission === "granted") {
             new Notification("SMS", {

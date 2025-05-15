@@ -14,6 +14,7 @@
         public static string msgFileEmpty = "File is Empty !";
         public static string msgFileDownloadProcess = "Downloading in Process...";
         public static string msgFileDownloadComplete = "Downloading Completed!";
+        public static string deleteSuccesfully = "{0} Deleted Succesfully !";
     }
 
     public static class JsStaticFun
@@ -24,6 +25,7 @@
         public static string localStorageGet = "localStorageFunctions.getItem";
         public static string localStorageSet = "localStorageFunctions.setItem";
         public static string scrollToBottom = "scrollToBottom";
+        public static string scrollToTop = "scrollToTop";
         public static string notifySend = "notifyUpdates";
     }
 

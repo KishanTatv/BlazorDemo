@@ -63,6 +63,8 @@
     [Parameter] public int ActiveMessageId { get; set; }
     [Parameter] public int UserId { get; set; }
     [Parameter] public string UserName { get; set; }
+    [Parameter] public EventCallback<MessageModel> MessageChatData { get; set; }
+    [Parameter] public EventCallback<MessageModel> RefreshMessageList { get; set; }
     private int _lastMessageId = -1;
     private string chatMessage = string.Empty;
     List<MessageModel> chatHistoryList = new List<MessageModel>();
@@ -123,6 +125,7 @@
             chatHistoryList.Add(item);
             chatMessage = string.Empty;
             await signalRService.SendMessage(newMessageDTO);
+            await RefreshMessageList.InvokeAsync(item);
             await ScrollToBottomAsync();
         }
     }
@@ -139,6 +142,7 @@
         {
             chatHistoryList = res.Data;
             await ScrollToBottomAsync();
+            await MessageChatData.InvokeAsync(chatHistoryList.LastOrDefault());
         }
     }
 

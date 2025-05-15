@@ -6,6 +6,7 @@
 @inject IMessage _message
 @inject SignalRService signalRService
 @inject IJSRuntime JSRuntime
+@inject IToastService ToastService
 @implements IDisposable
 
 <div>
@@ -13,16 +14,19 @@
     {
         <Card Class="my-2">
             <CardBody Class="@(ActiveMessageId == item.MessageId ? "bg-secondary rounded" : "")" @onclick="async () => await NewChatOpen(item)">
-                @if(item.UnreadCount > 0){
+                @if (item.UnreadCount > 0)
+                {
                     <Badge Color="BadgeColor.Danger"
                     Position="Position.Absolute"
                     Placement="BadgePlacement.TopRight"
                     IndicatorType="BadgeIndicatorType.RoundedPill"
-                    VisuallyHiddenText="unread messages">@item.UnreadCount</Badge>
+                    VisuallyHiddenText="unread messages">
+                        @item.UnreadCount
+                    </Badge>
                 }
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center gap-2">
-                        @if(string.IsNullOrEmpty(item.UserPhoto))
+                        @if (string.IsNullOrEmpty(item.UserPhoto))
                         {
                             <img style="height:25px; width:25px; border-radius:50%;" src="Images/default-profile.jpg" alt="img" />
                         }
@@ -62,12 +66,15 @@
     [Parameter] public int UserId { get; set; }
     [Parameter] public int ActiveMessageId { get; set; }
     [Parameter] public EventCallback<ParentMessageModel> ParentMessageId { get; set; }
+    [Parameter] public bool MessageListRefresh { get; set; } = false;
+    [Parameter] public KeyValuePair<bool, MessageModel> MessageRefreshChat { get; set; }
+    [Parameter] public EventCallback OnRefreshCompleted { get; set; }
     private IEnumerable<ParentMessageModel> parentMessageModels = Enumerable.Empty<ParentMessageModel>();
-    private bool isComponentVisible;
+    private bool isComponentVisible = false;
 
     protected override async Task OnInitializedAsync()
     {
-        var reqData = new ChatListReq(){UserId = UserId};
+        var reqData = new ChatListReq() { UserId = UserId };
         var res = await _message.GetParentMessageListAsync(reqData);
         if (res.Result)
         {
@@ -76,39 +83,94 @@
         }
         isComponentVisible = true;
         signalRService.MessageReceived += OnMessageReceived;
+        signalRService.MessageChatEnd += OnChatComplete;
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (MessageListRefresh)
+        {
+            parentMessageModels = parentMessageModels.Where(x => x.MessageId != ActiveMessageId).ToList();
+            ToastService.ShowSuccess(string.Format(SystemMessage.deleteSuccesfully, "Chat"));
+            if (parentMessageModels.Any())
+            {
+                await NewChatOpen(parentMessageModels.First());
+            }
+            await OnRefreshCompleted.InvokeAsync();
+        }
+        if(MessageRefreshChat.Key == true){
+            var parentMessageList = parentMessageModels.ToList();
+            var openChat = parentMessageList.FirstOrDefault(x => x.MessageId == ActiveMessageId);
+            if (openChat != null)
+            {
+                openChat.Topic = MessageRefreshChat.Value.Message;
+                if(parentMessageList.FirstOrDefault()?.MessageId != ActiveMessageId){
+                    parentMessageList.Remove(openChat);
+                    parentMessageList.Insert(0, openChat);
+                    await JSRuntime.InvokeVoidAsync(JsStaticFun.scrollToTop, "card-chatList");
+                }
+            }
+            parentMessageModels = parentMessageList;
+            await OnRefreshCompleted.InvokeAsync();
+        }
     }
 
     private async Task NewChatOpen(ParentMessageModel message)
     {
         ActiveMessageId = message.MessageId;
-        var openChat = parentMessageModels.FirstOrDefault(x => x.MessageId == message.MessageId);
-        if(openChat != null){
+        var parentMessageList = parentMessageModels.ToList();
+        var openChat = parentMessageList.FirstOrDefault(x => x.MessageId == message.MessageId);
+        if (openChat != null)
+        {
             openChat.UnreadCount = 0;
         }
+        parentMessageModels = parentMessageList;
         await ParentMessageId.InvokeAsync(message);
     }
 
     public async void OnMessageReceived(MessageResponseDTO message)
     {
-        if(!isComponentVisible){
-            await JSRuntime.InvokeVoidAsync(JsStaticFun.notifySend, string.Concat("chat message : ", message.Sender));
+        if (!isComponentVisible)
+        {
+            // await JSRuntime.InvokeVoidAsync(JsStaticFun.notifySend, string.Concat("chat message : ", message.Sender, " - ", message.Message));
         }
-        else{
-            if(message.ParentMessageId != ActiveMessageId && parentMessageModels.Any()){
+        else
+        {
+            if (message.ParentMessageId != ActiveMessageId && parentMessageModels.Any())
+            {
                 var targetUser = parentMessageModels.FirstOrDefault(x => x.MessageId == message.ParentMessageId);
                 if (targetUser != null)
                 {
                     targetUser.UnreadCount++;
                     targetUser.Topic = message.Message;
-                    StateHasChanged();
                 }
+                parentMessageModels = parentMessageModels.OrderByDescending(x => x.UnreadCount);
+                StateHasChanged();
             }
+        }
+    }
+
+    public async void OnChatComplete(int parentMessageId)
+    {
+        parentMessageModels = parentMessageModels.Where(x => x.MessageId != parentMessageId).ToList();
+        if (ActiveMessageId == parentMessageId)
+        {
+            if (parentMessageModels.Any())
+            {
+                await NewChatOpen(parentMessageModels.First());
+            }
+        }
+        else
+        {
+            StateHasChanged();
         }
     }
 
     void IDisposable.Dispose()
     {
         isComponentVisible = false;
+        // signalRService.MessageReceived -= OnMessageReceived;
+        signalRService.MessageChatEnd -= OnChatComplete;
     }
 
 }

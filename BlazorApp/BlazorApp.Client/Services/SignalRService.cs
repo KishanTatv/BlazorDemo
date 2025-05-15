@@ -13,6 +13,7 @@ namespace BlazorApp.Client.Services
 
         public event Action<MessageResponseDTO>? MessageReceived;
         public event Action<int>? MessageReadMark;
+        public event Action<int>? MessageChatEnd;
 
         public SignalRService(ITokenService tokenService)
         {
@@ -65,6 +66,11 @@ namespace BlazorApp.Client.Services
             await _hubConnection.InvokeAsync("readAllMessages", readMessageReq);
         }
 
+        public async Task EndChat(ReadMessageDTO messageReq)
+        {
+            await StartConnectionAsync();
+            await _hubConnection.InvokeAsync("EndConversation", messageReq);
+        }
 
         public void ListenHandler()
         {
@@ -75,6 +81,10 @@ namespace BlazorApp.Client.Services
             _hubConnection.On<int>("MessageSeen", (parentMessageId) =>
             {
                 MessageReadMark?.Invoke(parentMessageId);
+            });
+            _hubConnection.On<int>("ReceiveEndConversation", (parentMessageId) =>
+            {
+                MessageChatEnd?.Invoke(parentMessageId);
             });
         }
 
