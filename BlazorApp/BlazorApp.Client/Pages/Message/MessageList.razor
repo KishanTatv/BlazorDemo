@@ -17,10 +17,10 @@
                 @if (item.UnreadCount > 0)
                 {
                     <Badge Color="BadgeColor.Danger"
-                    Position="Position.Absolute"
-                    Placement="BadgePlacement.TopRight"
-                    IndicatorType="BadgeIndicatorType.RoundedPill"
-                    VisuallyHiddenText="unread messages">
+                           Position="Position.Absolute"
+                           Placement="BadgePlacement.TopRight"
+                           IndicatorType="BadgeIndicatorType.RoundedPill"
+                           VisuallyHiddenText="unread messages">
                         @item.UnreadCount
                     </Badge>
                 }
@@ -96,13 +96,15 @@
             }
             await OnRefreshCompleted.InvokeAsync();
         }
-        if(MessageRefreshChat.Key == true){
+        if (MessageRefreshChat.Key == true)
+        {
             var parentMessageList = parentMessageModels.ToList();
             var openChat = parentMessageList.FirstOrDefault(x => x.MessageId == ActiveMessageId);
             if (openChat != null)
             {
                 openChat.Topic = MessageRefreshChat.Value.Message;
-                if(parentMessageList.FirstOrDefault()?.MessageId != ActiveMessageId){
+                if (parentMessageList.FirstOrDefault()?.MessageId != ActiveMessageId)
+                {
                     parentMessageList.Remove(openChat);
                     parentMessageList.Insert(0, openChat);
                     await JSRuntime.InvokeVoidAsync(JsStaticFun.scrollToTop, "card-chatList");
