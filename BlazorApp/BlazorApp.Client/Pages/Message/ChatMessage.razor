@@ -148,7 +148,7 @@
 
     private async void OnMessageReceived(MessageResponseDTO message)
     {
-        if (message.ParentMessageId == ActiveMessageId)
+        if (message.ParentMessageId == ActiveMessageId && message.SenderId != UserId)
         {
             var newMessage = new MessageModel
                 {

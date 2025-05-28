@@ -10,11 +10,13 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.JSInterop;
 using SMS.DataAccess.Data.Implementations;
 using SMS.DataAccess.Data.Implementations.AcademicPerformance;
+using SMS.DataAccess.Data.Implementations.Floor;
 using SMS.DataAccess.Data.Implementations.Message;
 using SMS.DataAccess.Data.Implementations.Student;
 using SMS.DataAccess.Data.Implementations.StudyMaterial;
 using SMS.DataAccess.Data.Interfaces;
 using SMS.DataAccess.Data.Interfaces.AcademicPerformance;
+using SMS.DataAccess.Data.Interfaces.Floor;
 using SMS.DataAccess.Data.Interfaces.Message;
 using SMS.DataAccess.Data.Interfaces.Student;
 using SMS.DataAccess.Data.Interfaces.StudyMaterial;
@@ -64,7 +66,7 @@ builder.Services.AddScoped<IStudent, Student>();
 builder.Services.AddScoped<IStudyMaterial, StudyMaterial>();
 builder.Services.AddScoped<IAcademicPerformance, AcademicPerformance>();
 builder.Services.AddScoped<IMessage, Message>();
-
+builder.Services.AddScoped<IFloor, Floor>();
 
 //culture setup
 var host = builder.Build();

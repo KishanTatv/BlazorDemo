@@ -54,5 +54,14 @@
             public static string ParentMessageList = "message/GetParentMessageList";
             public static string ChatData = "message/GetMessageList";
         }
+
+        public class FloorPlan
+        {
+            public const string GetBuildingList = "FloorPlan/GetBuildingsList";
+            public const string GetFloorList = "FloorPlan/GetFloorList";
+            public const string GetRoomList = "FloorPlan/GetRoomList";
+            public const string GetRoomCellsListByFloorId = "FloorPlan/GetRoomCellsListByFloorId";
+        }
+
     }
 }

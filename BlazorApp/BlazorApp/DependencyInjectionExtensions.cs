@@ -7,11 +7,13 @@ using Blazored.Toast.Services;
 using Microsoft.AspNetCore.Components.WebAssembly.Services;
 using SMS.DataAccess.Data.Implementations;
 using SMS.DataAccess.Data.Implementations.AcademicPerformance;
+using SMS.DataAccess.Data.Implementations.Floor;
 using SMS.DataAccess.Data.Implementations.Message;
 using SMS.DataAccess.Data.Implementations.Student;
 using SMS.DataAccess.Data.Implementations.StudyMaterial;
 using SMS.DataAccess.Data.Interfaces;
 using SMS.DataAccess.Data.Interfaces.AcademicPerformance;
+using SMS.DataAccess.Data.Interfaces.Floor;
 using SMS.DataAccess.Data.Interfaces.Message;
 using SMS.DataAccess.Data.Interfaces.Student;
 using SMS.DataAccess.Data.Interfaces.StudyMaterial;
@@ -48,6 +50,7 @@ namespace BlazorApp
             services.AddScoped<IStudyMaterial, StudyMaterial>();
             services.AddScoped<IAcademicPerformance, AcademicPerformance>();
             services.AddScoped<IMessage, Message>();
+            services.AddScoped<IFloor, Floor>();
             services.AddScoped<SignalRService>();
 
             // Blazor Bootstrap & Local Storage

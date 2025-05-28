@@ -38,6 +38,7 @@
         public const string StaffTask = "Staff Task";
         public const string AcademicPerformance = "Academic Performance";
         public const string Message = "Message";
+        public const string Floor = "Floor";
     }
 
     public static class FixFileName
