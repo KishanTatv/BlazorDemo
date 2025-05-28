@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using SMS.DataAccess.Data.Interfaces.Floor;
+using SMS.DataAccess.Models;
 using SMS.DataAccess.Models.Floor;
 using SMS.Shared.HttpManager.DTO;
 using SMS.Shared.HttpManager.Interface;
@@ -19,40 +20,47 @@ namespace SMS.DataAccess.Data.Implementations.Floor
             _APIConnection = AppSettingsConfig.GetConnectionString(config);
         }
 
-        public async Task<HttpResponseDTO<BuildingResponseDTO>> GetBuildingsList()
+        public async Task<HttpResponseDTO<List<SelectOptionDTO>>> GetBuildingsList()
         {
-            var response = await _httpClientManager.GetAsync<BuildingResponseDTO>(
-                UrlBuilderUtility.GetCombineUrl(API_Routes.FloorPlan.GetBuildingList, _APIConnection));
+            var response = await _httpClientManager.GetAsync<List<SelectOptionDTO>>(
+                UrlBuilderUtility.GetCombineUrl(API_Routes.Common.GetBuildingList, _APIConnection));
             return response;
         }
 
-        public async Task<HttpResponseDTO<FloorResponseDTO>> GetFloorsList(FloorFilterDTO floorFilterDTO)
+        public async Task<HttpResponseDTO<List<SelectOptionDTO>>> GetFloorsList(FloorFilterDTO filterDTO)
         {
-            var response = await _httpClientManager.GetAsync<FloorResponseDTO>(
-                UrlBuilderUtility.GetCombineUrl(API_Routes.FloorPlan.GetFloorList, _APIConnection) +
-                UrlBuilderUtility.GenerateQueryStringFromDTO(floorFilterDTO)
+            var response = await _httpClientManager.GetAsync<List<SelectOptionDTO>>(
+                UrlBuilderUtility.GetCombineUrl(API_Routes.Common.GetFloorList, _APIConnection) +
+                UrlBuilderUtility.GenerateQueryStringFromDTO(filterDTO)
                 );
             return response;
         }
 
-        public async Task<HttpResponseDTO<RoomResponseDTO>> GetRoomsList(RoomFilterDTO roomFilterDTO)
-        {
-            var response = await _httpClientManager.GetAsync<RoomResponseDTO>(
-                UrlBuilderUtility.GetCombineUrl(API_Routes.FloorPlan.GetRoomList, _APIConnection) +
-                UrlBuilderUtility.GenerateQueryStringFromDTO(roomFilterDTO));
-            return response;
-        }
-
-        public async Task<HttpResponseDTO<List<RoomCoordinatesResponseDTO>>> GetRoomCellsListByFloorId(int floorId)
+        public async Task<HttpResponseDTO<List<RoomCoordinatesResponseDTO>>> GetRoomCellsListByFloorId(FloorFilterDTO filterDTO)
         {
             var response = await _httpClientManager.GetAsync<List<RoomCoordinatesResponseDTO>>(
                 UrlBuilderUtility.GetCombineUrl(API_Routes.FloorPlan.GetRoomCellsListByFloorId, _APIConnection) +
-                UrlBuilderUtility.GenerateQueryString(
-                   [new KeyValuePair<string, string>("FloorId", floorId.ToString())]
-               ));
+                UrlBuilderUtility.GenerateQueryStringFromDTO(filterDTO)
+                );
             return response;
         }
 
+        public async Task<HttpResponseDTO<bool>> UpdateRoomCoordinate(List<RoomsCellsViewModel> filterDTO)
+        {
+            var response = await _httpClientManager.PostAsync<bool>(
+                UrlBuilderUtility.GetCombineUrl(API_Routes.FloorPlan.UpdateRoomCells, _APIConnection),
+                TypeConversionUtility.ConvertToStringContent(filterDTO)
+                );
+            return response;
+        }
 
+        public async Task<HttpResponseDTO<bool>> FloorFinalize(int floorId)
+        {
+            var response = await _httpClientManager.PostAsync<bool>(
+                UrlBuilderUtility.GetCombineUrl(API_Routes.FloorPlan.UpdateFloorFinalize, _APIConnection) +
+                UrlBuilderUtility.GenerateQueryStringFromDTO(new { FloorId = floorId }), null
+                );
+            return response;
+        }
     }
 }

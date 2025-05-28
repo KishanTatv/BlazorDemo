@@ -42,4 +42,17 @@ namespace SMS.Shared.Static.Enum
         UnitTest = 4,
     }
 
+    public enum RoomType
+    {
+        ClassRoom = 1,
+        ScienceLab = 2,
+        ComputerLab = 3,
+        Office = 4,
+        Library = 5,
+        Lobby = 6,
+        WashRoom = 7,
+        BlockedArea = 8,
+        Other = 9
+    }
+
 }

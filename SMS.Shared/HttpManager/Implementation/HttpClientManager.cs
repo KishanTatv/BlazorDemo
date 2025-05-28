@@ -35,7 +35,7 @@ namespace SMS.Shared.HttpManager.Implementation
             }
         }
 
-        public async Task<HttpResponseDTO<T>> PostAsync<T>(string url, HttpContent content)
+        public async Task<HttpResponseDTO<T>> PostAsync<T>(string url, HttpContent? content)
         {
             try
             {

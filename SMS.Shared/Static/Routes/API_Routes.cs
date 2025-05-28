@@ -11,6 +11,8 @@
             public const string GetSubjectsByTeacherClassDivision = "common/GetSubjectListByTeacherAndClassAndDivision";
             public const string GetSubjectListByStudentId = "common/GetSubjectListByStudentId";
             public const string GetStudentListByParentId = "common/GetStudentListByParentId";
+            public const string GetBuildingList = "common/GetBuildings";
+            public const string GetFloorList = "common/GetFloorListByBuildingId";
         }
 
         public class Auth
@@ -57,10 +59,9 @@
 
         public class FloorPlan
         {
-            public const string GetBuildingList = "FloorPlan/GetBuildingsList";
-            public const string GetFloorList = "FloorPlan/GetFloorList";
-            public const string GetRoomList = "FloorPlan/GetRoomList";
             public const string GetRoomCellsListByFloorId = "FloorPlan/GetRoomCellsListByFloorId";
+            public const string UpdateRoomCells = "FloorPlan/UpdateRoomCells";
+            public const string UpdateFloorFinalize = "FloorPlan/UpdateFloorFinalize";
         }
 
     }

@@ -28,7 +28,7 @@
         public int RoomCellId { get; set; }
         public int RoomId { get; set; }
         public int RoomType { get; set; }
-        public string? RoomNumber { get; set; }
+        public string RoomNumber { get; set; }
         public int CellX { get; set; }
         public int CellY { get; set; }
         public bool IsDeleted { get; set; }
@@ -53,12 +53,5 @@
         public int? Width { get; set; }
         public string? Color { get; set; }
     }
-
-    public class RoomResponseDTO
-    {
-        public List<RoomDTO>? Rooms { get; set; }
-        public int TotalCount { get; set; }
-    }
-
 
 }

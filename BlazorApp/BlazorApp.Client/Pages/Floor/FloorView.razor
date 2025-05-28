@@ -1,9 +1,11 @@
 ﻿@page "/floor"
 @using SMS.DataAccess.Data.Interfaces.Floor
 @using SMS.DataAccess.Models.Floor
+@using System.Text.Json
 @rendermode InteractiveWebAssembly
 
 @inject ITokenService tokenService
+@inject IToastService ToastService
 @inject IJSRuntime JSRuntime
 @inject IFloor _floor
 
@@ -41,22 +43,35 @@ Source="https://unpkg.com/konva@9.3.20/konva.min.js" />
             }
         </InputSelect>
     </div>
-    <div class="col-sm-2 mb-3">
-        <label>Room</label>
-        <InputSelect class="form-select" aria-label="Default select example" @bind-Value="filters.RoomId" @bind-Value:after="ChangeRoom">
-            @if (roomDataList.Any())
-            {
-                foreach (var roomItem in roomDataList.DistinctBy(x => x.RoomNumber))
+    @if(IsAdminOrSuperAdmin){
+        <div class="col-sm-2 mb-3">
+            <label>Room</label>
+            <InputSelect class="form-select" aria-label="Default select example" @bind-Value="filters.RoomId" @bind-Value:after="ChangeRoom">
+                @if (roomDataList.Any())
                 {
-                    <option value="@roomItem.RoomId">@roomItem.RoomNumber</option>
+                    foreach (var roomItem in roomDataList.DistinctBy(x => x.RoomNumber))
+                    {
+                        <option value="@roomItem.RoomId">@roomItem.RoomNumber</option>
+                    }
                 }
-            }
-        </InputSelect>
-    </div>
-    @* <div class="col-sm-2 mb-3">
-        <button class="btn btn-primary mt-2" @onclick="GetSelectedCells">Save Selected Cells</button>
-    </div> *@
+            </InputSelect>
+        </div>
+        <div class="col-sm mt-3">
+        </div>
+        <div class="col-sm mt-3">
+            <button class="btn btn-primary mt-2" @onclick="RoomCell">Save</button>
+            <button class="btn btn-primary mt-2" @onclick="FinalSubmit">Finalize</button>
+        </div>
+    }
 
+</div>
+<div class="d-flex">
+    @foreach(var rooms in Enum.GetValues(typeof(RoomType))){
+        <p class="m-0 mx-1">
+            <span class="px-2 mx-1" Style="background-color: @GetRoomColor((int)rooms);"></span>
+            @((RoomType)rooms)
+        </p>
+    }
 </div>
 
 <br />
@@ -113,23 +128,12 @@ Source="https://unpkg.com/konva@9.3.20/konva.min.js" />
         }
     }
 
-    // [JSInvokable]
-    // public void OnCellClicked(int x, int y)
-    // {
-    //     var cell = cells.FirstOrDefault(c => c.X == x && c.Y == y);
-    //     if (cell is not null)
-    //     {
-    //         ToggleCellSelection(cell);
-    //         StateHasChanged();
-    //     }
-    // }
-
     private async Task GetRoomDataList()
     {
         var res = await _floor.GetRoomCellsListByFloorId(new FloorFilterDTO() { FloorId = filters.FloorId });
         roomDataList = new List<RoomCoordinatesResponseDTO>();
         Rooms = new List<RoomDTO>();
-        if (res.Result)
+        if (res.Result && res.Data.Any())
         {
             RoomSource = res.Data.Where(r => !r.IsDeleted).Select(r => new RoomCell
                 {
@@ -173,6 +177,7 @@ Source="https://unpkg.com/konva@9.3.20/konva.min.js" />
             }
             MaxColumn = Rooms.Max(r => r.CellX + r.Width - 1) + paddingX ?? 3;
             MaxRow = Rooms.Max(r => r.CellY + r.Height - 1) + paddingY ?? 20;
+            filters.RoomId = Rooms.First().RoomId;
             await RenderFloorPlan();
         }
     }
@@ -195,6 +200,10 @@ Source="https://unpkg.com/konva@9.3.20/konva.min.js" />
 
     private async Task ChangeRoom()
     {
+        var prevRoomCells = RoomSource
+                .Where(cell => cell.RoomId == roomId && cell.CellX > 0 && cell.CellY > 0)
+                .ToList();
+
         roomId = filters.RoomId;
         Rooms.Clear();
 
@@ -210,12 +219,10 @@ Source="https://unpkg.com/konva@9.3.20/konva.min.js" />
                 var maxX = roomCells.Max(c => c.CellX);
                 var minY = roomCells.Min(c => c.CellY);
                 var maxY = roomCells.Max(c => c.CellY);
-
                 int paddingX = 1;
                 int paddingY = 3;
 
                 var room = roomDataList.FirstOrDefault(r => r.RoomId == roomId.Value);
-
                 Rooms.Add(new RoomDTO
                     {
                         RoomId = room.RoomId,
@@ -225,10 +232,11 @@ Source="https://unpkg.com/konva@9.3.20/konva.min.js" />
                         CellY = minY + paddingY,
                         Width = maxX - minX + 1,
                         Height = maxY - minY + 1
-                    });
+                    }
+                );
 
-                await JSRuntime.InvokeVoidAsync("clearSelection");
-                await JSRuntime.InvokeVoidAsync("highlightCells", roomCells, Rooms.First().Color);
+                await JSRuntime.InvokeVoidAsync("clearSelection", prevRoomCells, "#F1EE8E");
+                await JSRuntime.InvokeVoidAsync("highlightCells", roomCells, Rooms.First().Color, filters.RoomId);
             }
         }
     }
@@ -250,63 +258,91 @@ Source="https://unpkg.com/konva@9.3.20/konva.min.js" />
                     height = first.Height
                 };
             }).OrderBy(x => x.RoomId).ThenBy(x => x.y).ThenBy(x => x.x).ToList();
-        roomId = roomsData.First().RoomId;
-        int canvasWidth = MaxColumn * 80; 
+        roomId = filters.RoomId;
+        int canvasWidth = MaxColumn * 80;
         int canvasHeight = MaxRow * 80;
 
         var roomCells = RoomSource.Where(cell => cell.RoomId == roomId && cell.CellX > 0 && cell.CellY > 0).ToList();
 
         await JSRuntime.InvokeVoidAsync("konvaInterop.initStage", "konva-container", canvasWidth, canvasHeight);
-        await JSRuntime.InvokeVoidAsync("konvaInterop.drawRooms", roomsData, 40 );
-        await JSRuntime.InvokeVoidAsync("highlightCells", roomCells, Rooms.First().Color);
+        await JSRuntime.InvokeVoidAsync("konvaInterop.drawRooms", roomsData, 40);
+        if(IsAdminOrSuperAdmin){
+            await JSRuntime.InvokeVoidAsync("highlightCells", roomCells, roomsData.First(x => x.RoomId == roomId).Color, roomId);
+        }
 
     }
 
-    private async Task GetSelectedCells()
+    private async Task RoomCell()
     {
-        var selectedCells = await JSRuntime.InvokeAsync<string[]>("getSelectedCells");
+        var originalRoomCells = roomDataList
+        .Where(c => c.RoomId == roomId && c.CellX > 0 && c.CellY > 0 && !c.IsDeleted)
+        .Select(c => new RoomsCellsViewModel
+            {
+                RoomCellId = c.RoomCellId,
+                RoomId = c.RoomId,
+                RoomType = c.RoomType,
+                RoomNumber = c.RoomNumber,
+                CellX = c.CellX,
+                CellY = c.CellY,
+                IsDeleted = false
+            }).ToList();
 
-        foreach (var cell in selectedCells)
+        var selected = await JSRuntime.InvokeAsync<string[]>("getSelectedCells");
+        var selectedSet = new HashSet<string>(selected); // for fast lookup
+
+        var updatedList = new List<RoomsCellsViewModel>();
+
+        // Deselect: mark original ones that are no longer selected
+        foreach (var cell in originalRoomCells)
         {
-            // Each cell is in format "x_y" (e.g., "3_4")
-            var parts = cell.Split('_');
+            var key = $"{cell.CellX}_{cell.CellY}";
+            if (!selectedSet.Contains(key))
+            {
+                cell.IsDeleted = true;
+            }
+            updatedList.Add(cell);
+        }
+
+        foreach (var key in selectedSet)
+        {
+            var parts = key.Split('_');
             int x = int.Parse(parts[0]);
             int y = int.Parse(parts[1]);
 
-            Console.WriteLine($"Selected Cell: X={x}, Y={y}");
-
-            // Optionally add logic to save or use this data
+            var exists = originalRoomCells.Any(c => c.CellX == x && c.CellY == y);
+            if (!exists)
+            {
+                updatedList.Add(new RoomsCellsViewModel
+                    {
+                        RoomId = roomId ?? 0,
+                        RoomNumber = Rooms.FirstOrDefault()?.RoomNumber ?? "",
+                        RoomType = Rooms.FirstOrDefault()?.RoomType ?? 0,
+                        CellX = x,
+                        CellY = y,
+                        IsDeleted = false
+                    });
+            }
         }
+
+        var res = await _floor.UpdateRoomCoordinate(updatedList);
+        if(res.Result){
+            ToastService.ShowSuccess(res.Message);
+            await GetRoomDataList();
+        };
     }
 
 
-    private void ToggleCellSelection(Cell clickedCell)
-    {
-        if (clickedCell.RoomId == selectedRoomId)
-        {
-            clickedCell.IsSelected = !clickedCell.IsSelected;
-            return;
-        }
-
-        var isAdjacent = cells.Any(cell =>
-            cell.RoomId == selectedRoomId &&
-            cell.IsSelected &&
-            Math.Abs(cell.X - clickedCell.X) + Math.Abs(cell.Y - clickedCell.Y) == 1
-        );
-
-        if (isAdjacent)
-        {
-            clickedCell.IsSelected = true;
-            clickedCell.RoomId = selectedRoomId;
+    private async Task FinalSubmit(){
+        if(filters.FloorId > 0){
+            var res = await _floor.FloorFinalize(filters.FloorId.Value);
+            if (res.Result)
+            {
+                ToastService.ShowSuccess(res.Message);
+            };
         }
     }
 
 }
-
-
-
-
-
 
 
 
@@ -315,6 +351,8 @@ Source="https://unpkg.com/konva@9.3.20/konva.min.js" />
     let allCells = {}; // To store all cells for lookup
     const cells = [];
     let selectColor = "";
+    let selectedRoomId = 0;
+    let roomCellMap = new Map(); // key: 'x_y', value: roomId
 
     window.konvaInterop = {
         initStage: function (containerId, width, height) {
@@ -331,18 +369,20 @@ Source="https://unpkg.com/konva@9.3.20/konva.min.js" />
         },
 
         drawRooms: function (flatRoomCells, gridSize) {
-            const allCellMap = new Map(); // Global cell map for all rooms
+            const allCellMap = new Map();
 
-            // Group cells by RoomId
             const roomsById = {};
             let maxX = 0;
             let maxY = 0;
+            roomCellMap.clear();
+
             flatRoomCells.forEach(cell => {
                 if (cell.x > maxX) maxX = cell.x;
                 if (cell.y > maxY) maxY = cell.y;
                 const key = cell.roomId;
                 const cellKey = `${cell.x}_${cell.y}`;
-                allCellMap.set(cellKey, cell.roomId); // Track room ID for each cell
+                allCellMap.set(cellKey, cell.roomId);
+                roomCellMap.set(cellKey, cell.roomId);
 
                 if (!roomsById[key]) {
                     roomsById[key] = {
@@ -355,13 +395,11 @@ Source="https://unpkg.com/konva@9.3.20/konva.min.js" />
                 roomsById[key].Cells.push({ cellX: cell.x, cellY: cell.y });
             });
 
-            drawGrid(maxX + 80, maxY + 80, gridSize);
+            drawGrid(maxX * 5, maxY * 5, gridSize, allCellMap);
 
-            // Process each room
             Object.values(roomsById).forEach(room => {
                 let pathData = '';
 
-                // Step 1: Fill each cell with color
                 room.Cells.forEach(cell => {
                     const x = cell.cellX;
                     const y = cell.cellY;
@@ -375,26 +413,19 @@ Source="https://unpkg.com/konva@9.3.20/konva.min.js" />
                         width: gridSize,
                         height: gridSize,
                         fill: room.Color,
-                        opacity: 0.7,
+                        opacity: 0.9,
                         cornerRadius: 2,
                         listening: true,
                         id: cellKey,
                     });
+
                     rect.on('click', () => {
-                        if (selectedCellIds.has(cellKey)) {
-                            selectedCellIds.delete(cellKey);
-                            rect.fill(room.Color);  // Restore the original room color on deselect
-                        } else {
-                            selectedCellIds.add(cellKey);
-                            rect.fill('#ffffff');  // Light blue on select
-                        }
-                        window.konvaLayer.batchDraw();
+                        handleCellClick(x, y, cellKey, rect, room.Color);
                     });
 
                     window.konvaLayer.add(rect);
                 });
 
-                // Step 2: Draw outer border
                 room.Cells.forEach(cell => {
                     const x = cell.cellX;
                     const y = cell.cellY;
@@ -409,7 +440,6 @@ Source="https://unpkg.com/konva@9.3.20/konva.min.js" />
                     const leftKey = `${x - 1}_${y}`;
                     const rightKey = `${x + 1}_${y}`;
 
-                    // If no neighbor
                     if (allCellMap.get(leftKey) !== room.RoomId) {
                         pathData += `M${left},${top} L${left},${bottom} `;
                     }
@@ -422,10 +452,8 @@ Source="https://unpkg.com/konva@9.3.20/konva.min.js" />
                     if (allCellMap.get(bottomKey) !== room.RoomId) {
                         pathData += `M${left},${bottom} L${right},${bottom} `;
                     }
-
                 });
 
-                // Step 3: Add the border path
                 if (pathData.trim() !== '') {
                     const borderPath = new Konva.Path({
                         data: pathData,
@@ -436,7 +464,6 @@ Source="https://unpkg.com/konva@9.3.20/konva.min.js" />
                     window.konvaLayer.add(borderPath);
                 }
 
-                // Step 4: Add optional room label
                 if (room.Cells.length > 0) {
                     const firstCell = room.Cells[0];
                     const label = new Konva.Text({
@@ -454,39 +481,32 @@ Source="https://unpkg.com/konva@9.3.20/konva.min.js" />
         }
     };
 
-    window.clearSelection = function () {
-        window.konvaLayer.find('.grid-cell').forEach(rect => {
-            rect.stroke('#ddd');
-            rect.strokeWidth(1);
-            rect.fill('#ffffff');
-        });
-
-        window.konvaLayer.batchDraw();
-    };
-
-    window.highlightCells = function (roomCells, color) {
-        roomCells.forEach(cell => {
-            const cellKey = `${cell.CellX}_${cell.CellY}`;
-            const rect = window.konvaLayer.findOne(`#${cellKey}`);
-
-            // Only add a stroke if not already highlighted
-            if (rect) {
-                rect.stroke('blue'); // Highlight stroke with blue color
-                rect.strokeWidth(3);
+    function handleCellClick(x, y, cellKey, rect) {
+        const isSelected = selectedCellIds.has(cellKey);
+        console.log(`key00 : ${x}_${y}`);
+        if (isSelected) {
+            if (canDeselectCell(x, y)) {
+                selectedCellIds.delete(cellKey);
+                rect.fill('#ffffff'); // unselected
+            } else {
+                // alert(`Cannot deselect cell at (${x}, ${y}) – would split the room.`);
             }
-            selectedCellIds.add(cellKey);
-            selectColor = color;
-        });
+        } else {
+            if (canSelectCell(x, y)) {
+                selectedCellIds.add(cellKey);
+                if(selectColor){
+                    rect.fill(selectColor);
+                }
+            } else {
+                // alert(`Invalid cell selection at (${x}, ${y})`);
+            }
+        }
+
         window.konvaLayer.batchDraw();
-    };
+    }
 
 
-    window.getSelectedCells = () => {
-        return Array.from(selectedCellIds);
-    };
-
-    // Step 0: Draw background grid (selectable empty cells)
-    function drawGrid(maxX, maxY, gridSize) {
+    function drawGrid(maxX, maxY, gridSize, allCellMap) {
         for (let y = 1; y <= maxY; y++) {
             for (let x = 1; x <= maxX; x++) {
                 const cellKey = `${x}_${y}`;
@@ -504,18 +524,138 @@ Source="https://unpkg.com/konva@9.3.20/konva.min.js" />
                 });
 
                 rect.on('click', () => {
-                    if (selectedCellIds.has(cellKey)) {
-                        selectedCellIds.delete(cellKey);
-                        rect.fill('#ffffff');
-                    } else {
-                        selectedCellIds.add(cellKey);
-                        rect.fill(selectColor);
-                    }
-                    window.konvaLayer.batchDraw();
+                    handleCellClick(x, y, cellKey, rect, '#ffffff');
                 });
 
                 window.konvaLayer.add(rect);
             }
         }
     }
+
+    function canSelectCell(x, y) {
+        const key = `${x}_${y}`;
+
+        // Prevent overlapping with other rooms
+        if (roomCellMap.has(key) && roomCellMap.get(key) !== selectedRoomId) {
+            return false; // belongs to another room
+        }
+
+        // Allow if already selected
+        if (selectedCellIds.has(key)) return true;
+
+        const offsets = [
+            { dx: -1, dy: 0 },
+            { dx: 1, dy: 0 },
+            { dx: 0, dy: -1 },
+            { dx: 0, dy: 1 }
+        ];
+
+        for (const offset of offsets) {
+            const neighborKey = `${x + offset.dx}_${y + offset.dy}`;
+            if (selectedCellIds.has(neighborKey)) {
+                return true;
+            }
+        }
+
+        // Allow if no cells selected yet (first selection)
+        return selectedCellIds.size === 0;
+    }
+
+
+    function canDeselectCell(x, y) {
+        const tempSet = new Set(selectedCellIds);
+        const removeKey = `${x}_${y}`;
+        tempSet.delete(removeKey);
+
+        if (tempSet.size === 0) return true;
+
+        const visited = new Set();
+        const startKey = Array.from(tempSet)[0];
+        const [startX, startY] = startKey.split('_').map(Number);
+
+        dfs(startX, startY, visited, tempSet);
+
+        return visited.size === tempSet.size;
+    }
+
+    function dfs(x, y, visited, validSet) {
+        const key = `${x}_${y}`;
+        if (visited.has(key) || !validSet.has(key)) return;
+
+        visited.add(key);
+
+        const offsets = [
+            { dx: -1, dy: 0 },
+            { dx: 1, dy: 0 },
+            { dx: 0, dy: -1 },
+            { dx: 0, dy: 1 }
+        ];
+
+        for (const offset of offsets) {
+            dfs(x + offset.dx, y + offset.dy, visited, validSet);
+        }
+    }
+
+
+    // window.clearSelection = function () {
+    //     window.konvaLayer.find('.grid-cell').forEach(rect => {
+    //         rect.stroke('#ddd');
+    //         rect.strokeWidth(1);
+    //         rect.fill('#ffffff');
+    //     });
+
+    //     window.konvaLayer.batchDraw();
+    // };
+
+    window.clearSelection = function (roomCells, color) {
+        selectedCellIds.clear();
+
+        // Clear all selection 
+        window.konvaLayer.find('.grid-cell').forEach(rect => {
+            const cellKey = rect.id();
+            rect.stroke('#ddd');
+            rect.strokeWidth(1);
+            rect.fill('#ffffff'); // Reset to default
+        });
+
+        roomCells.forEach(cell => {
+            const cellKey = `${cell.cellX}_${cell.cellY}`;
+            const rect = window.konvaLayer.findOne(`#${cellKey}`);
+
+            if (rect) {
+                // rect.fill(selectColor);
+                // rect.stroke('blue');
+                // rect.strokeWidth(1);
+                selectedCellIds.add(cellKey);
+            }
+        });
+
+        window.konvaLayer.batchDraw();
+    };
+
+
+    window.highlightCells = function (roomCells, color, roomId) {
+        selectedCellIds.clear(); // clear any previous selection
+        selectedRoomId = roomId;
+        selectColor = color;
+
+        roomCells.forEach(cell => {
+            const cellKey = `${cell.cellX}_${cell.cellY}`;
+            const rect = window.konvaLayer.findOne(`#${cellKey}`);
+
+            if (rect) {
+                rect.stroke('black');
+                rect.strokeWidth(1);
+                // rect.fill(selectColor); // use the selected room color
+            }
+            selectedCellIds.add(cellKey); // register as selected
+        });
+
+        window.konvaLayer.batchDraw();
+    };
+
+
+    window.getSelectedCells = () => {
+        return Array.from(selectedCellIds);
+    };
 </script>
