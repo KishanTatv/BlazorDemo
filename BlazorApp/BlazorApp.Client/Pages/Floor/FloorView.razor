@@ -518,7 +518,6 @@
 
     function handleCellClick(x, y, cellKey, rect) {
         const isSelected = selectedCellIds.has(cellKey);
-        console.log(`key00 : ${x}_${y}`);
         if (isSelected) {
             if (canDeselectCell(x, y)) {
                 selectedCellIds.delete(cellKey);
