@@ -147,12 +147,7 @@
 
             roomDataList = res.Data;
             var allCoords = roomDataList.Where(rc => !rc.IsDeleted).ToList();
-            var globalMinX = allCoords.Min(rc => rc.CellX);
-            var globalMinY = allCoords.Min(rc => rc.CellY);
-            var globalMaxX = allCoords.Max(rc => rc.CellX);
-            var globalMaxY = allCoords.Max(rc => rc.CellY);
-            int paddingX = 1;
-            int paddingY = 1;
+            int paddingX = 1, paddingY = 1;
 
             var groupedRooms = allCoords.GroupBy(rc => rc.RoomId).ToList();
 
@@ -212,7 +207,6 @@
                 .ToList();
 
         roomId = filters.RoomId;
-        Rooms.Clear();
 
         if (roomId.HasValue)
         {
@@ -222,28 +216,10 @@
 
             if (roomCells.Any())
             {
-                var minX = roomCells.Min(c => c.CellX);
-                var maxX = roomCells.Max(c => c.CellX);
-                var minY = roomCells.Min(c => c.CellY);
-                var maxY = roomCells.Max(c => c.CellY);
-                int paddingX = 1;
-                int paddingY = 3;
-
-                var room = roomDataList.FirstOrDefault(r => r.RoomId == roomId.Value);
-                Rooms.Add(new RoomDTO
-                    {
-                        RoomId = room.RoomId,
-                        RoomNumber = room.RoomNumber,
-                        Color = GetRoomColor(room.RoomType),
-                        CellX = minX + paddingX,
-                        CellY = minY + paddingY,
-                        Width = maxX - minX + 1,
-                        Height = maxY - minY + 1
-                    }
-                );
+                var roomColor = GetRoomColor(roomDataList.First(r => r.RoomId == roomId).RoomType);
 
                 await JSRuntime.InvokeVoidAsync("clearSelection", prevRoomCells);
-                await JSRuntime.InvokeVoidAsync("highlightCells", roomCells, Rooms.First().Color, filters.RoomId);
+                await JSRuntime.InvokeVoidAsync("highlightCells", roomCells, roomColor, filters.RoomId);
             }
         }
     }
@@ -266,8 +242,6 @@
                 };
             }).OrderBy(x => x.RoomId).ThenBy(x => x.y).ThenBy(x => x.x).ToList();
         roomId = filters.RoomId;
-        int canvasWidth = MaxColumn * 80;
-        int canvasHeight = MaxRow * 80;
 
         var roomCells = RoomSource.Where(cell => cell.RoomId == roomId && cell.CellX > 0 && cell.CellY > 0).ToList();
 
